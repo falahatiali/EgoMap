@@ -1,0 +1,25 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: egodb
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_DATABASE: 'egodb'
+      MYSQL_ROOT_PASSWORD: 123456789
+      MYSQL_USER: 'egoboy'
+      MYSQL_PASSWORD: 123456
+    ports:
+      - "3398:3306"
+    volumes:
+      - egodata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p123456789"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  egodata:
+    driver: local
