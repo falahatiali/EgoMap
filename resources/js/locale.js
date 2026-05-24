@@ -93,6 +93,14 @@ function applyTranslations(locale) {
             el.placeholder = strings[key];
         }
     });
+
+    document.querySelectorAll('[data-locale-field]').forEach((el) => {
+        const value = el.getAttribute(`data-${locale}`);
+
+        if (value) {
+            el.textContent = value;
+        }
+    });
 }
 
 /**

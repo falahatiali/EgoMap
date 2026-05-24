@@ -2,16 +2,31 @@
 
 namespace Tests\Feature;
 
+use Database\Seeders\MbtiQuizSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class HomePageTest extends TestCase
 {
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->seed(MbtiQuizSeeder::class);
+    }
+
     public function test_home_page_renders_in_english_by_default(): void
     {
         $response = $this->get(route('home'));
 
         $response->assertOk();
         $response->assertSee('See your relationship patterns clearly.', false);
+        $response->assertSee('MBTI Personality Type', false);
+        $response->assertSee('70 questions', false);
+        $response->assertSee(route('quiz.start', 'mbti-personality'), false);
+        $response->assertSee('Start test', false);
         $response->assertSee('dir="ltr"', false);
         $response->assertSee('id="eg-i18n"', false);
     }

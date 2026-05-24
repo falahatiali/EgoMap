@@ -5,7 +5,26 @@ return [
     'hero_title' => 'See your relationship patterns clearly.',
     'hero_subtitle' => 'A free, AI-powered personality insight that reveals your strengths, your blind spot, and the path forward — in under 5 minutes.',
     'cta_start' => 'Start free test',
+    'cta_browse_tests' => 'Browse tests',
     'cta_learn' => 'See how it works',
+    'hero_test_available' => 'MBTI personality test is live — start in one tap.',
+
+    'tests_section_badge' => 'Available now',
+    'tests_section_title' => 'Pick a test & begin',
+    'tests_section_subtitle' => 'No signup. Your progress saves automatically. Results in minutes.',
+    'tests_empty' => 'New tests are coming soon.',
+
+    'test_card_featured' => 'Featured',
+    'test_card_free' => 'Free',
+    'test_card_questions' => ':count questions',
+    'test_card_minutes' => ':minutes min',
+    'test_card_start' => 'Start test',
+    'test_type_mbti' => 'Personality type',
+    'test_type_likert' => 'Relationship patterns',
+    'test_type_assessment' => 'Assessment',
+
+    'trust_science' => 'Evidence-based scoring',
+    'trust_science_desc' => 'Weighted algorithms across personality dimensions — clear, reproducible results.',
 
     'trust_anonymous' => 'No login required',
     'trust_anonymous_desc' => 'Start instantly. Stay anonymous until you choose otherwise.',
@@ -38,10 +57,10 @@ return [
     'report_pro_teaser' => 'We found 3 common traps for your personality type that lead 90% of your relationships to a dead end.',
     'report_pro_cta' => 'See your full roadmap',
 
-    'mission_badge' => 'Free mini-mission',
-    'mission_title' => 'A 2-minute exercise, tailored to your type.',
-    'mission_desc' => 'Because you\'re Anxious-Attuned, we\'ve unlocked a calming breath exercise — right now, for free.',
-    'mission_cta' => 'Try the exercise',
+    'mission_badge' => 'Full report by email',
+    'mission_title' => 'Want the complete breakdown?',
+    'mission_desc' => 'Finish the test, see your free summary instantly, then request the full report in your inbox.',
+    'mission_cta' => 'Start test',
 
     'final_title' => 'Ready to meet yourself?',
     'final_subtitle' => 'Your patterns aren\'t your prison. They\'re your starting point.',
