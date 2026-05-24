@@ -35,5 +35,6 @@ class DatabaseSeeder extends Seeder
         $member->assignRole('member');
 
         $this->call(QuizSeeder::class);
+        $this->call(MbtiQuizSeeder::class);
     }
 }
