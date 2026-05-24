@@ -17,10 +17,25 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call(RolePermissionSeeder::class);
+
+        $admin = User::factory()->create([
+            'name' => 'Admin User',
+            'email' => 'admin@egomap.test',
         ]);
+        $admin->assignRole('super-admin');
+
+        $pro = User::factory()->create([
+            'name' => 'Pro User',
+            'email' => 'pro@egomap.test',
+        ]);
+        $pro->assignRole('pro');
+
+        $member = User::factory()->create([
+            'name' => 'Member User',
+            'email' => 'member@egomap.test',
+        ]);
+        $member->assignRole('member');
 
         $this->call(QuizSeeder::class);
     }

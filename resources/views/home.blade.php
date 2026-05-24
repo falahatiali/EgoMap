@@ -119,21 +119,29 @@
                             <p class="small mb-0 eg-text-muted" data-i18n="home.report_blindspot_desc">{{ __('home.report_blindspot_desc') }}</p>
                         </div>
 
-                        <div class="eg-pro-locked">
-                            <div class="eg-pro-blur">
+                        <x-access-gate permission="reports.section.traps">
+                            <div class="eg-pro-unlocked mt-4 p-4 eg-glass">
                                 <h3 class="h6 fw-semibold mb-2" data-i18n="home.report_pro_title">{{ __('home.report_pro_title') }}</h3>
                                 <p class="small eg-text-muted mb-0" data-i18n="home.report_pro_teaser">{{ __('home.report_pro_teaser') }}</p>
                             </div>
-                            <div class="eg-pro-overlay">
-                                <span class="eg-lock-badge">
-                                    <i class="fa-solid fa-lock"></i>
-                                    <span data-i18n="home.report_pro_locked">{{ __('home.report_pro_locked') }}</span>
-                                </span>
-                                <a href="#start" class="eg-btn-ghost eg-transition btn-sm">
-                                    <span data-i18n="home.report_pro_cta">{{ __('home.report_pro_cta') }}</span>
-                                </a>
-                            </div>
-                        </div>
+                            <x-slot:denied>
+                                <div class="eg-pro-locked">
+                                    <div class="eg-pro-blur">
+                                        <h3 class="h6 fw-semibold mb-2" data-i18n="home.report_pro_title">{{ __('home.report_pro_title') }}</h3>
+                                        <p class="small eg-text-muted mb-0" data-i18n="home.report_pro_teaser">{{ __('home.report_pro_teaser') }}</p>
+                                    </div>
+                                    <div class="eg-pro-overlay">
+                                        <span class="eg-lock-badge">
+                                            <i class="fa-solid fa-lock"></i>
+                                            <span data-i18n="home.report_pro_locked">{{ __('home.report_pro_locked') }}</span>
+                                        </span>
+                                        <a href="#start" class="eg-btn-ghost eg-transition btn-sm">
+                                            <span data-i18n="home.report_pro_cta">{{ __('home.report_pro_cta') }}</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </x-slot:denied>
+                        </x-access-gate>
                     </div>
                 </div>
             </div>
