@@ -1,0 +1,23 @@
+/**
+ * Direction-only overrides — keep this file small.
+ */
+
+[dir="rtl"] .eg-display {
+    letter-spacing: 0;
+    font-weight: 700;
+}
+
+[dir="rtl"] .eg-hero-title {
+    max-width: 22ch;
+}
+
+[dir="rtl"] .eg-lock-badge {
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+/* Bootstrap logical alignment helpers */
+[dir="rtl"] .navbar-toggler {
+    margin-inline-start: auto;
+    margin-inline-end: 0.5rem;
+}

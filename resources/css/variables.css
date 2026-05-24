@@ -1,0 +1,73 @@
+/**
+ * EgoMap Theme Engine — design tokens only.
+ * Override tokens for RTL/FA via [dir="rtl"]; never duplicate component rules.
+ */
+
+:root {
+    /* Palette — Deep Navy, Slate, Vibrant Accent */
+    --eg-navy-950: #070b14;
+    --eg-navy-900: #0f172a;
+    --eg-navy-800: #1e293b;
+    --eg-slate-400: #94a3b8;
+    --eg-slate-500: #64748b;
+    --eg-accent: #6366f1;
+    --eg-accent-bright: #818cf8;
+    --eg-accent-soft: rgba(99, 102, 241, 0.14);
+    --eg-accent-glow: rgba(99, 102, 241, 0.35);
+    --eg-rose: #f472b6;
+    --eg-rose-soft: rgba(244, 114, 182, 0.12);
+
+    /* Semantic */
+    --eg-bg-deep: var(--eg-navy-950);
+    --eg-bg-mid: var(--eg-navy-900);
+    --eg-bg-elevated: var(--eg-navy-800);
+    --eg-surface: rgba(255, 255, 255, 0.04);
+    --eg-surface-hover: rgba(255, 255, 255, 0.07);
+    --eg-border: rgba(148, 163, 184, 0.12);
+    --eg-border-strong: rgba(148, 163, 184, 0.22);
+    --eg-text: #f8fafc;
+    --eg-text-muted: var(--eg-slate-400);
+    --eg-danger: #f87171;
+    --eg-danger-soft: rgba(248, 113, 113, 0.12);
+    --eg-success: #34d399;
+
+    /* Typography */
+    --eg-font-body: "Inter", system-ui, sans-serif;
+    --eg-font-display: "Inter", system-ui, sans-serif;
+    --eg-line-height: 1.65;
+    --eg-line-height-tight: 1.15;
+
+    /* Spacing scale */
+    --eg-space-xs: 0.25rem;
+    --eg-space-sm: 0.5rem;
+    --eg-space-md: 1rem;
+    --eg-space-lg: 1.5rem;
+    --eg-space-xl: 2.5rem;
+    --eg-space-2xl: 4rem;
+
+    /* Radii */
+    --eg-radius-sm: 0.5rem;
+    --eg-radius: 1rem;
+    --eg-radius-lg: 1.5rem;
+    --eg-radius-pill: 2rem;
+
+    /* Layout */
+    --eg-nav-height: 4.5rem;
+    --eg-container-narrow: 42rem;
+
+    /* Motion */
+    --eg-ease: cubic-bezier(0.4, 0, 0.2, 1);
+    --eg-duration: 0.2s;
+}
+
+[dir="rtl"] {
+    --eg-accent: #d4b04a;
+    --eg-accent-bright: #e8c547;
+    --eg-accent-soft: rgba(212, 176, 74, 0.16);
+    --eg-accent-glow: rgba(232, 160, 168, 0.22);
+    --eg-bg-mid: #16121f;
+    --eg-bg-elevated: #221a2e;
+    --eg-font-body: "Vazirmatn", system-ui, sans-serif;
+    --eg-font-display: "Vazirmatn", system-ui, sans-serif;
+    --eg-line-height: 1.85;
+}
