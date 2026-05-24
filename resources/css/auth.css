@@ -1,0 +1,209 @@
+/* Auth pages — login, register, email verification */
+
+.eg-auth-body .eg-auth-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - var(--eg-nav-height) - 8rem);
+    padding: var(--eg-space-xl) 0 var(--eg-space-2xl);
+}
+
+.eg-auth-container {
+    max-width: 28rem;
+}
+
+.eg-auth-card {
+    padding: var(--eg-space-xl) var(--eg-space-lg);
+    border-radius: var(--eg-radius-lg);
+    text-align: center;
+}
+
+.eg-auth-card--verify {
+    max-width: 100%;
+}
+
+.eg-auth-icon {
+    width: 3.5rem;
+    height: 3.5rem;
+    margin: 0 auto var(--eg-space-lg);
+    border-radius: var(--eg-radius);
+    background: linear-gradient(135deg, var(--eg-accent-soft), rgba(255, 255, 255, 0.04));
+    border: 1px solid var(--eg-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    color: var(--eg-accent-bright);
+}
+
+.eg-auth-icon--verify {
+    background: linear-gradient(135deg, var(--eg-accent-glow), var(--eg-rose-soft));
+}
+
+.eg-auth-title {
+    font-size: 1.65rem;
+    margin-bottom: var(--eg-space-sm);
+}
+
+.eg-auth-subtitle {
+    color: var(--eg-text-muted);
+    font-size: 0.95rem;
+    margin-bottom: var(--eg-space-lg);
+    line-height: 1.6;
+}
+
+.eg-auth-form {
+    text-align: start;
+}
+
+.eg-auth-input {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--eg-border);
+    color: var(--eg-text);
+}
+
+.eg-auth-input:focus {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--eg-accent);
+    box-shadow: 0 0 0 0.2rem var(--eg-accent-soft);
+    color: var(--eg-text);
+}
+
+.eg-auth-input::placeholder {
+    color: var(--eg-slate-500);
+}
+
+.eg-auth-form .form-label {
+    color: var(--eg-text-muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.eg-auth-submit {
+    padding: 0.75rem 1.25rem;
+    font-weight: 600;
+}
+
+.eg-auth-footer-text {
+    margin-top: var(--eg-space-lg);
+    margin-bottom: 0;
+    font-size: 0.9rem;
+    color: var(--eg-text-muted);
+}
+
+.eg-auth-link {
+    color: var(--eg-accent-bright);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.eg-auth-link:hover {
+    color: var(--eg-accent);
+    text-decoration: underline;
+}
+
+.eg-auth-link-btn {
+    color: var(--eg-accent-bright) !important;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.eg-auth-link-btn:disabled {
+    opacity: 0.45;
+}
+
+.eg-auth-alert {
+    background: rgba(52, 211, 153, 0.12);
+    border: 1px solid rgba(52, 211, 153, 0.25);
+    color: var(--eg-success);
+    font-size: 0.9rem;
+    margin-bottom: var(--eg-space-lg);
+}
+
+.eg-auth-error {
+    color: var(--eg-danger);
+    font-size: 0.875rem;
+    margin-top: var(--eg-space-sm);
+    margin-bottom: var(--eg-space-md);
+}
+
+.eg-otp-inputs {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    margin-bottom: var(--eg-space-lg);
+}
+
+.eg-otp-inputs.is-invalid .eg-otp-digit {
+    border-color: var(--eg-danger);
+}
+
+.eg-otp-digit {
+    width: 3.25rem;
+    height: 3.75rem;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-family: var(--eg-font-display);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--eg-border);
+    border-radius: var(--eg-radius-sm);
+    color: var(--eg-text);
+    padding: 0;
+}
+
+.eg-otp-digit:focus {
+    border-color: var(--eg-accent-bright);
+    box-shadow: 0 0 0 0.2rem var(--eg-accent-soft);
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--eg-text);
+}
+
+.eg-auth-timer {
+    margin-bottom: var(--eg-space-lg);
+}
+
+.eg-auth-timer-label {
+    color: var(--eg-text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+}
+
+.eg-auth-timer-value {
+    font-size: 2rem;
+    letter-spacing: 0.08em;
+    color: var(--eg-accent-bright);
+    margin-bottom: 0;
+}
+
+.eg-auth-timer-expired {
+    color: var(--eg-danger);
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 0;
+}
+
+.eg-nav-auth-link {
+    color: var(--eg-text-muted) !important;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.eg-nav-auth-link:hover {
+    color: var(--eg-text) !important;
+}
+
+.eg-result-account-cta {
+    margin-top: var(--eg-space-xl);
+    padding: var(--eg-space-lg);
+    border-radius: var(--eg-radius);
+    background: linear-gradient(135deg, var(--eg-accent-soft), rgba(255, 255, 255, 0.03));
+    border: 1px solid var(--eg-border);
+    text-align: center;
+}
+
+[x-cloak] {
+    display: none !important;
+}
