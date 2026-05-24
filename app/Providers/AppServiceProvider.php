@@ -2,8 +2,11 @@
 
 namespace App\Providers;
 
+use App\Listeners\ClaimGuestQuizSessions;
 use App\Support\LocaleConfig;
 use App\Support\TranslationBundle;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Translatable\Facades\Translatable;
@@ -31,5 +34,7 @@ class AppServiceProvider extends ServiceProvider
         View::composer('layouts.app', function ($view): void {
             $view->with('i18nBundle', TranslationBundle::forGroups(['common', 'nav', 'home']));
         });
+
+        Event::listen(Login::class, ClaimGuestQuizSessions::class);
     }
 }

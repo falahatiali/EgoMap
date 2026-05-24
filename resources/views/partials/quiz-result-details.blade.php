@@ -1,0 +1,114 @@
+@php
+    $isDark = ($theme ?? 'light') === 'dark';
+@endphp
+
+@if (! empty($report['dimensions']))
+    <section @class(['eg-result-panel', 'eg-glass' => $isDark])>
+        <h2 class="eg-result-panel-title">{{ __('quiz.dimension_breakdown') }}</h2>
+        <div class="row g-3">
+            @foreach ($report['dimensions'] as $dimension)
+                @php
+                    $prefersRight = ($dimension['preference'] ?? '') === ($dimension['right_label'] ?? '');
+                    $leftPercent = (int) ($dimension['percent'] ?? 50);
+                    $rightPercent = 100 - $leftPercent;
+                    $winPercent = $prefersRight ? $rightPercent : $leftPercent;
+                @endphp
+                <div class="col-md-6">
+                    <div class="eg-axis-card">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span @class(['eg-axis-letter', 'is-active' => ! $prefersRight])>{{ $dimension['left_label'] ?? '' }}</span>
+                            <span class="eg-axis-pct">{{ $winPercent }}%</span>
+                            <span @class(['eg-axis-letter', 'is-active' => $prefersRight])>{{ $dimension['right_label'] ?? '' }}</span>
+                        </div>
+                        <div class="eg-axis-track">
+                            <div
+                                class="eg-axis-fill {{ $prefersRight ? 'from-end' : 'from-start' }}"
+                                style="width: {{ $winPercent }}%"
+                            ></div>
+                        </div>
+                        <p class="eg-axis-pref small mb-0 mt-2">
+                            {{ __('quiz.dimension_preference', ['letter' => $dimension['preference'] ?? '']) }}
+                        </p>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </section>
+@endif
+
+@if (! empty($content['strengths']))
+    <section @class(['eg-result-panel', 'eg-glass' => $isDark])>
+        <h2 class="eg-result-panel-title">
+            <i class="fa-solid fa-sparkles"></i>
+            {{ __('quiz.strengths_title') }}
+        </h2>
+        <div class="row g-3">
+            @foreach ($content['strengths'] as $strength)
+                <div class="col-md-4">
+                    <div class="eg-result-chip-card">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>{{ $strength }}</span>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </section>
+@endif
+
+@if (! empty($content['growth_areas']))
+    <section @class(['eg-result-panel', 'eg-glass' => $isDark])>
+        <h2 class="eg-result-panel-title">
+            <i class="fa-solid fa-seedling"></i>
+            {{ __('quiz.growth_title') }}
+        </h2>
+        <div class="row g-3">
+            @foreach ($content['growth_areas'] as $area)
+                <div class="col-md-6">
+                    <div class="eg-result-note-card">
+                        <span>{{ $area }}</span>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </section>
+@endif
+
+<div class="row g-4">
+    @if (! empty($content['work_style']))
+        <div class="col-lg-6">
+            <section @class(['eg-result-panel', 'h-100', 'eg-glass' => $isDark])>
+                <h2 class="eg-result-panel-title">
+                    <i class="fa-solid fa-briefcase"></i>
+                    {{ __('quiz.work_style_title') }}
+                </h2>
+                <p class="eg-result-body-text mb-0">{{ $content['work_style'] }}</p>
+            </section>
+        </div>
+    @endif
+
+    @if (! empty($content['relationships']))
+        <div class="col-lg-6">
+            <section @class(['eg-result-panel', 'h-100', 'eg-glass' => $isDark])>
+                <h2 class="eg-result-panel-title">
+                    <i class="fa-solid fa-heart"></i>
+                    {{ __('quiz.relationships_title') }}
+                </h2>
+                <p class="eg-result-body-text mb-0">{{ $content['relationships'] }}</p>
+            </section>
+        </div>
+    @endif
+</div>
+
+@if (! empty($content['famous_examples']))
+    <section @class(['eg-result-panel', 'eg-result-famous', 'eg-glass' => $isDark])>
+        <h2 class="eg-result-panel-title">
+            <i class="fa-solid fa-star"></i>
+            {{ __('quiz.famous_title') }}
+        </h2>
+        <div class="d-flex flex-wrap gap-2">
+            @foreach ($content['famous_examples'] as $name)
+                <span class="eg-famous-pill">{{ $name }}</span>
+            @endforeach
+        </div>
+    </section>
+@endif

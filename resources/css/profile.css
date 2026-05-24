@@ -1,0 +1,538 @@
+/* Profile page */
+
+.eg-profile-page {
+    padding-bottom: var(--eg-space-2xl);
+}
+
+.eg-profile-hero {
+    padding: var(--eg-space-xl) 0 var(--eg-space-lg);
+}
+
+.eg-profile-hero-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--eg-space-xl) var(--eg-space-lg);
+    border-radius: var(--eg-radius-lg);
+    gap: var(--eg-space-lg);
+}
+
+@media (min-width: 768px) {
+    .eg-profile-hero-card {
+        flex-direction: row;
+        text-align: start;
+        padding: var(--eg-space-xl);
+    }
+}
+
+.eg-profile-avatar {
+    width: 5rem;
+    height: 5rem;
+    border-radius: var(--eg-radius);
+    background: linear-gradient(135deg, var(--eg-accent), var(--eg-accent-bright));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--eg-text);
+    flex-shrink: 0;
+    box-shadow: 0 12px 40px var(--eg-accent-glow);
+}
+
+.eg-profile-hero-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.eg-profile-name {
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+}
+
+.eg-profile-email {
+    color: var(--eg-text-muted);
+    margin-bottom: 0;
+}
+
+.eg-profile-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--eg-space-md);
+    font-size: 0.875rem;
+    color: var(--eg-text-muted);
+}
+
+.eg-profile-verified {
+    color: var(--eg-success);
+}
+
+.eg-profile-section {
+    padding-top: var(--eg-space-xl);
+}
+
+.eg-profile-empty {
+    text-align: center;
+    padding: var(--eg-space-xl) var(--eg-space-lg);
+    border-radius: var(--eg-radius-lg);
+    color: var(--eg-text-muted);
+}
+
+.eg-profile-empty i {
+    font-size: 2rem;
+    margin-bottom: var(--eg-space-md);
+    opacity: 0.6;
+}
+
+.eg-profile-session-card {
+    padding: var(--eg-space-lg);
+    border-radius: var(--eg-radius);
+    display: flex;
+    flex-direction: column;
+}
+
+.eg-profile-session-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--eg-space-sm);
+    margin-bottom: var(--eg-space-sm);
+}
+
+.eg-profile-status {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.2rem 0.55rem;
+    border-radius: var(--eg-radius-pill);
+    white-space: nowrap;
+}
+
+.eg-profile-status--active {
+    background: var(--eg-accent-soft);
+    color: var(--eg-accent-bright);
+}
+
+.eg-profile-progress {
+    height: 0.35rem;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: var(--eg-radius-pill);
+    overflow: hidden;
+}
+
+.eg-profile-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--eg-accent), var(--eg-accent-bright));
+    border-radius: var(--eg-radius-pill);
+    transition: width 0.4s var(--eg-ease);
+}
+
+.eg-profile-history {
+    display: flex;
+    flex-direction: column;
+    gap: var(--eg-space-md);
+}
+
+.eg-profile-history-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--eg-space-md);
+    padding: var(--eg-space-lg);
+    border-radius: var(--eg-radius);
+}
+
+@media (min-width: 768px) {
+    .eg-profile-history-item {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+.eg-profile-history-main {
+    display: flex;
+    align-items: center;
+    gap: var(--eg-space-md);
+    min-width: 0;
+}
+
+.eg-profile-history-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--eg-radius-sm);
+    background: var(--eg-accent-soft);
+    color: var(--eg-accent-bright);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+.eg-profile-result-title {
+    color: var(--eg-text);
+    font-weight: 500;
+}
+
+.eg-profile-history-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--eg-space-sm);
+    flex-shrink: 0;
+}
+
+.eg-nav-profile-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--eg-text-muted) !important;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.eg-nav-profile-link:hover {
+    color: var(--eg-text) !important;
+}
+
+.eg-nav-profile-avatar {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    background: var(--eg-accent-soft);
+    color: var(--eg-accent-bright);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+/* Stats */
+.eg-profile-stats-row {
+    margin-top: calc(var(--eg-space-lg) * -1);
+    position: relative;
+    z-index: 1;
+}
+
+.eg-profile-stat {
+    text-align: center;
+    padding: var(--eg-space-lg);
+    border-radius: var(--eg-radius);
+}
+
+.eg-profile-stat-value {
+    display: block;
+    font-family: var(--eg-font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--eg-text);
+    line-height: 1.1;
+}
+
+.eg-profile-stat-label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--eg-text-muted);
+    margin-top: 0.25rem;
+}
+
+/* My tests section */
+.eg-profile-tests-section {
+    padding-top: var(--eg-space-xl);
+}
+
+.eg-profile-section-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--eg-space-md);
+    margin-bottom: var(--eg-space-lg);
+}
+
+.eg-profile-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: var(--eg-space-lg);
+    padding: 0.25rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--eg-border);
+    border-radius: var(--eg-radius-pill);
+    width: fit-content;
+    max-width: 100%;
+}
+
+.eg-profile-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 0.9rem;
+    border: none;
+    border-radius: var(--eg-radius-pill);
+    background: transparent;
+    color: var(--eg-text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color var(--eg-duration) var(--eg-ease), background var(--eg-duration) var(--eg-ease);
+}
+
+.eg-profile-filter:hover {
+    color: var(--eg-text);
+}
+
+.eg-profile-filter.is-active {
+    background: var(--eg-accent-soft);
+    color: var(--eg-accent-bright);
+}
+
+.eg-profile-filter-count {
+    font-size: 0.72rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: var(--eg-radius-pill);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.eg-profile-filter.is-active .eg-profile-filter-count {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Test cards */
+.eg-profile-test-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: var(--eg-space-lg);
+    border-radius: var(--eg-radius);
+    text-decoration: none;
+    color: inherit;
+    transition: transform var(--eg-duration) var(--eg-ease), border-color var(--eg-duration) var(--eg-ease), box-shadow var(--eg-duration) var(--eg-ease);
+}
+
+.eg-profile-test-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--eg-border-strong);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+    color: inherit;
+}
+
+.eg-profile-test-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--eg-space-sm);
+    margin-bottom: var(--eg-space-md);
+}
+
+.eg-profile-test-badge {
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--eg-radius-sm);
+    background: linear-gradient(135deg, var(--eg-test-accent, var(--eg-accent)), transparent);
+    border: 1px solid var(--eg-border);
+    box-shadow: 0 8px 24px var(--eg-test-glow, var(--eg-accent-glow));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    color: var(--eg-text);
+}
+
+.eg-profile-status--done {
+    background: rgba(52, 211, 153, 0.12);
+    color: var(--eg-success);
+}
+
+.eg-profile-test-name {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    color: var(--eg-text);
+}
+
+.eg-profile-test-result {
+    font-size: 0.9rem;
+    margin-bottom: 0;
+    line-height: 1.5;
+}
+
+.eg-profile-test-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--eg-space-sm);
+    margin-top: auto;
+    padding-top: var(--eg-space-md);
+    font-size: 0.8rem;
+    color: var(--eg-text-muted);
+}
+
+.eg-profile-test-arrow {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--eg-accent-bright);
+    flex-shrink: 0;
+}
+
+/* Test detail page */
+.eg-profile-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--eg-text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: var(--eg-space-md);
+    transition: color var(--eg-duration) var(--eg-ease);
+}
+
+.eg-profile-back-link:hover {
+    color: var(--eg-text);
+}
+
+.eg-profile-result-hero {
+    padding: 0 0 var(--eg-space-lg);
+}
+
+.eg-profile-result-hero-inner {
+    text-align: center;
+    padding: var(--eg-space-xl) var(--eg-space-lg);
+    border-radius: var(--eg-radius-lg);
+    max-width: 44rem;
+    margin-inline: auto;
+}
+
+.eg-profile-result-eyebrow {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--eg-text-muted);
+    margin-bottom: 0.75rem;
+}
+
+.eg-profile-result-type-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 5rem;
+    padding: 0.45rem 1.1rem;
+    border-radius: var(--eg-radius-pill);
+    background: var(--eg-result-accent);
+    color: #fff;
+    font-weight: 800;
+    font-size: 1.2rem;
+    letter-spacing: 0.08em;
+    box-shadow: 0 12px 32px var(--eg-result-glow);
+    margin-bottom: 1rem;
+}
+
+.eg-profile-result-title {
+    font-size: clamp(1.65rem, 4vw, 2.2rem);
+    margin-bottom: 0.75rem;
+}
+
+.eg-profile-result-summary {
+    color: var(--eg-text-muted);
+    font-size: 1.05rem;
+    line-height: 1.65;
+    margin-bottom: 1rem;
+}
+
+.eg-profile-result-date {
+    font-size: 0.85rem;
+    color: var(--eg-text-muted);
+}
+
+.eg-profile-result-content {
+    max-width: 52rem;
+}
+
+.eg-profile-result-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--eg-space-sm);
+    margin-top: var(--eg-space-lg);
+    padding-top: var(--eg-space-lg);
+    border-top: 1px solid var(--eg-border);
+}
+
+/* Dark-themed result panels inside profile */
+.eg-profile-result-page .eg-result-panel,
+.eg-profile-test-detail .eg-result-panel.eg-glass {
+    margin-bottom: var(--eg-space-md);
+    padding: var(--eg-space-lg);
+    border-radius: var(--eg-radius);
+}
+
+.eg-profile-test-detail .eg-result-panel-title {
+    color: var(--eg-text-muted);
+}
+
+.eg-profile-test-detail .eg-result-panel-title i {
+    color: var(--eg-result-accent);
+}
+
+.eg-profile-test-detail .eg-result-body-text,
+.eg-profile-test-detail .eg-axis-pref {
+    color: var(--eg-text-muted);
+}
+
+.eg-profile-test-detail .eg-axis-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--eg-border);
+    border-radius: var(--eg-radius-sm);
+    padding: var(--eg-space-md);
+}
+
+.eg-profile-test-detail .eg-axis-letter {
+    color: var(--eg-text-muted);
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.eg-profile-test-detail .eg-axis-letter.is-active {
+    color: var(--eg-result-accent);
+}
+
+.eg-profile-test-detail .eg-axis-pct {
+    color: var(--eg-text);
+    font-weight: 700;
+}
+
+.eg-profile-test-detail .eg-axis-track {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.eg-profile-test-detail .eg-axis-fill {
+    background: linear-gradient(90deg, var(--eg-result-accent), var(--eg-accent-bright));
+}
+
+.eg-profile-test-detail .eg-result-chip-card,
+.eg-profile-test-detail .eg-result-note-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--eg-border);
+    color: var(--eg-text);
+}
+
+.eg-profile-test-detail .eg-result-chip-card i {
+    color: var(--eg-result-accent);
+}
+
+.eg-profile-test-detail .eg-famous-pill {
+    background: var(--eg-accent-soft);
+    color: var(--eg-accent-bright);
+    border: 1px solid var(--eg-border);
+}

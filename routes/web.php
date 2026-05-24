@@ -3,6 +3,8 @@
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Auth\VerifyEmail;
+use App\Livewire\Profile\Show;
+use App\Livewire\Profile\TestShow;
 use App\Livewire\Quiz\Result;
 use App\Livewire\Quiz\Take;
 use App\Models\Quiz;
@@ -49,6 +51,9 @@ Route::post('/logout', function () {
 
     return redirect()->route('home');
 })->middleware('auth')->name('logout');
+
+Route::livewire('/profile', Show::class)->middleware('auth')->name('profile');
+Route::livewire('/profile/tests/{uuid}', TestShow::class)->middleware('auth')->name('profile.test.show');
 
 Route::livewire('/quiz/session/{uuid}/result', Result::class)->name('quiz.result');
 Route::livewire('/quiz/session/{uuid}', Take::class)->name('quiz.session');
