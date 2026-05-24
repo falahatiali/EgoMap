@@ -1,6 +1,8 @@
 @php
+    use App\Support\LocaleConfig;
+
     $locale = app()->getLocale();
-    $isRtl = $locale === 'fa';
+    $isRtl = LocaleConfig::isRtl($locale);
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', $locale) }}" dir="{{ $isRtl ? 'rtl' : 'ltr' }}">

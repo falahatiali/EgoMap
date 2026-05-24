@@ -12,7 +12,6 @@
     "sail": false,
     "skills": [
         "laravel-best-practices",
-        "livewire-development",
-        "tailwindcss-development"
+        "livewire-development"
     ]
 }

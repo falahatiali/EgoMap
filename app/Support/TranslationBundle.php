@@ -7,14 +7,18 @@ use Illuminate\Support\Facades\Lang;
 class TranslationBundle
 {
     /**
+     * Static UI strings from lang files (not database content).
+     *
      * @param  list<string>  $groups  Lang file names without locale prefix (e.g. home, nav)
-     * @return array{en: array<string, string>, fa: array<string, string>}
+     * @return array<string, array<string, string>>
      */
     public static function forGroups(array $groups): array
     {
-        $bundle = ['en' => [], 'fa' => []];
+        $bundle = [];
 
-        foreach (['en', 'fa'] as $locale) {
+        foreach (LocaleConfig::supported() as $locale) {
+            $bundle[$locale] = [];
+
             foreach ($groups as $group) {
                 /** @var array<string, string> $lines */
                 $lines = Lang::get($group, [], $locale);

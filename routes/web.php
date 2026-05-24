@@ -1,10 +1,11 @@
 <?php
 
+use App\Support\LocaleConfig;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::match(['get', 'post'], '/locale/{locale}', function (Request $request, string $locale) {
-    if (! in_array($locale, ['en', 'fa'], true)) {
+    if (! LocaleConfig::isSupported($locale)) {
         abort(404);
     }
 
