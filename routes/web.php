@@ -1,5 +1,7 @@
 <?php
 
+use App\Livewire\Quiz\Result;
+use App\Livewire\Quiz\Take;
 use App\Support\LocaleConfig;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -19,3 +21,7 @@ Route::match(['get', 'post'], '/locale/{locale}', function (Request $request, st
 })->name('locale.switch');
 
 Route::get('/', fn () => view('home'))->name('home');
+
+Route::livewire('/quiz/session/{uuid}/result', Result::class)->name('quiz.result');
+Route::livewire('/quiz/session/{uuid}', Take::class)->name('quiz.session');
+Route::livewire('/quiz/{slug}', Take::class)->name('quiz.start');
