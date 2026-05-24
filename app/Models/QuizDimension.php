@@ -3,12 +3,24 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasAppTranslations;
+use App\Observers\AssignsUuidObserver;
 use Database\Factories\QuizDimensionFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+#[Fillable([
+    'quiz_id',
+    'key',
+    'label',
+    'description',
+    'sort_order',
+    'meta',
+])]
+#[ObservedBy([AssignsUuidObserver::class])]
 class QuizDimension extends Model
 {
     /** @use HasFactory<QuizDimensionFactory> */
@@ -16,16 +28,6 @@ class QuizDimension extends Model
 
     /** @var list<string> */
     public array $translatable = ['label', 'description'];
-
-    /** @var list<string> */
-    protected $fillable = [
-        'quiz_id',
-        'key',
-        'label',
-        'description',
-        'sort_order',
-        'meta',
-    ];
 
     /**
      * @return array<string, string>

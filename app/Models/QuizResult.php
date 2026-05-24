@@ -3,28 +3,30 @@
 namespace App\Models;
 
 use App\Enums\ResultStatus;
+use App\Observers\AssignsUuidObserver;
 use Database\Factories\QuizResultFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[Fillable([
+    'quiz_session_id',
+    'outcome_profile_id',
+    'dimension_scores',
+    'free_report',
+    'premium_report',
+    'status',
+    'ai_model',
+    'ai_prompt_version',
+    'generated_at',
+])]
+#[ObservedBy([AssignsUuidObserver::class])]
 class QuizResult extends Model
 {
     /** @use HasFactory<QuizResultFactory> */
     use HasFactory;
-
-    /** @var list<string> */
-    protected $fillable = [
-        'quiz_session_id',
-        'outcome_profile_id',
-        'dimension_scores',
-        'free_report',
-        'premium_report',
-        'status',
-        'ai_model',
-        'ai_prompt_version',
-        'generated_at',
-    ];
 
     /**
      * @return array<string, string>

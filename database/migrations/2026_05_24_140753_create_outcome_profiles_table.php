@@ -10,10 +10,12 @@ return new class extends Migration
     {
         Schema::create('outcome_profiles', function (Blueprint $table) {
             $table->id();
+            $table->uuid('uuid')->unique();
             $table->foreignId('quiz_id')->constrained()->cascadeOnDelete();
             $table->string('code');
             $table->json('title');
             $table->json('summary')->nullable();
+            $table->json('content')->nullable();
             $table->json('match_rules')->nullable();
             $table->unsignedSmallInteger('sort_order')->default(0);
             $table->boolean('is_active')->default(true);

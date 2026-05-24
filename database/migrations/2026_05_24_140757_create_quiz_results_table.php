@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('quiz_results', function (Blueprint $table) {
             $table->id();
+            $table->uuid('uuid')->unique();
             $table->foreignId('quiz_session_id')->unique()->constrained()->cascadeOnDelete();
             $table->foreignId('outcome_profile_id')->nullable()->constrained()->nullOnDelete();
             $table->json('dimension_scores')->nullable();

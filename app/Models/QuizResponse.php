@@ -2,23 +2,25 @@
 
 namespace App\Models;
 
+use App\Observers\AssignsUuidObserver;
 use Database\Factories\QuizResponseFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[Fillable([
+    'quiz_session_id',
+    'question_id',
+    'value',
+    'answered_at',
+])]
+#[ObservedBy([AssignsUuidObserver::class])]
 class QuizResponse extends Model
 {
     /** @use HasFactory<QuizResponseFactory> */
     use HasFactory;
-
-    /** @var list<string> */
-    protected $fillable = [
-        'quiz_session_id',
-        'question_id',
-        'value',
-        'answered_at',
-    ];
 
     /**
      * @return array<string, string>

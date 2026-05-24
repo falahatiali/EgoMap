@@ -4,11 +4,26 @@ namespace App\Models;
 
 use App\Enums\QuizType;
 use App\Models\Concerns\HasAppTranslations;
+use App\Observers\AssignsUuidObserver;
 use Database\Factories\QuizFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+#[Fillable([
+    'slug',
+    'type',
+    'name',
+    'description',
+    'is_active',
+    'settings',
+    'scoring_config',
+    'estimated_minutes',
+    'version',
+])]
+#[ObservedBy([AssignsUuidObserver::class])]
 class Quiz extends Model
 {
     /** @use HasFactory<QuizFactory> */
@@ -16,19 +31,6 @@ class Quiz extends Model
 
     /** @var list<string> */
     public array $translatable = ['name', 'description'];
-
-    /** @var list<string> */
-    protected $fillable = [
-        'slug',
-        'type',
-        'name',
-        'description',
-        'is_active',
-        'settings',
-        'scoring_config',
-        'estimated_minutes',
-        'version',
-    ];
 
     /**
      * @return array<string, string>

@@ -3,30 +3,33 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasAppTranslations;
+use App\Observers\AssignsUuidObserver;
 use Database\Factories\OutcomeProfileFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+#[Fillable([
+    'quiz_id',
+    'code',
+    'title',
+    'summary',
+    'content',
+    'match_rules',
+    'sort_order',
+    'is_active',
+])]
+#[ObservedBy([AssignsUuidObserver::class])]
 class OutcomeProfile extends Model
 {
     /** @use HasFactory<OutcomeProfileFactory> */
     use HasAppTranslations, HasFactory;
 
     /** @var list<string> */
-    public array $translatable = ['title', 'summary'];
-
-    /** @var list<string> */
-    protected $fillable = [
-        'quiz_id',
-        'code',
-        'title',
-        'summary',
-        'match_rules',
-        'sort_order',
-        'is_active',
-    ];
+    public array $translatable = ['title', 'summary', 'content'];
 
     /**
      * @return array<string, string>

@@ -3,32 +3,34 @@
 namespace App\Models;
 
 use App\Enums\SessionStatus;
+use App\Observers\AssignsUuidObserver;
 use Database\Factories\QuizSessionFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Support\Str;
 
+#[Fillable([
+    'quiz_id',
+    'user_id',
+    'guest_token',
+    'locale',
+    'status',
+    'current_sort_order',
+    'meta',
+    'started_at',
+    'completed_at',
+    'email',
+    'email_report_sent_at',
+])]
+#[ObservedBy([AssignsUuidObserver::class])]
 class QuizSession extends Model
 {
     /** @use HasFactory<QuizSessionFactory> */
     use HasFactory;
-
-    /** @var list<string> */
-    protected $fillable = [
-        'uuid',
-        'quiz_id',
-        'user_id',
-        'guest_token',
-        'locale',
-        'status',
-        'current_sort_order',
-        'meta',
-        'started_at',
-        'completed_at',
-    ];
 
     /**
      * @return array<string, string>
@@ -41,16 +43,8 @@ class QuizSession extends Model
             'current_sort_order' => 'integer',
             'started_at' => 'datetime',
             'completed_at' => 'datetime',
+            'email_report_sent_at' => 'datetime',
         ];
-    }
-
-    protected static function booted(): void
-    {
-        static::creating(function (QuizSession $session): void {
-            if (empty($session->uuid)) {
-                $session->uuid = (string) Str::uuid();
-            }
-        });
     }
 
     /**

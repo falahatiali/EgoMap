@@ -14,6 +14,8 @@ return new class extends Migration
             $table->foreignId('quiz_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->string('guest_token', 64)->nullable()->index();
+            $table->string('email')->nullable();
+            $table->timestamp('email_report_sent_at')->nullable();
             $table->string('locale', 5)->default('en');
             $table->string('status')->default('in_progress');
             $table->unsignedSmallInteger('current_sort_order')->nullable();

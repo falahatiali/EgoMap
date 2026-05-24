@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('question_options', function (Blueprint $table) {
             $table->id();
+            $table->uuid('uuid')->unique();
             $table->foreignId('question_id')->constrained()->cascadeOnDelete();
             $table->unsignedSmallInteger('sort_order')->default(0);
             $table->json('label');
