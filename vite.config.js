@@ -9,6 +9,7 @@ export default defineConfig({
                 'resources/css/bootstrap-rtl.css',
                 'resources/css/app.css',
                 'resources/js/app.js',
+                'resources/js/quiz-take.js',
             ],
             refresh: true,
         }),
