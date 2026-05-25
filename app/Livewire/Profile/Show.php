@@ -13,7 +13,7 @@ use Livewire\Component;
 #[Layout('layouts.app')]
 class Show extends Component
 {
-    public User $user;
+    public ?User $user;
 
     #[Url(as: 'tab', history: true)]
     public string $filter = 'all';
