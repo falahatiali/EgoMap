@@ -6,11 +6,14 @@ use App\Enums\QuestionType;
 use App\Enums\SessionStatus;
 use App\Models\Question;
 use App\Models\QuestionOption;
+use App\Models\Quiz;
 use App\Models\QuizSession;
 use App\Services\Quiz\QuizSessionClaimService;
 use App\Services\Quiz\QuizSessionService;
+use App\Support\QuizResultViewData;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -22,6 +25,8 @@ class Take extends Component
     public string $uuid = '';
 
     public ?QuizSession $session = null;
+
+    public ?QuizSession $returningSession = null;
 
     public bool $starting = false;
 
@@ -67,6 +72,10 @@ class Take extends Component
         if ($slug !== null) {
             $this->slug = $slug;
 
+            if (Auth::check()) {
+                $this->applyAuthenticatedEntry($quizSessionService);
+            }
+
             return;
         }
 
@@ -83,6 +92,71 @@ class Take extends Component
 
         $quiz = $quizSessionService->findActiveQuizBySlug($this->slug);
 
+        if (Auth::check()) {
+            $this->beginOrResumeForAuthenticatedUser($quiz, $resumeUuid, $quizSessionService);
+
+            return;
+        }
+
+        $this->beginOrResumeForGuest($quiz, $resumeUuid, $quizSessionService);
+    }
+
+    public function startRetake(QuizSessionService $quizSessionService): void
+    {
+        if ($this->slug === null) {
+            return;
+        }
+
+        $quiz = $quizSessionService->findActiveQuizBySlug($this->slug);
+
+        $this->dispatch('quiz-clear-stored-session', slug: $this->slug);
+
+        $session = $quizSessionService->start($quiz);
+
+        $this->redirectRoute('quiz.session', ['uuid' => $session->uuid], navigate: true);
+    }
+
+    private function beginOrResumeForAuthenticatedUser(
+        Quiz $quiz,
+        ?string $resumeUuid,
+        QuizSessionService $quizSessionService,
+    ): void {
+        if ($resumeUuid !== null) {
+            $this->dispatch('quiz-clear-stored-session', slug: $this->slug);
+        }
+
+        $this->applyAuthenticatedEntry($quizSessionService, $quiz);
+    }
+
+    private function applyAuthenticatedEntry(
+        QuizSessionService $quizSessionService,
+        ?Quiz $quiz = null,
+    ): void {
+        $quiz ??= $quizSessionService->findActiveQuizBySlug((string) $this->slug);
+        $entry = $quizSessionService->resolveAuthenticatedEntry($quiz, Auth::user());
+
+        if ($entry['action'] === 'resume' && $entry['session'] !== null) {
+            $this->redirectRoute('quiz.session', ['uuid' => $entry['session']->uuid], navigate: true);
+
+            return;
+        }
+
+        if ($entry['action'] === 'show_previous' && $entry['session'] !== null) {
+            $this->returningSession = $entry['session'];
+            $this->starting = false;
+
+            return;
+        }
+
+        $session = $quizSessionService->start($quiz);
+        $this->redirectRoute('quiz.session', ['uuid' => $session->uuid], navigate: true);
+    }
+
+    private function beginOrResumeForGuest(
+        Quiz $quiz,
+        ?string $resumeUuid,
+        QuizSessionService $quizSessionService,
+    ): void {
         if ($resumeUuid !== null) {
             $existing = $quizSessionService->findByUuidOrNull($resumeUuid);
 
@@ -211,6 +285,20 @@ class Take extends Component
 
     public function render(): View
     {
+        if ($this->returningSession !== null) {
+            $resultData = QuizResultViewData::fromSession($this->returningSession);
+            $report = $resultData['report'];
+
+            return view('livewire.quiz.returning', [
+                'quizName' => $this->returningSession->quiz->getTranslation('name', app()->getLocale(), true),
+                'typeCode' => (string) ($report['type_code'] ?? '—'),
+                'title' => (string) ($report['title'] ?? ''),
+                'summary' => (string) ($resultData['content']['tagline'] ?? ($report['summary'] ?? '')),
+                'completedAt' => $this->returningSession->completed_at,
+                'palette' => $resultData['palette'],
+            ]);
+        }
+
         if ($this->session === null) {
             return view('livewire.quiz.starting', [
                 'slug' => $this->slug,

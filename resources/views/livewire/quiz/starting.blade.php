@@ -23,15 +23,17 @@
     </div>
 </div>
 
-@script
-<script>
-    const slug = @json($slug);
-    const storageKey = slug ? `egomap_quiz_${slug}` : null;
-    const savedUuid = storageKey ? localStorage.getItem(storageKey) : null;
+@guest
+    @script
+    <script>
+        const slug = @json($slug);
+        const storageKey = slug ? `egomap_quiz_${slug}` : null;
+        const savedUuid = storageKey ? localStorage.getItem(storageKey) : null;
 
-    $wire.beginOrResume(savedUuid);
-</script>
-@endscript
+        $wire.beginOrResume(savedUuid);
+    </script>
+    @endscript
+@endguest
 
 @push('scripts')
 <script>

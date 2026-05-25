@@ -9,6 +9,7 @@ use App\Models\Quiz;
 use App\Models\QuizResponse;
 use App\Models\QuizResult;
 use App\Models\QuizSession;
+use App\Models\User;
 use App\Services\Quiz\Scoring\ScoringEngineFactory;
 use App\Support\LocaleConfig;
 use Illuminate\Support\Facades\DB;
@@ -60,6 +61,102 @@ class QuizSessionService
         return QuizSession::query()
             ->with(['quiz.questions' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order')->with('options')])
             ->where('uuid', $uuid)
+            ->first();
+    }
+
+    public function findInProgressForUser(Quiz $quiz, User $user): ?QuizSession
+    {
+        return QuizSession::query()
+            ->where('quiz_id', $quiz->id)
+            ->where('user_id', $user->id)
+            ->where('status', SessionStatus::InProgress)
+            ->latest('updated_at')
+            ->first();
+    }
+
+    public function findResumableInProgressForUser(Quiz $quiz, User $user): ?QuizSession
+    {
+        $sessions = QuizSession::query()
+            ->where('quiz_id', $quiz->id)
+            ->where('user_id', $user->id)
+            ->where('status', SessionStatus::InProgress)
+            ->withCount('responses')
+            ->latest('updated_at')
+            ->get();
+
+        foreach ($sessions as $session) {
+            if ($this->hasMeaningfulProgress($session)) {
+                return $session->load([
+                    'quiz.questions' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order')->with('options'),
+                ]);
+            }
+        }
+
+        return null;
+    }
+
+    public function hasMeaningfulProgress(QuizSession $session): bool
+    {
+        if (($session->responses_count ?? $session->responses()->count()) > 0) {
+            return true;
+        }
+
+        return ($session->current_sort_order ?? 1) > 1;
+    }
+
+    public function abandonStaleEmptySessionsForUser(User $user, ?int $quizId = null): int
+    {
+        return QuizSession::query()
+            ->where('user_id', $user->id)
+            ->when($quizId !== null, fn ($query) => $query->where('quiz_id', $quizId))
+            ->where('status', SessionStatus::InProgress)
+            ->whereDoesntHave('responses')
+            ->where('current_sort_order', '<=', 1)
+            ->update(['status' => SessionStatus::Abandoned]);
+    }
+
+    /**
+     * Decide how a signed-in user should enter a quiz.
+     *
+     * @return array{action: 'resume'|'show_previous'|'start_fresh', session: QuizSession|null}
+     */
+    public function resolveAuthenticatedEntry(Quiz $quiz, User $user): array
+    {
+        $this->claimService->claimForUser($user);
+        $this->abandonStaleEmptySessionsForUser($user, $quiz->id);
+
+        $resumable = $this->findResumableInProgressForUser($quiz, $user);
+
+        if ($resumable !== null) {
+            return [
+                'action' => 'resume',
+                'session' => $resumable,
+            ];
+        }
+
+        $completed = $this->findLatestCompletedForUser($quiz, $user);
+
+        if ($completed !== null) {
+            return [
+                'action' => 'show_previous',
+                'session' => $completed,
+            ];
+        }
+
+        return [
+            'action' => 'start_fresh',
+            'session' => null,
+        ];
+    }
+
+    public function findLatestCompletedForUser(Quiz $quiz, User $user): ?QuizSession
+    {
+        return QuizSession::query()
+            ->where('quiz_id', $quiz->id)
+            ->where('user_id', $user->id)
+            ->where('status', SessionStatus::Completed)
+            ->with(['result.outcomeProfile', 'quiz'])
+            ->latest('completed_at')
             ->first();
     }
 
