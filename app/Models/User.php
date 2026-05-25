@@ -45,4 +45,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(QuizSession::class)->latest('updated_at');
     }
+
+    /**
+     * @return HasMany<NoContactProtocol, $this>
+     */
+    public function noContactProtocols(): HasMany
+    {
+        return $this->hasMany(NoContactProtocol::class)->latest('updated_at');
+    }
 }

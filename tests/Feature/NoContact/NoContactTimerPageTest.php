@@ -1,0 +1,71 @@
+<?php
+
+namespace Tests\Feature\NoContact;
+
+use App\Livewire\NoContact\Show;
+use App\Models\User;
+use App\Services\NoContact\NoContactTimerService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
+use Livewire\Livewire;
+use Tests\TestCase;
+
+class NoContactTimerPageTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_no_contact_page_renders_setup_mode(): void
+    {
+        $response = $this->get(route('no-contact'));
+
+        $response->assertOk();
+        $response->assertSee('No-contact protocol', false);
+        $response->assertSee('Lock in protocol', false);
+        $response->assertSee('90 days', false);
+    }
+
+    public function test_user_can_start_protocol_via_livewire(): void
+    {
+        Carbon::setTestNow('2026-05-25 12:00:00');
+
+        $user = User::factory()->create();
+
+        Livewire::actingAs($user)
+            ->test(Show::class)
+            ->set('selectedDays', 30)
+            ->call('startProtocol')
+            ->assertDontSee('Choose how long you go dark', false)
+            ->assertSee('Time left in protocol', false)
+            ->assertSee('30 days', false);
+
+        $this->assertDatabaseHas('no_contact_protocols', [
+            'user_id' => $user->id,
+            'duration_days' => 30,
+            'status' => 'active',
+        ]);
+    }
+
+    public function test_slip_requires_confirmation_then_resets(): void
+    {
+        Carbon::setTestNow('2026-05-25 12:00:00');
+
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        app(NoContactTimerService::class)->start(60);
+
+        Carbon::setTestNow('2026-06-10 12:00:00');
+
+        Livewire::test(Show::class)
+            ->call('recordSlip')
+            ->assertSet('confirmSlip', true)
+            ->call('recordSlip')
+            ->assertSet('confirmSlip', false);
+
+        $protocol = app(NoContactTimerService::class)->findActiveProtocol();
+
+        $this->assertNotNull($protocol);
+        $this->assertSame(1, $protocol->slip_count);
+        $this->assertTrue($protocol->streak_started_at->equalTo(Carbon::parse('2026-06-10 12:00:00')));
+    }
+}

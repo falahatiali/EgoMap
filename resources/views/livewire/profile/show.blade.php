@@ -12,6 +12,11 @@
                     'label' => __('profile.browse_tests'),
                     'icon' => 'fa-flask',
                 ],
+                [
+                    'href' => route('no-contact'),
+                    'label' => __('nav.no_contact'),
+                    'icon' => 'fa-hourglass-half',
+                ],
             ],
         ])
     </section>

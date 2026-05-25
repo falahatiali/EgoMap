@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Listeners\ClaimGuestNoContactProtocols;
 use App\Listeners\ClaimGuestQuizSessions;
 use App\Support\LocaleConfig;
 use App\Support\TranslationBundle;
@@ -32,9 +33,10 @@ class AppServiceProvider extends ServiceProvider
         );
 
         View::composer('layouts.app', function ($view): void {
-            $view->with('i18nBundle', TranslationBundle::forGroups(['common', 'nav', 'home']));
+            $view->with('i18nBundle', TranslationBundle::forGroups(['common', 'nav', 'home', 'no_contact']));
         });
 
         Event::listen(Login::class, ClaimGuestQuizSessions::class);
+        Event::listen(Login::class, ClaimGuestNoContactProtocols::class);
     }
 }

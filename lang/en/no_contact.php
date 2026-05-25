@@ -1,0 +1,53 @@
+<?php
+
+return [
+    'page_title' => 'No-contact protocol',
+    'page_subtitle' => 'Your streak lives on our servers — refresh, close the tab, come back tomorrow. It keeps counting.',
+    'back_home' => 'Back home',
+
+    'setup_badge' => 'Detox phase',
+    'setup_title' => 'Choose how long you go dark',
+    'setup_subtitle' => 'No stalking. No “just checking.” Pick a commitment — we recommend 90 days for nervous system recovery.',
+    'recommended' => 'Recommended',
+    'days' => ':count days',
+    'unit_days' => 'days',
+    'start_protocol' => 'Lock in protocol',
+    'invalid_duration' => 'Please choose a valid duration.',
+
+    'active_badge' => 'Protocol active',
+    'active_title' => 'No-contact streak',
+    'stat_elapsed' => 'Current streak',
+    'stat_slips' => 'Resets',
+    'remaining_label' => 'Time left in protocol',
+    'elapsed_days' => '{0} Just started|{1} :count day clean|[2,*] :count days clean',
+    'elapsed_hours' => '{0} Just started|{1} :count hour clean|[2,*] :count hours clean',
+    'slip_count' => '{0} No slips yet|{1} :count reset|[2,*] :count resets',
+    'slip_warning' => 'Checked their story? Sent a text? That is a slip — timer resets to zero.',
+    'slip_button' => 'I slipped — reset timer',
+    'slip_confirm_title' => 'Reset your streak?',
+    'slip_confirm_body' => 'Honesty matters. If you broke no-contact, the clock starts from scratch. No partial credit.',
+    'slip_confirm_yes' => 'Yes, reset from zero',
+    'slip_confirm_no' => 'Not yet — keep going',
+    'no_active_protocol' => 'No active protocol found.',
+
+    'rules_title' => 'Steel rules',
+    'rule_1' => 'No messages, no calls, no “just checking in.”',
+    'rule_2' => 'No social stalking — stories, bios, or new partners.',
+    'rule_3' => 'Slip = full reset. Your future self is watching.',
+
+    'completed_badge' => 'Protocol complete',
+    'completed_title' => 'You finished the commitment',
+    'completed_subtitle' => 'You held the line for :days days. Start a new protocol if you need another season of discipline.',
+    'start_again' => 'Start new protocol',
+
+    'preset_30' => '30 days',
+    'preset_30_desc' => 'Emergency stabilization — first month of detox.',
+    'preset_60' => '60 days',
+    'preset_60_desc' => 'Two months to break the dopamine loop.',
+    'preset_90' => '90 days',
+    'preset_90_desc' => 'Gold standard — nervous system and identity reset.',
+    'preset_120' => '4 months',
+    'preset_120_desc' => 'Deep season of silence and rebuild.',
+    'preset_180' => '6 months',
+    'preset_180_desc' => 'Full half-year empire foundation.',
+];
