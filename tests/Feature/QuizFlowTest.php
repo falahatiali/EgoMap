@@ -92,6 +92,7 @@ class QuizFlowTest extends TestCase
         $response->assertOk();
         $response->assertSee($session->result->free_report['type_code'], false);
         $response->assertSee(__('quiz.strengths_title'), false);
+        $response->assertSee(__('quiz.narrative_title'), false);
     }
 
     public function test_livewire_advances_after_binary_answer(): void

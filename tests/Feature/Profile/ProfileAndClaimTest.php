@@ -77,6 +77,86 @@ class ProfileAndClaimTest extends TestCase
         $this->assertSame(2, QuizSession::query()->count());
     }
 
+    public function test_authenticated_user_with_completed_session_sees_previous_result_gate(): void
+    {
+        $user = User::factory()->create();
+        $quiz = Quiz::query()->where('slug', 'mbti-personality')->firstOrFail();
+        $service = app(QuizSessionService::class);
+        $session = $service->start($quiz);
+        $session->update(['user_id' => $user->id]);
+        $service->complete($session->fresh());
+
+        Livewire::actingAs($user)
+            ->test(Take::class, ['slug' => 'mbti-personality'])
+            ->assertSet('returningSession.uuid', $session->uuid)
+            ->assertSee(__('quiz.returning_eyebrow'))
+            ->assertSee(__('quiz.retake_test'));
+
+        $this->assertSame(1, QuizSession::query()->count());
+    }
+
+    public function test_empty_in_progress_session_does_not_block_completed_result_gate(): void
+    {
+        $user = User::factory()->create();
+        $quiz = Quiz::query()->where('slug', 'mbti-personality')->firstOrFail();
+        $service = app(QuizSessionService::class);
+
+        $completed = $service->start($quiz);
+        $completed->update(['user_id' => $user->id]);
+        $service->complete($completed->fresh());
+
+        QuizSession::factory()->create([
+            'user_id' => $user->id,
+            'quiz_id' => $quiz->id,
+            'status' => SessionStatus::InProgress,
+            'current_sort_order' => 1,
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(Take::class, ['slug' => 'mbti-personality'])
+            ->assertSet('returningSession.uuid', $completed->uuid)
+            ->assertSee(__('quiz.view_previous_result'));
+
+        $this->assertSame(
+            SessionStatus::Abandoned,
+            QuizSession::query()->whereKeyNot($completed->id)->first()->status,
+        );
+    }
+
+    public function test_authenticated_user_can_start_retake(): void
+    {
+        $user = User::factory()->create();
+        $quiz = Quiz::query()->where('slug', 'mbti-personality')->firstOrFail();
+        $service = app(QuizSessionService::class);
+        $session = $service->start($quiz);
+        $session->update(['user_id' => $user->id]);
+        $service->complete($session->fresh());
+
+        Livewire::actingAs($user)
+            ->test(Take::class, ['slug' => 'mbti-personality'])
+            ->call('startRetake')
+            ->assertRedirect(route('quiz.session', ['uuid' => QuizSession::query()->latest('id')->first()->uuid]));
+
+        $this->assertSame(2, QuizSession::query()->count());
+        $this->assertSame(SessionStatus::InProgress, QuizSession::query()->latest('id')->first()->status);
+    }
+
+    public function test_authenticated_user_resumes_in_progress_from_database(): void
+    {
+        $user = User::factory()->create();
+        $quiz = Quiz::query()->where('slug', 'mbti-personality')->firstOrFail();
+        $service = app(QuizSessionService::class);
+        $session = $service->start($quiz);
+        $session->update(['user_id' => $user->id]);
+        $service->saveAnswer($session, $quiz->questions()->orderBy('sort_order')->firstOrFail(), 'A');
+
+        Livewire::actingAs($user)
+            ->test(Take::class, ['slug' => 'mbti-personality'])
+            ->assertRedirect(route('quiz.session', ['uuid' => $session->uuid]));
+
+        $this->assertSame(1, QuizSession::query()->count());
+    }
+
     public function test_user_can_have_multiple_completed_sessions_for_same_quiz(): void
     {
         $user = User::factory()->create();
@@ -107,6 +187,29 @@ class ProfileAndClaimTest extends TestCase
             ->assertOk()
             ->assertSee($user->email)
             ->assertSee(__('profile.my_tests_title'));
+    }
+
+    public function test_profile_lists_completed_session_with_type_code_and_quiz_name(): void
+    {
+        $user = User::factory()->create();
+        $quiz = Quiz::query()->where('slug', 'mbti-personality')->firstOrFail();
+        $service = app(QuizSessionService::class);
+        $session = $service->start($quiz);
+        $session->update(['user_id' => $user->id, 'email' => $user->email]);
+
+        foreach ($quiz->questions()->with('options')->orderBy('sort_order')->get() as $question) {
+            $service->saveAnswer($session, $question, $question->options->first()->value);
+        }
+
+        $service->complete($session->fresh());
+        $typeCode = (string) $session->fresh()->result->free_report['type_code'];
+
+        Livewire::actingAs($user)
+            ->test(Show::class)
+            ->assertOk()
+            ->assertSee($typeCode, false)
+            ->assertSee($quiz->getTranslation('name', 'en', true), false)
+            ->assertSee(__('profile.status_completed'), false);
     }
 
     public function test_user_can_view_completed_test_detail(): void
