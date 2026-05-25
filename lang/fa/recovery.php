@@ -1,0 +1,62 @@
+<?php
+
+return [
+    'triage_title' => 'اولین قدمت را پیدا کنیم',
+    'triage_subtitle' => 'دو سؤال سریع. بدون ثبت‌نام. یک جهت شفاف.',
+    'step_label' => 'گام :current از :total',
+    'q1_title' => 'چند وقت است که جدا شده‌اید؟',
+    'q1_subtitle' => 'راست بگو — زمان‌بندی روی سیستم عصبی‌ات اثر می‌گذارد.',
+    'q2_title' => 'الان سخت‌ترین دردت چیست؟',
+    'q2_subtitle' => 'همان که امروز بیشتر می‌سوزد.',
+    'result_badge' => 'اولین حرکت تو',
+    'result_subtitle' => 'بر اساس جواب‌ها، از اینجا شروع کن — نه همه‌جا یک‌جا.',
+    'result_phase' => 'تو در فاز :phase هستی',
+    'start_over' => 'شروع دوباره',
+
+    'duration_days' => 'روزها',
+    'duration_weeks' => 'هفته‌ها',
+    'duration_months' => 'ماه‌ها',
+    'duration_years' => 'سال‌ها',
+
+    'struggle_stalking' => 'چک کردن شبکه‌های اجتماعی‌شان',
+    'struggle_worthless' => 'احساس بی‌ارزشی',
+    'struggle_anger' => 'خشم و عصبانیت',
+    'struggle_get_back' => 'تلاش برای برگرداندنش',
+
+    'rec_no_contact_title' => 'شروع پروتکل نو-کانتکت',
+    'rec_no_contact_body' => 'قبل از اینکه سیگنال تو را ببرد، آن را قطع کن. تایمر روی سرور — لغزش = ریست کامل.',
+    'rec_get_back_body' => 'تعقیب کوچکت می‌کند. اول نو-کانتکت؛ بعد بساز.',
+    'rec_vent_title' => 'تخلیه امن، بعد قطع ارتباط',
+    'rec_anger_body' => 'خشم نیاز به خروجی دارد — نه پیام ساعت ۲ شب. با تایمر نو-کانتکت شروع کن.',
+    'rec_no_contact_cta' => 'باز کردن تایمر',
+    'rec_diagnose_title' => 'شروع دیباگ رابطه',
+    'rec_worthless_body' => 'ارزشت نظر آن‌ها نیست. اول دیتای الگوهای خودت — یک تست، یک PDF.',
+    'rec_diagnose_cta' => 'شروع دیباگ رایگان',
+
+    'phase_diagnose' => 'تشخیص',
+    'phase_detox' => 'سم‌زدایی',
+    'phase_deliver' => 'ساختن',
+
+    'journey_title' => 'مسیر ریکاوری تو',
+    'journey_subtitle' => 'یک فاز در هر زمان. بقیه تا وقتی به آن برسی قفل است.',
+    'current_phase' => 'تمرکز فعلی',
+    'needs_triage_title' => 'اول ورود کوتاه را تمام کن',
+    'needs_triage_body' => 'دو سؤال تا فقط آنچه امروز نیاز داری نشان دهیم.',
+    'needs_triage_cta' => 'شروع ورود',
+
+    'tool_diagnose_title' => 'دیباگ رابطه',
+    'tool_diagnose_body' => 'الگوهایت را با ارزیابی MBTI نقشه کن — PDF رایگان بعد از اتمام.',
+    'tool_detox_title' => 'مرکز فرمان نو-کانتکت',
+    'tool_detox_body' => 'استریک روی سرور ذخیره می‌شود. لغزش = ریست کامل.',
+    'tool_deliver_title' => 'ردیاب امپراتوری',
+    'tool_deliver_body' => 'باشگاه، فستینگ و ابزار ساخت — بعد از تثبیت Detox.',
+    'open_tool' => 'باز کردن',
+    'ai_coach_soon' => 'مربی AI سخت‌گیرانه',
+    'ai_coach_soon_body' => 'به‌زودی — تخلیه بدون ارسال پیام.',
+
+    'lock_diagnose_focus_detox' => 'اول روی Detox تمرکز کن — Diagnose بعد از ۱۴ روز تمیز',
+    'lock_detox_after_diagnose' => 'بعد از یک تست تشخیصی کامل باز می‌شود',
+    'lock_deliver_after_diagnose' => 'بعد از فاز Detox باز می‌شود',
+    'lock_deliver_after_detox' => 'بعد از ۱۴ روز نو-کانتکت یا اتمام پروتکل',
+    'lock_phase_default' => 'اول فاز فعلی را تمام کن',
+];

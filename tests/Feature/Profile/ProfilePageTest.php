@@ -28,7 +28,7 @@ class ProfilePageTest extends TestCase
 
     public function test_profile_http_route_lists_completed_test_for_authenticated_user(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->recoveryDiagnose()->create();
         $session = $this->completeSessionFor($user);
 
         $response = $this->actingAs($user)->get(route('profile'));
@@ -41,7 +41,7 @@ class ProfilePageTest extends TestCase
 
     public function test_profile_filter_completed_shows_only_completed_sessions(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->recoveryDiagnose()->create();
         $quiz = Quiz::query()->where('slug', 'mbti-personality')->firstOrFail();
         $completed = $this->completeSessionFor($user);
 
@@ -63,7 +63,7 @@ class ProfilePageTest extends TestCase
 
     public function test_profile_filter_in_progress_shows_progress_label(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->recoveryDiagnose()->create();
         $quiz = Quiz::query()->where('slug', 'mbti-personality')->firstOrFail();
         $service = app(QuizSessionService::class);
         $session = $service->start($quiz);
@@ -80,7 +80,7 @@ class ProfilePageTest extends TestCase
 
     public function test_profile_shows_empty_state_when_user_has_no_sessions(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->recoveryDiagnose()->create();
 
         Livewire::actingAs($user)
             ->test(Show::class)
@@ -90,7 +90,7 @@ class ProfilePageTest extends TestCase
 
     public function test_profile_test_card_links_to_test_detail_for_completed_session(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->recoveryDiagnose()->create();
         $session = $this->completeSessionFor($user);
 
         $this->actingAs($user)

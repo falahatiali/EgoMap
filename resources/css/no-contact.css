@@ -125,6 +125,11 @@
     gap: 0.35rem;
 }
 
+.eg-nc-countdown-row--clock {
+    direction: ltr;
+    unicode-bidi: isolate;
+}
+
 .eg-nc-countdown-row--primary {
     margin-bottom: 0.35rem;
 }

@@ -1,0 +1,146 @@
+/* Recovery onboarding triage */
+
+.eg-triage-page {
+    min-height: calc(100vh - var(--eg-nav-height) - 3rem);
+}
+
+.eg-triage-progress {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.eg-triage-dot {
+    width: 2.5rem;
+    height: 0.25rem;
+    border-radius: var(--eg-radius-pill);
+    background: var(--eg-border);
+    transition: background var(--eg-duration) var(--eg-ease), transform var(--eg-duration) var(--eg-ease);
+}
+
+.eg-triage-dot.is-active {
+    background: var(--eg-accent-bright);
+    transform: scaleY(1.4);
+}
+
+.eg-triage-panel,
+.eg-triage-result {
+    max-width: 28rem;
+}
+
+.eg-triage-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.eg-triage-option {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border-radius: var(--eg-radius);
+    border: 1px solid var(--eg-border);
+    background: var(--eg-surface);
+    color: var(--eg-text);
+    font-weight: 600;
+    text-align: start;
+    cursor: pointer;
+    transition: border-color var(--eg-duration) var(--eg-ease), background var(--eg-duration) var(--eg-ease);
+}
+
+.eg-triage-option:hover {
+    border-color: var(--eg-accent-bright);
+    background: var(--eg-accent-soft);
+}
+
+.eg-triage-rec-card {
+    padding: var(--eg-space-xl);
+    border-radius: var(--eg-radius-lg);
+    border: 1px solid var(--eg-border-strong);
+}
+
+.eg-triage-rec-icon {
+    width: 3.5rem;
+    height: 3.5rem;
+    margin: 0 auto var(--eg-space-md);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--eg-accent-soft);
+    color: var(--eg-accent-bright);
+    font-size: 1.35rem;
+}
+
+.eg-hero--minimal {
+    text-align: center;
+    padding-top: clamp(3rem, 8vw, 5.5rem);
+    padding-bottom: clamp(3rem, 10vw, 6rem);
+}
+
+.eg-hero--minimal .eg-hero-title {
+    max-width: 20ch;
+    margin-inline: auto;
+}
+
+.eg-hero--minimal .eg-hero-sub {
+    max-width: 46ch;
+    margin-inline: auto;
+}
+
+.eg-hero-cta-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--eg-space-md);
+    margin-top: var(--eg-space-lg);
+}
+
+.eg-btn-hero {
+    padding: 0.95rem 2.5rem;
+    font-size: 1.05rem;
+    min-width: min(100%, 18rem);
+}
+
+.eg-journey-steps {
+    display: grid;
+    gap: var(--eg-space-md);
+    grid-template-columns: 1fr;
+    margin-bottom: var(--eg-space-lg);
+}
+
+@media (min-width: 768px) {
+    .eg-journey-steps {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.eg-journey-step {
+    padding: var(--eg-space-md);
+    border-radius: var(--eg-radius);
+    border: 1px solid var(--eg-border);
+    background: var(--eg-surface);
+    text-align: center;
+}
+
+.eg-journey-step.is-current {
+    border-color: var(--eg-accent-bright);
+    box-shadow: 0 0 20px -8px var(--eg-accent-glow);
+}
+
+.eg-journey-step.is-locked {
+    opacity: 0.55;
+}
+
+.eg-journey-step-lock {
+    font-size: 0.72rem;
+    color: var(--eg-text-muted);
+    margin-top: 0.35rem;
+}
+
+.eg-profile-primary-tool {
+    padding: var(--eg-space-xl);
+    border-radius: var(--eg-radius-lg);
+    border: 1px solid var(--eg-border-strong);
+    background: linear-gradient(165deg, var(--eg-accent-soft) 0%, var(--eg-surface) 55%);
+    margin-bottom: var(--eg-space-xl);
+}

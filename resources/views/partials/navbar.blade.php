@@ -55,7 +55,7 @@
                         <a href="{{ route('register') }}" class="eg-btn-ghost btn-sm text-center">{{ __('nav.register') }}</a>
                     @endauth
 
-                    <a href="{{ route('quiz.start', 'mbti-personality') }}" class="eg-btn-primary eg-transition eg-shadow-glow btn-sm text-center d-none d-lg-inline-flex">
+                    <a href="{{ route('onboarding') }}" class="eg-btn-primary eg-transition eg-shadow-glow btn-sm text-center d-none d-lg-inline-flex" wire:navigate>
                         <span data-i18n="nav.start_test">{{ __('nav.start_test') }}</span>
                         <i class="fa-solid fa-arrow-{{ app()->getLocale() === 'fa' ? 'left' : 'right' }}" data-icon-directional></i>
                     </a>

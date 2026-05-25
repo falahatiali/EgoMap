@@ -11,6 +11,9 @@ return [
     'recommended' => 'Recommended',
     'days' => ':count days',
     'unit_days' => 'days',
+    'unit_hours' => 'h',
+    'unit_minutes' => 'm',
+    'unit_seconds' => 's',
     'start_protocol' => 'Lock in protocol',
     'invalid_duration' => 'Please choose a valid duration.',
 

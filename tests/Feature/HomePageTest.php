@@ -26,7 +26,7 @@ class HomePageTest extends TestCase
         $response->assertSee('Diagnose. Detox. Deliver.', false);
         $response->assertSee('MBTI Personality Type', false);
         $response->assertSee('70 questions', false);
-        $response->assertSee(route('quiz.start', 'mbti-personality'), false);
+        $response->assertSee(route('onboarding'), false);
         $response->assertSee('Start relationship debug (free)', false);
         $response->assertSee('The Civilian', false);
         $response->assertSee('The Sovereign', false);
@@ -44,7 +44,7 @@ class HomePageTest extends TestCase
         $response = $this->get(route('home'));
 
         $response->assertOk();
-        $response->assertSee('رفت؟ دنبال روح لاشی ندو. امپراتوری خودت را بساز.', false);
+        $response->assertSee('رفت؟ دیگر دنبال خاطره‌اش ندو. امپراتوری خودت را بساز.', false);
         $response->assertSee('تشخیص. سم‌زدایی. ساختن.', false);
         $response->assertSee('dir="rtl"', false);
     }

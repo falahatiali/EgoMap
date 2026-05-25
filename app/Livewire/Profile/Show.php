@@ -4,6 +4,7 @@ namespace App\Livewire\Profile;
 
 use App\Models\User;
 use App\Services\Profile\UserQuizHistoryService;
+use App\Services\Recovery\RecoveryJourneyService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
@@ -32,7 +33,7 @@ class Show extends Component
         $this->filter = $filter;
     }
 
-    public function render(UserQuizHistoryService $historyService): View
+    public function render(UserQuizHistoryService $historyService, RecoveryJourneyService $journeyService): View
     {
         $records = $historyService->recordsForUser($this->user);
 
@@ -53,6 +54,7 @@ class Show extends Component
             'totalCompleted' => $completed->count(),
             'totalInProgress' => $inProgress->count(),
             'totalTests' => $records->count(),
+            'journey' => $journeyService->dashboardState($this->user),
         ]);
     }
 }

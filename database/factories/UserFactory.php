@@ -2,6 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Enums\BreakupDuration;
+use App\Enums\PrimaryStruggle;
+use App\Enums\RecoveryPhase;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -40,6 +43,26 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    public function recoveryDiagnose(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'breakup_duration' => BreakupDuration::Months->value,
+            'primary_struggle' => PrimaryStruggle::Worthless->value,
+            'recovery_phase' => RecoveryPhase::Diagnose->value,
+            'recovery_triage_completed_at' => now(),
+        ]);
+    }
+
+    public function recoveryDetox(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'breakup_duration' => BreakupDuration::Weeks->value,
+            'primary_struggle' => PrimaryStruggle::Stalking->value,
+            'recovery_phase' => RecoveryPhase::Detox->value,
+            'recovery_triage_completed_at' => now(),
         ]);
     }
 }

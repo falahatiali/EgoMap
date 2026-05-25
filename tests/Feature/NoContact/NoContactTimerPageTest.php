@@ -45,6 +45,24 @@ class NoContactTimerPageTest extends TestCase
         ]);
     }
 
+    public function test_farsi_locale_renders_persian_digits_and_ltr_clock(): void
+    {
+        Carbon::setTestNow('2026-05-25 12:00:00');
+
+        $user = User::factory()->create();
+        $this->withSession(['locale' => 'fa']);
+        app()->setLocale('fa');
+
+        Livewire::actingAs($user)
+            ->test(Show::class)
+            ->set('selectedDays', 90)
+            ->call('startProtocol')
+            ->assertSee('زمان باقی‌مانده', false)
+            ->assertSee('dir="ltr"', false)
+            ->assertSee('data-digit-locale="fa"', false)
+            ->assertSee('۰', false);
+    }
+
     public function test_slip_requires_confirmation_then_resets(): void
     {
         Carbon::setTestNow('2026-05-25 12:00:00');

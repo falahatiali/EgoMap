@@ -1,0 +1,62 @@
+<?php
+
+return [
+    'triage_title' => 'Let’s find your first step',
+    'triage_subtitle' => 'Two quick questions. No signup. One clear direction.',
+    'step_label' => 'Step :current of :total',
+    'q1_title' => 'How long since the breakup?',
+    'q1_subtitle' => 'Be honest — the timeline shapes your nervous system.',
+    'q2_title' => 'What is your biggest struggle right now?',
+    'q2_subtitle' => 'Pick the one that hits hardest today.',
+    'result_badge' => 'Your first move',
+    'result_subtitle' => 'Based on your answers, start here — not everywhere at once.',
+    'result_phase' => 'You are in the :phase phase',
+    'start_over' => 'Start over',
+
+    'duration_days' => 'Days',
+    'duration_weeks' => 'Weeks',
+    'duration_months' => 'Months',
+    'duration_years' => 'Years',
+
+    'struggle_stalking' => 'Stalking their social media',
+    'struggle_worthless' => 'Feeling worthless',
+    'struggle_anger' => 'Anger and rage',
+    'struggle_get_back' => 'Trying to get them back',
+
+    'rec_no_contact_title' => 'Start the no-contact protocol',
+    'rec_no_contact_body' => 'Cut the signal before it cuts you. A server-backed timer resets if you slip — no willpower theater.',
+    'rec_get_back_body' => 'Chasing makes you smaller. Lock no-contact first; rebuild later.',
+    'rec_vent_title' => 'Vent safely, then cut contact',
+    'rec_anger_body' => 'Anger needs an outlet — but not a text at 2 a.m. Start with the no-contact timer.',
+    'rec_no_contact_cta' => 'Open no-contact timer',
+    'rec_diagnose_title' => 'Run relationship debug',
+    'rec_worthless_body' => 'Your worth is not their opinion. Get data on your patterns first — one test, one PDF.',
+    'rec_diagnose_cta' => 'Start free debug',
+
+    'phase_diagnose' => 'Diagnose',
+    'phase_detox' => 'Detox',
+    'phase_deliver' => 'Deliver',
+
+    'journey_title' => 'Your recovery path',
+    'journey_subtitle' => 'One phase at a time. The rest stays locked until you earn it.',
+    'current_phase' => 'Current focus',
+    'needs_triage_title' => 'Complete your intake first',
+    'needs_triage_body' => 'Two questions so we show only what you need today.',
+    'needs_triage_cta' => 'Start intake',
+
+    'tool_diagnose_title' => 'Relationship debug',
+    'tool_diagnose_body' => 'Map your patterns with the MBTI assessment — free PDF when you finish.',
+    'tool_detox_title' => 'No-contact command center',
+    'tool_detox_body' => 'Your streak is stored on our servers. Slip = full reset.',
+    'tool_deliver_title' => 'Empire tracker',
+    'tool_deliver_body' => 'Gym, fasting, and builder tools — unlock when Detox is solid.',
+    'open_tool' => 'Open',
+    'ai_coach_soon' => 'Tough-love AI coach',
+    'ai_coach_soon_body' => 'Coming next — vent without sending the text.',
+
+    'lock_diagnose_focus_detox' => 'Focus on Detox first — unlock Diagnose after 14 clean days',
+    'lock_detox_after_diagnose' => 'Unlock after you complete one diagnostic test',
+    'lock_deliver_after_diagnose' => 'Unlock after Detox phase',
+    'lock_deliver_after_detox' => 'Unlock after 14 days on no-contact or completing the protocol',
+    'lock_phase_default' => 'Complete your current phase first',
+];

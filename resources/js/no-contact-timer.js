@@ -1,3 +1,5 @@
+import { padDigits } from "./locale-digits.js";
+
 /**
  * Client-side countdown synced to server anchor timestamps.
  * Survives refresh; authoritative state remains on the backend (Livewire poll).
@@ -12,6 +14,7 @@ export function initNoContactTimers(root = document) {
 
         const targetIso = element.dataset.targetEndsAt;
         const serverNowIso = element.dataset.serverNow;
+        const digitLocale = element.dataset.digitLocale ?? "en";
 
         if (! targetIso || ! serverNowIso) {
             return;
@@ -42,19 +45,19 @@ export function initNoContactTimers(root = document) {
             const seconds = totalSeconds % 60;
 
             if (parts.days) {
-                parts.days.textContent = String(days).padStart(2, '0');
+                parts.days.textContent = padDigits(days, 2, digitLocale);
             }
 
             if (parts.hours) {
-                parts.hours.textContent = String(hours).padStart(2, '0');
+                parts.hours.textContent = padDigits(hours, 2, digitLocale);
             }
 
             if (parts.minutes) {
-                parts.minutes.textContent = String(minutes).padStart(2, '0');
+                parts.minutes.textContent = padDigits(minutes, 2, digitLocale);
             }
 
             if (parts.seconds) {
-                parts.seconds.textContent = String(seconds).padStart(2, '0');
+                parts.seconds.textContent = padDigits(seconds, 2, digitLocale);
             }
 
             if (progressRing) {

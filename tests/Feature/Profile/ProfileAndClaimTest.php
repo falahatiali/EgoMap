@@ -174,7 +174,7 @@ class ProfileAndClaimTest extends TestCase
 
     public function test_authenticated_user_can_view_profile(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->recoveryDiagnose()->create();
         $quiz = Quiz::query()->where('slug', 'mbti-personality')->firstOrFail();
 
         QuizSession::factory()->completed()->create([
@@ -191,7 +191,7 @@ class ProfileAndClaimTest extends TestCase
 
     public function test_profile_lists_completed_session_with_type_code_and_quiz_name(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->recoveryDiagnose()->create();
         $quiz = Quiz::query()->where('slug', 'mbti-personality')->firstOrFail();
         $service = app(QuizSessionService::class);
         $session = $service->start($quiz);

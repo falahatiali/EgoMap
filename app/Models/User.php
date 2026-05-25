@@ -16,7 +16,15 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Ai\Concerns\HasConversations;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable([
+    'name',
+    'email',
+    'password',
+    'recovery_phase',
+    'breakup_duration',
+    'primary_struggle',
+    'recovery_triage_completed_at',
+])]
 #[Hidden(['password', 'remember_token'])]
 #[ObservedBy([AssignsUuidObserver::class])]
 class User extends Authenticatable
@@ -34,6 +42,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'email_verification_expires_at' => 'datetime',
+            'recovery_triage_completed_at' => 'datetime',
             'password' => 'hashed',
         ];
     }

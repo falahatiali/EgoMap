@@ -11,6 +11,9 @@ return [
     'recommended' => 'پیشنهادی',
     'days' => ':count روز',
     'unit_days' => 'روز',
+    'unit_hours' => 'س',
+    'unit_minutes' => 'د',
+    'unit_seconds' => 'ث',
     'start_protocol' => 'قفل کردن پروتکل',
     'invalid_duration' => 'لطفاً یک مدت معتبر انتخاب کن.',
 

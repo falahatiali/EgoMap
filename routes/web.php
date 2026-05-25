@@ -4,6 +4,7 @@ use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Auth\VerifyEmail;
 use App\Livewire\NoContact\Show as NoContactShow;
+use App\Livewire\Onboarding\Triage as OnboardingTriage;
 use App\Livewire\Profile\Show;
 use App\Livewire\Profile\TestShow;
 use App\Livewire\Quiz\Result;
@@ -53,6 +54,7 @@ Route::post('/logout', function () {
     return redirect()->route('home');
 })->middleware('auth')->name('logout');
 
+Route::livewire('/start', OnboardingTriage::class)->name('onboarding');
 Route::livewire('/no-contact', NoContactShow::class)->name('no-contact');
 
 Route::livewire('/profile', Show::class)->middleware('auth')->name('profile');

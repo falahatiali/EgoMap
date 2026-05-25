@@ -83,12 +83,17 @@
                 </div>
             </div>
         @elseif ($state['mode'] === 'active')
+            @php
+                $digits = app(\App\Services\Locale\LocaleDigitFormatter::class);
+                $locale = app()->getLocale();
+            @endphp
             <div
                 id="eg-no-contact-timer"
                 class="eg-nc-active mx-auto"
                 data-target-ends-at="{{ $state['target_ends_at'] }}"
                 data-streak-started-at="{{ $state['streak_started_at'] }}"
                 data-server-now="{{ $state['server_now'] }}"
+                data-digit-locale="{{ $locale }}"
                 wire:key="nc-timer-{{ $state['protocol_uuid'] }}"
             >
                 <div class="eg-nc-ring-wrap mb-4">
@@ -107,24 +112,24 @@
                         <div class="eg-nc-countdown" aria-live="polite">
                             <div class="eg-nc-countdown-row eg-nc-countdown-row--primary">
                                 <div class="eg-nc-unit">
-                                    <span class="eg-nc-unit-value" data-nc-part="days">{{ str_pad((string) $state['countdown']['days'], 2, '0', STR_PAD_LEFT) }}</span>
+                                    <span class="eg-nc-unit-value" data-nc-part="days">{{ $digits->format($state['countdown']['days'], $locale) }}</span>
                                     <span class="eg-nc-unit-label">{{ __('no_contact.unit_days') }}</span>
                                 </div>
                             </div>
-                            <div class="eg-nc-countdown-row">
+                            <div class="eg-nc-countdown-row eg-nc-countdown-row--clock" dir="ltr">
                                 <div class="eg-nc-unit">
-                                    <span class="eg-nc-unit-value" data-nc-part="hours">{{ str_pad((string) $state['countdown']['hours'], 2, '0', STR_PAD_LEFT) }}</span>
-                                    <span class="eg-nc-unit-label">h</span>
+                                    <span class="eg-nc-unit-value" data-nc-part="hours">{{ $digits->pad($state['countdown']['hours'], 2, $locale) }}</span>
+                                    <span class="eg-nc-unit-label">{{ __('no_contact.unit_hours') }}</span>
                                 </div>
-                                <span class="eg-nc-sep">:</span>
+                                <span class="eg-nc-sep" aria-hidden="true">:</span>
                                 <div class="eg-nc-unit">
-                                    <span class="eg-nc-unit-value" data-nc-part="minutes">{{ str_pad((string) $state['countdown']['minutes'], 2, '0', STR_PAD_LEFT) }}</span>
-                                    <span class="eg-nc-unit-label">m</span>
+                                    <span class="eg-nc-unit-value" data-nc-part="minutes">{{ $digits->pad($state['countdown']['minutes'], 2, $locale) }}</span>
+                                    <span class="eg-nc-unit-label">{{ __('no_contact.unit_minutes') }}</span>
                                 </div>
-                                <span class="eg-nc-sep">:</span>
+                                <span class="eg-nc-sep" aria-hidden="true">:</span>
                                 <div class="eg-nc-unit">
-                                    <span class="eg-nc-unit-value" data-nc-part="seconds">{{ str_pad((string) $state['countdown']['seconds'], 2, '0', STR_PAD_LEFT) }}</span>
-                                    <span class="eg-nc-unit-label">s</span>
+                                    <span class="eg-nc-unit-value" data-nc-part="seconds">{{ $digits->pad($state['countdown']['seconds'], 2, $locale) }}</span>
+                                    <span class="eg-nc-unit-label">{{ __('no_contact.unit_seconds') }}</span>
                                 </div>
                             </div>
                         </div>
@@ -135,7 +140,7 @@
                     <div class="col-sm-4">
                         <div class="eg-nc-stat eg-glass">
                             <span class="eg-nc-stat-label">{{ __('no_contact.active_badge') }}</span>
-                            <span class="eg-nc-stat-value">{{ __('no_contact.days', ['count' => $state['duration_days']]) }}</span>
+                            <span class="eg-nc-stat-value">{{ __('no_contact.days', ['count' => $digits->format($state['duration_days'], $locale)]) }}</span>
                         </div>
                     </div>
                     <div class="col-sm-4">
@@ -147,7 +152,7 @@
                     <div class="col-sm-4">
                         <div class="eg-nc-stat eg-glass">
                             <span class="eg-nc-stat-label">{{ __('no_contact.stat_slips') }}</span>
-                            <span class="eg-nc-stat-value">{{ trans_choice('no_contact.slip_count', $state['slip_count'], ['count' => $state['slip_count']]) }}</span>
+                            <span class="eg-nc-stat-value">{{ trans_choice('no_contact.slip_count', $state['slip_count'], ['count' => $digits->format($state['slip_count'], $locale)]) }}</span>
                         </div>
                     </div>
                 </div>

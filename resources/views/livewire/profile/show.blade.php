@@ -52,7 +52,77 @@
         </div>
     </section>
 
+    {{-- Recovery journey --}}
+    <section class="container eg-profile-section">
+        @if ($journey['needs_triage'])
+            <div class="eg-profile-primary-tool eg-glass text-center mb-4">
+                <h2 class="h5 fw-semibold mb-2">{{ __('recovery.needs_triage_title') }}</h2>
+                <p class="eg-text-muted small mb-3">{{ __('recovery.needs_triage_body') }}</p>
+                <a href="{{ route('onboarding') }}" class="eg-btn-primary eg-transition" wire:navigate>
+                    {{ __('recovery.needs_triage_cta') }}
+                </a>
+            </div>
+        @else
+            <div class="eg-profile-section-head mb-3">
+                <div>
+                    <h2 class="eg-display h4 mb-1">{{ __('recovery.journey_title') }}</h2>
+                    <p class="eg-text-muted mb-0">{{ __('recovery.journey_subtitle') }}</p>
+                </div>
+            </div>
+
+            <div class="eg-journey-steps">
+                @foreach ($journey['steps'] as $step)
+                    <div @class([
+                        'eg-journey-step',
+                        'is-current' => $step['is_current'],
+                        'is-locked' => ! $step['unlocked'],
+                    ])>
+                        @if ($step['unlocked'])
+                            <i class="fa-solid fa-circle-check text-success mb-2"></i>
+                        @else
+                            <i class="fa-solid fa-lock mb-2 eg-text-muted"></i>
+                        @endif
+                        <span class="small fw-semibold d-block">{{ $step['label'] }}</span>
+                        @if ($step['is_current'])
+                            <span class="badge rounded-pill mt-1" style="background: var(--eg-accent-soft); color: var(--eg-accent-bright);">
+                                {{ __('recovery.current_phase') }}
+                            </span>
+                        @elseif (! $step['unlocked'] && $step['lock_reason'])
+                            <p class="eg-journey-step-lock mb-0">{{ $step['lock_reason'] }}</p>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+
+            @if ($journey['primary_tool'])
+                <article class="eg-profile-primary-tool">
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="eg-triage-rec-icon flex-shrink-0 mb-0">
+                            <i class="fa-solid fa-{{ $journey['primary_tool']['icon'] }}"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h3 class="h5 fw-semibold mb-2">{{ $journey['primary_tool']['title'] }}</h3>
+                            <p class="eg-text-muted small mb-3">{{ $journey['primary_tool']['body'] }}</p>
+                            <a href="{{ $journey['primary_tool']['url'] }}" class="eg-btn-primary eg-transition" wire:navigate>
+                                {{ __('recovery.open_tool') }}
+                                <i class="fa-solid fa-arrow-{{ app()->getLocale() === 'fa' ? 'left' : 'right' }} ms-1" data-icon-directional></i>
+                            </a>
+                        </div>
+                    </div>
+                </article>
+            @endif
+
+            @if ($journey['show_ai_coach'])
+                <div class="eg-glass p-4 mb-4 opacity-75">
+                    <h3 class="h6 fw-semibold mb-1">{{ __('recovery.ai_coach_soon') }}</h3>
+                    <p class="eg-text-muted small mb-0">{{ __('recovery.ai_coach_soon_body') }}</p>
+                </div>
+            @endif
+        @endif
+    </section>
+
     {{-- Stats --}}
+    @if (! ($journey['needs_triage'] ?? true) && ($journey['show_tests'] ?? false))
     <section class="container eg-profile-stats-row">
         <div class="row g-3">
             <div class="col-md-4">
@@ -75,15 +145,17 @@
             </div>
         </div>
     </section>
+    @endif
 
     {{-- My Tests --}}
+    @if (! ($journey['needs_triage'] ?? true) && ($journey['show_tests'] ?? false))
     <section class="container eg-profile-section eg-profile-tests-section pb-5" id="my-tests">
         <div class="eg-profile-section-head">
             <div>
                 <h2 class="eg-display h4 mb-1">{{ __('profile.my_tests_title') }}</h2>
                 <p class="eg-text-muted mb-0">{{ __('profile.my_tests_subtitle') }}</p>
             </div>
-            <a href="{{ route('home') }}#tests" class="eg-btn-primary btn-sm">
+            <a href="{{ route('quiz.start', 'mbti-personality') }}" class="eg-btn-primary btn-sm" wire:navigate>
                 <i class="fa-solid fa-plus me-1"></i>
                 {{ __('profile.take_new_test') }}
             </a>
@@ -131,4 +203,5 @@
             </div>
         @endif
     </section>
+    @endif
 </div>

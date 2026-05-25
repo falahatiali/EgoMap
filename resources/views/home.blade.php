@@ -6,7 +6,7 @@
     @php
         $primaryQuiz = $featuredQuizzes->first();
         $locale = app()->getLocale();
-        $quizCta = $primaryQuiz ? route('quiz.start', $primaryQuiz->slug) : '#tests';
+        $startCta = route('onboarding');
     @endphp
 
     @if (session('quiz_notice'))
@@ -18,50 +18,24 @@
         </div>
     @endif
 
-    <section class="eg-hero eg-hero--home" id="start">
+    <section class="eg-hero eg-hero--home eg-hero--minimal" id="start">
         <div class="container">
-            <div class="row align-items-center g-5">
-                <div class="col-lg-7">
-                    <span class="eg-badge mb-4 eg-shadow-sm">
-                        <i class="fa-solid fa-house-heart"></i>
-                        <span data-i18n="home.hero_badge">{{ __('home.hero_badge') }}</span>
-                    </span>
-                    <h1 class="eg-display eg-hero-title mb-4" data-i18n="home.hero_title">{{ __('home.hero_title') }}</h1>
-                    <p class="eg-hero-sub eg-text-muted mb-4" data-i18n="home.hero_subtitle">{{ __('home.hero_subtitle') }}</p>
+            <span class="eg-badge mb-4 eg-shadow-sm">
+                <i class="fa-solid fa-house-heart"></i>
+                <span data-i18n="home.hero_badge">{{ __('home.hero_badge') }}</span>
+            </span>
+            <h1 class="eg-display eg-hero-title mb-4" data-i18n="home.hero_title">{{ __('home.hero_title') }}</h1>
+            <p class="eg-hero-sub eg-text-muted mb-0" data-i18n="home.hero_subtitle">{{ __('home.hero_subtitle') }}</p>
 
-                    @if ($primaryQuiz)
-                        <p class="eg-text-muted small mb-4">
-                            <i class="fa-solid fa-circle-check text-success me-1"></i>
-                            <span data-i18n="home.hero_test_available">{{ __('home.hero_test_available') }}</span>
-                        </p>
-                    @endif
-
-                    <div class="d-flex flex-column flex-sm-row flex-wrap gap-3">
-                        <a href="{{ $quizCta }}" class="eg-btn-primary eg-btn-pulse eg-transition eg-shadow-glow eg-hover-lift">
-                            <i class="fa-solid fa-stethoscope"></i>
-                            <span data-i18n="home.cta_start">{{ __('home.cta_start') }}</span>
-                            <i class="fa-solid fa-arrow-{{ $locale === 'fa' ? 'left' : 'right' }}" data-icon-directional></i>
-                        </a>
-                        <a href="#framework" class="eg-btn-ghost eg-transition">
-                            <span data-i18n="home.cta_learn">{{ __('home.cta_learn') }}</span>
-                        </a>
-                        <a href="#tests" class="eg-btn-ghost eg-transition d-none d-md-inline-flex">
-                            <span data-i18n="home.cta_browse_tests">{{ __('home.cta_browse_tests') }}</span>
-                        </a>
-                    </div>
-                </div>
-
-                <div class="col-lg-5">
-                    @if ($primaryQuiz)
-                        <div class="eg-hero-test-panel">
-                            @include('partials.quiz-card', ['quiz' => $primaryQuiz, 'featured' => true])
-                        </div>
-                    @else
-                        <div class="eg-glass eg-shadow-md eg-transition p-4 p-xl-5 text-center">
-                            <p class="eg-text-muted mb-0" data-i18n="home.tests_empty">{{ __('home.tests_empty') }}</p>
-                        </div>
-                    @endif
-                </div>
+            <div class="eg-hero-cta-wrap">
+                <a href="{{ $startCta }}" class="eg-btn-primary eg-btn-pulse eg-btn-hero eg-transition eg-shadow-glow eg-hover-lift" wire:navigate>
+                    <i class="fa-solid fa-stethoscope"></i>
+                    <span data-i18n="home.cta_start">{{ __('home.cta_start') }}</span>
+                    <i class="fa-solid fa-arrow-{{ $locale === 'fa' ? 'left' : 'right' }}" data-icon-directional></i>
+                </a>
+                <a href="#pain" class="eg-btn-ghost eg-transition small">
+                    <span data-i18n="home.cta_learn">{{ __('home.cta_learn') }}</span>
+                </a>
             </div>
         </div>
     </section>
@@ -220,7 +194,7 @@
                             </li>
                         @endforeach
                     </ul>
-                    <a href="{{ $quizCta }}" class="eg-btn-ghost eg-transition w-100 text-center">
+                    <a href="{{ $startCta }}" class="eg-btn-ghost eg-transition w-100 text-center">
                         <span data-i18n="home.pricing_cta_free">{{ __('home.pricing_cta_free') }}</span>
                     </a>
                 </article>
@@ -242,7 +216,7 @@
                             </li>
                         @endforeach
                     </ul>
-                    <a href="{{ $quizCta }}" class="eg-btn-primary eg-transition w-100 text-center">
+                    <a href="{{ $startCta }}" class="eg-btn-primary eg-transition w-100 text-center">
                         <span data-i18n="home.pricing_cta_pro">{{ __('home.pricing_cta_pro') }}</span>
                     </a>
                 </article>
@@ -280,7 +254,7 @@
             <h2 class="eg-display eg-section-title mb-3" data-i18n="home.final_title">{{ __('home.final_title') }}</h2>
             <p class="eg-text-muted mx-auto mb-5" style="max-width: 44ch;" data-i18n="home.final_subtitle">{{ __('home.final_subtitle') }}</p>
             @if ($primaryQuiz)
-                <a href="{{ $quizCta }}" class="eg-btn-primary eg-btn-pulse eg-transition eg-shadow-glow d-inline-flex">
+                <a href="{{ $startCta }}" class="eg-btn-primary eg-btn-pulse eg-transition eg-shadow-glow d-inline-flex">
                     <span data-i18n="home.final_cta">{{ __('home.final_cta') }}</span>
                     <i class="fa-solid fa-arrow-{{ $locale === 'fa' ? 'left' : 'right' }}" data-icon-directional></i>
                 </a>
@@ -290,11 +264,9 @@
 @endsection
 
 @section('sticky_cta')
-    @if ($primaryQuiz ?? null)
-        <a href="{{ route('quiz.start', $primaryQuiz->slug) }}" class="eg-btn-primary eg-btn-pulse eg-transition w-100">
-            <i class="fa-solid fa-stethoscope"></i>
-            <span data-i18n="home.cta_start">{{ __('home.cta_start') }}</span>
-            <i class="fa-solid fa-arrow-{{ app()->getLocale() === 'fa' ? 'left' : 'right' }}" data-icon-directional></i>
-        </a>
-    @endif
+    <a href="{{ route('onboarding') }}" class="eg-btn-primary eg-btn-pulse eg-transition w-100" wire:navigate>
+        <i class="fa-solid fa-stethoscope"></i>
+        <span data-i18n="home.cta_start">{{ __('home.cta_start') }}</span>
+        <i class="fa-solid fa-arrow-{{ app()->getLocale() === 'fa' ? 'left' : 'right' }}" data-icon-directional></i>
+    </a>
 @endsection

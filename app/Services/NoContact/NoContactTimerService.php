@@ -5,6 +5,7 @@ namespace App\Services\NoContact;
 use App\Enums\NoContactStatus;
 use App\Models\NoContactProtocol;
 use App\Models\User;
+use App\Services\Locale\LocaleDigitFormatter;
 use App\Services\Quiz\QuizSessionClaimService;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +15,7 @@ class NoContactTimerService
 {
     public function __construct(
         private readonly QuizSessionClaimService $guestService,
+        private readonly LocaleDigitFormatter $digits,
     ) {}
 
     /**
@@ -290,11 +292,15 @@ class NoContactTimerService
         $days = intdiv($seconds, 86400);
 
         if ($days > 0) {
-            return trans_choice('no_contact.elapsed_days', $days, ['count' => $days], $locale);
+            return trans_choice('no_contact.elapsed_days', $days, [
+                'count' => $this->digits->format($days, $locale),
+            ], $locale);
         }
 
         $hours = intdiv($seconds, 3600);
 
-        return trans_choice('no_contact.elapsed_hours', $hours, ['count' => $hours], $locale);
+        return trans_choice('no_contact.elapsed_hours', $hours, [
+            'count' => $this->digits->format($hours, $locale),
+        ], $locale);
     }
 }
