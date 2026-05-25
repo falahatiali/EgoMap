@@ -14,11 +14,28 @@ class QuizResultViewData
         $session->loadMissing(['result.outcomeProfile', 'quiz']);
 
         $report = $session->result?->free_report ?? [];
+        $report = is_array($report) ? $report : [];
+
+        $typeCode = strtolower((string) ($report['type_code'] ?? ''));
+        $locale = LocaleConfig::resolve($session->locale ?? app()->getLocale());
+
         $content = self::resolveContent($session, $report);
-        $palette = MbtiTypePalette::for(strtolower((string) ($report['type_code'] ?? '')));
+        $content = MbtiContentCatalog::buildContentForType($typeCode, $locale, $content);
+
+        if (! empty($report['dimensions']) && is_array($report['dimensions'])) {
+            /** @var list<array<string, mixed>> $dimensions */
+            $dimensions = $report['dimensions'];
+            $report['dimensions'] = MbtiContentCatalog::enrichDimensions($dimensions, $locale);
+        }
+
+        $palette = MbtiTypePalette::for($typeCode);
+
+        if (! empty($content['group']) && is_string($content['group'])) {
+            $palette['group'] = $content['group'];
+        }
 
         return [
-            'report' => is_array($report) ? $report : [],
+            'report' => $report,
             'content' => $content,
             'palette' => $palette,
         ];

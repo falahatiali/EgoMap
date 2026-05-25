@@ -24,6 +24,9 @@
                             <div class="axis-fill" style="width: {{ $item['percent'] ?? 0 }}%; background: {{ $item['color'] ?? $theme->accent }};"></div>
                         </div>
                         <p class="axis-pref">{{ __('quiz.dimension_preference', ['letter' => $item['preference'] ?? ''], locale: $locale) }}</p>
+                        @if (! empty($item['description']))
+                            <p class="axis-desc">{{ $item['description'] }}</p>
+                        @endif
                     </div>
                 </td>
             </tr>

@@ -73,9 +73,19 @@ body.eg-result-body {
     margin: 0;
 }
 
+.eg-result-mantra {
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: #64748b;
+    font-style: italic;
+    margin: 1rem 0 0;
+}
+
 .eg-result-content {
     max-width: 52rem;
-    margin-top: -0.5rem;
+    margin-top: 1.5rem;
+    position: relative;
+    z-index: 1;
 }
 
 .eg-result-panel {
@@ -169,6 +179,15 @@ body.eg-result-body {
     color: #64748b;
 }
 
+.eg-axis-desc {
+    color: #94a3b8;
+    line-height: 1.55;
+}
+
+.eg-axis-names {
+    color: #64748b;
+}
+
 .eg-result-chip-card {
     display: flex;
     align-items: flex-start;
@@ -208,6 +227,60 @@ body.eg-result-body {
     font-size: 0.88rem;
     font-weight: 500;
     border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.eg-famous-card {
+    background: #fff;
+    border: 1px solid rgba(15, 23, 42, 0.07);
+    border-radius: 1rem;
+    padding: 1rem 1.1rem;
+}
+
+.eg-famous-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.eg-famous-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 999px;
+    background: var(--eg-result-soft);
+    color: var(--eg-result-accent);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.eg-famous-name {
+    color: #0f172a;
+}
+
+.eg-famous-role {
+    color: #64748b;
+}
+
+.eg-famous-match {
+    margin-inline-start: auto;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--eg-result-accent);
+    background: var(--eg-result-soft);
+    border-radius: 999px;
+    padding: 0.2rem 0.55rem;
+}
+
+.eg-famous-bio {
+    color: #475569;
+    line-height: 1.55;
+}
+
+.eg-famous-era {
+    color: #94a3b8;
 }
 
 .eg-result-email-panel {

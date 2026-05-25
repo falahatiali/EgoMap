@@ -41,10 +41,13 @@
     <div class="eg-result-hero">
         <div class="container">
             <div class="eg-result-hero-inner">
-                <p class="eg-result-eyebrow">{{ __('quiz.your_result') }}</p>
+                <p class="eg-result-eyebrow">{{ $content['hero_label'] ?? __('quiz.your_result') }}</p>
                 <div class="eg-result-type-badge">{{ $typeCode }}</div>
-                <h1 class="eg-result-title">{{ $report['title'] ?? '' }}</h1>
+                <h1 class="eg-result-title">{{ $report['title'] ?? ($content['archetype'] ?? '') }}</h1>
                 <p class="eg-result-summary">{{ $content['tagline'] ?? ($report['summary'] ?? '') }}</p>
+                @if (! empty($content['mantra']))
+                    <p class="eg-result-mantra">{{ $content['mantra'] }}</p>
+                @endif
             </div>
         </div>
     </div>

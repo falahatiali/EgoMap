@@ -31,4 +31,12 @@ return [
     'sending' => 'در حال ارسال…',
     'email_sent' => 'گزارش PDF کامل برای :email در صف ارسال قرار گرفت و تا لحظاتی دیگر می‌رسد.',
     'email_subject' => 'گزارش کامل :title',
+    'returning_eyebrow' => 'شما قبلاً این تست را انجام داده‌اید',
+    'returning_completed_at' => 'تکمیل شده در :date',
+    'view_previous_result' => 'مشاهده نتیجه قبلی',
+    'retake_test' => 'تکرار تست',
+    'narrative_title' => 'پروفایل شخصیتی شما',
+    'communication_title' => 'سبک ارتباطی',
+    'under_stress_title' => 'در شرایط استرس',
+    'ideal_environment_title' => 'محیط ایده‌آل',
 ];

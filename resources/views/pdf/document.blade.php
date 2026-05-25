@@ -303,6 +303,7 @@
         .axis-track { width: 100%; height: 12px; background: #e2e8f0; border-radius: 999px; overflow: hidden; }
         .axis-fill { height: 12px; border-radius: 999px; }
         .axis-pref { margin: 8px 0 0; font-size: 8.5pt; color: {{ $document->theme->textMuted }}; }
+        .axis-desc { margin: 4px 0 0; font-size: 8pt; color: {{ $document->theme->textMuted }}; line-height: 1.45; }
 
         /* Strengths */
         .chip-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }

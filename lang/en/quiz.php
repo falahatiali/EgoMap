@@ -31,4 +31,12 @@ return [
     'sending' => 'Sending…',
     'email_sent' => 'We queued your full PDF report for :email. It should arrive within a minute.',
     'email_subject' => 'Your :title — Full Report',
+    'returning_eyebrow' => 'You already completed this test',
+    'returning_completed_at' => 'Completed on :date',
+    'view_previous_result' => 'View previous result',
+    'retake_test' => 'Retake test',
+    'narrative_title' => 'Your personality profile',
+    'communication_title' => 'Communication style',
+    'under_stress_title' => 'Under stress',
+    'ideal_environment_title' => 'Ideal environment',
 ];

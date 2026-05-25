@@ -118,9 +118,11 @@ class QuizResultPdfDefinitionFactory
             [
                 'type' => PdfSectionType::Overview->value,
                 'title' => __('pdf.overview_title', locale: $locale),
-                'body' => trim($summary) !== '' && $summary !== $tagline
-                    ? $summary
-                    : __('pdf.overview_intro', locale: $locale),
+                'body' => trim((string) ($content['narrative'] ?? '')) !== ''
+                    ? (string) $content['narrative']
+                    : (trim($summary) !== '' && $summary !== $tagline
+                        ? $summary
+                        : __('pdf.overview_intro', locale: $locale)),
             ],
         ];
 
@@ -156,7 +158,8 @@ class QuizResultPdfDefinitionFactory
                         'preference' => (string) ($dimension['preference'] ?? ''),
                         'percent' => $winPercent,
                         'prefers_right' => $prefersRight,
-                        'label' => __('pdf.axis_'.$key, locale: $locale),
+                        'label' => (string) ($dimension['axis_name'] ?? __('pdf.axis_'.$key, locale: $locale)),
+                        'description' => (string) ($dimension['axis_description'] ?? ''),
                         'color' => $color,
                         'soft' => $soft,
                     ];
@@ -204,7 +207,67 @@ class QuizResultPdfDefinitionFactory
             ];
         }
 
-        if (! empty($content['famous_examples'])) {
+        if (! empty($content['communication_style'])) {
+            $sections[] = [
+                'type' => PdfSectionType::HighlightCard->value,
+                'title' => __('quiz.communication_title', locale: $locale),
+                'body' => (string) $content['communication_style'],
+                'icon' => 'comments',
+                'tone' => 'violet',
+            ];
+        }
+
+        if (! empty($content['under_stress'])) {
+            $sections[] = [
+                'type' => PdfSectionType::HighlightCard->value,
+                'title' => __('quiz.under_stress_title', locale: $locale),
+                'body' => (string) $content['under_stress'],
+                'icon' => 'bolt',
+                'tone' => 'amber',
+            ];
+        }
+
+        if (! empty($content['ideal_environment'])) {
+            $sections[] = [
+                'type' => PdfSectionType::HighlightCard->value,
+                'title' => __('quiz.ideal_environment_title', locale: $locale),
+                'body' => (string) $content['ideal_environment'],
+                'icon' => 'leaf',
+                'tone' => 'green',
+            ];
+        }
+
+        if (! empty($content['featured_people']) && is_array($content['featured_people'])) {
+            $sections[] = [
+                'type' => PdfSectionType::NoteGrid->value,
+                'title' => __('quiz.famous_title', locale: $locale),
+                'intro' => __('pdf.famous_intro', locale: $locale),
+                'tone' => 'neutral',
+                'items' => collect($content['featured_people'])->map(function (array $person): string {
+                    $name = (string) ($person['name'] ?? '');
+                    $role = (string) ($person['role'] ?? '');
+                    $bio = (string) ($person['bio'] ?? '');
+                    $era = (string) ($person['era'] ?? '');
+                    $match = (int) ($person['match_score'] ?? 0);
+
+                    $line = trim($name.($role !== '' ? " — {$role}" : ''));
+
+                    if ($bio !== '') {
+                        $line .= ': '.$bio;
+                    }
+
+                    if ($era !== '') {
+                        $line .= ' ('.$era.')';
+                    }
+
+                    if ($match > 0) {
+                        $line .= ' · '.$match.'%';
+                    }
+
+                    return $line;
+                })->values()->all(),
+            ];
+        } elseif (! empty($content['famous_examples'])) {
             $sections[] = [
                 'type' => PdfSectionType::PillList->value,
                 'title' => __('quiz.famous_title', locale: $locale),

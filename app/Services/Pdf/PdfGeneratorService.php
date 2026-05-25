@@ -3,6 +3,7 @@
 namespace App\Services\Pdf;
 
 use App\DataTransferObjects\Pdf\PdfDocumentDefinition;
+use App\DataTransferObjects\Pdf\PdfTheme;
 use App\Support\LocaleConfig;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
@@ -12,6 +13,8 @@ class PdfGeneratorService
 {
     public function generate(PdfDocumentDefinition $document): string
     {
+        $document = $this->ensureCompleteDocument($document);
+
         $previousLocale = App::getLocale();
         App::setLocale($document->locale);
 
@@ -50,5 +53,40 @@ class PdfGeneratorService
         if (is_file($path)) {
             @unlink($path);
         }
+    }
+
+    private function ensureCompleteDocument(PdfDocumentDefinition $document): PdfDocumentDefinition
+    {
+        $theme = $document->theme;
+
+        $normalizedTheme = PdfTheme::fromArray([
+            'accent' => $theme->accent,
+            'accent_soft' => $theme->accentSoft,
+            'accent_dark' => $theme->accentDark,
+            'background' => $this->themeValue($theme, 'background', '#f4f3ff'),
+            'surface' => $this->themeValue($theme, 'surface', '#ffffff'),
+            'text' => $this->themeValue($theme, 'text', '#0f172a'),
+            'text_muted' => $this->themeValue($theme, 'textMuted', '#64748b'),
+            'border' => $this->themeValue($theme, 'border', '#e2e8f0'),
+            'group_background' => $this->themeValue($theme, 'groupBackground', '#f8f7ff'),
+            'group_label' => $this->themeValue($theme, 'groupLabel', ''),
+        ]);
+
+        return new PdfDocumentDefinition(
+            locale: $document->locale,
+            filename: $document->filename,
+            theme: $normalizedTheme,
+            meta: $document->meta,
+            sections: $document->sections,
+        );
+    }
+
+    private function themeValue(object $theme, string $property, string $default): string
+    {
+        if (! property_exists($theme, $property)) {
+            return $default;
+        }
+
+        return (string) $theme->{$property};
     }
 }
