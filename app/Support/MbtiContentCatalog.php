@@ -19,6 +19,22 @@ final class MbtiContentCatalog
     /**
      * @return array<string, mixed>|null
      */
+    /**
+     * Build translatable outcome profile content for database seeding.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public static function translatableOutcomeContent(string $typeCode): array
+    {
+        $content = [];
+
+        foreach (LocaleConfig::supported() as $locale) {
+            $content[$locale] = self::buildContentForType($typeCode, $locale);
+        }
+
+        return $content;
+    }
+
     public static function profile(string $typeCode, ?string $locale = null): ?array
     {
         $code = strtolower($typeCode);

@@ -69,4 +69,16 @@ class MbtiContentCatalogTest extends TestCase
 
         $this->assertSame([], $people);
     }
+
+    #[Test]
+    public function it_builds_translatable_outcome_content_for_seeding(): void
+    {
+        $content = MbtiContentCatalog::translatableOutcomeContent('estj');
+
+        $this->assertArrayHasKey('en', $content);
+        $this->assertArrayHasKey('fa', $content);
+        $this->assertNotEmpty($content['en']['narrative'] ?? '');
+        $this->assertNotEmpty($content['fa']['narrative'] ?? '');
+        $this->assertNotEmpty($content['en']['featured_people'] ?? []);
+    }
 }
