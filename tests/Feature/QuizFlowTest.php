@@ -2,15 +2,18 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\Pdf\GenerateAndDeliverPdfJob;
 use App\Livewire\Quiz\Result;
 use App\Livewire\Quiz\Take;
-use App\Mail\QuizFullReportMail;
+use App\Mail\PdfDocumentMail;
 use App\Models\Quiz;
 use App\Models\QuizSession;
+use App\Services\Pdf\PdfGeneratorService;
 use App\Services\Quiz\QuizSessionService;
 use Database\Seeders\MbtiQuizSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Queue;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -107,6 +110,7 @@ class QuizFlowTest extends TestCase
     public function test_user_can_request_full_report_by_email(): void
     {
         Mail::fake();
+        Queue::fake();
 
         $quiz = Quiz::query()->where('slug', 'mbti-personality')->firstOrFail();
         $session = app(QuizSessionService::class)->start($quiz);
@@ -122,8 +126,18 @@ class QuizFlowTest extends TestCase
             ->call('sendFullReport')
             ->assertSet('emailSent', true);
 
-        Mail::assertSent(QuizFullReportMail::class, function (QuizFullReportMail $mail) use ($session): bool {
-            return $mail->session->uuid === $session->uuid;
+        Queue::assertPushed(GenerateAndDeliverPdfJob::class, function (GenerateAndDeliverPdfJob $job) use ($session): bool {
+            $this->assertSame('user@example.com', $job->recipientEmail);
+            $this->assertSame($session->uuid, $job->afterDeliveredPayload['session_uuid'] ?? null);
+
+            $job->handle(app(PdfGeneratorService::class));
+
+            return true;
+        });
+
+        Mail::assertSent(PdfDocumentMail::class, function (PdfDocumentMail $mail): bool {
+            return str_ends_with($mail->document->filename, '.pdf')
+                && $mail->mailEnvelope->subject !== '';
         });
 
         $this->assertNotNull($session->fresh()->email_report_sent_at);

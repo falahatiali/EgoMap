@@ -29,6 +29,6 @@ return [
     'email_placeholder' => 'you@example.com',
     'send_full_report' => 'Send full report',
     'sending' => 'Sending…',
-    'email_sent' => 'We sent your full report to :email.',
+    'email_sent' => 'We queued your full PDF report for :email. It should arrive within a minute.',
     'email_subject' => 'Your :title — Full Report',
 ];

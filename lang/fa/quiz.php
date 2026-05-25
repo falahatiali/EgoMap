@@ -29,6 +29,6 @@ return [
     'email_placeholder' => 'you@example.com',
     'send_full_report' => 'ارسال گزارش کامل',
     'sending' => 'در حال ارسال…',
-    'email_sent' => 'گزارش کامل به :email ارسال شد.',
+    'email_sent' => 'گزارش PDF کامل برای :email در صف ارسال قرار گرفت و تا لحظاتی دیگر می‌رسد.',
     'email_subject' => 'گزارش کامل :title',
 ];
