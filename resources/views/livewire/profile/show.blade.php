@@ -111,7 +111,7 @@
             </button>
         </div>
 
-        @if ($filteredSessions->isEmpty())
+        @if ($filteredRecords->isEmpty())
             <div class="eg-profile-empty eg-glass">
                 <i class="fa-solid fa-flask"></i>
                 <h3 class="h5 mb-2">{{ __('profile.no_tests_title') }}</h3>
@@ -120,8 +120,8 @@
             </div>
         @else
             <div class="row g-4">
-                @foreach ($filteredSessions as $session)
-                    @include('partials.profile-test-card', ['session' => $session])
+                @foreach ($filteredRecords as $record)
+                    @include('partials.profile-test-card', ['record' => $record])
                 @endforeach
             </div>
         @endif

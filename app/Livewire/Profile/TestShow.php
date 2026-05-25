@@ -31,7 +31,11 @@ class TestShow extends Component
             $this->session->refresh();
         }
 
-        abort_unless($this->session->user_id === Auth::id(), 403);
+        abort_unless(
+            $this->session->user_id === Auth::id()
+            || ($this->session->email !== null && $this->session->email === Auth::user()->email),
+            403,
+        );
 
         if ($this->session->status === SessionStatus::InProgress) {
             $this->redirectRoute('quiz.session', ['uuid' => $this->session->uuid], navigate: true);
@@ -61,7 +65,7 @@ class TestShow extends Component
             'report' => $data['report'],
             'content' => $data['content'],
             'palette' => $data['palette'],
-            'quizName' => $this->session->quiz->getTranslation('name', app()->getLocale()),
+            'quizName' => $this->session->quiz->getTranslation('name', app()->getLocale(), true),
             'completedAt' => $this->session->completed_at,
         ]);
     }

@@ -38,6 +38,7 @@
     @include('partials.navbar')
 
     <main>
+        {{ $slot ?? '' }}
         @yield('content')
     </main>
 

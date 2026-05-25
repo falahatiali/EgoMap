@@ -7,7 +7,7 @@
     class="eg-profile-page eg-profile-test-detail"
     style="--eg-result-accent: {{ $palette['accent'] }}; --eg-result-soft: {{ $palette['soft'] }}; --eg-result-glow: {{ $palette['glow'] }};"
 >
-    <section class="container pt-4">
+    <section class="container container-xl pt-4">
         @include('partials.page-nav-actions', [
             'links' => [
                 [
@@ -35,8 +35,8 @@
         class="eg-profile-result-hero"
         style="--eg-result-accent: {{ $palette['accent'] }}; --eg-result-soft: {{ $palette['soft'] }}; --eg-result-glow: {{ $palette['glow'] }};"
     >
-        <div class="container">
-            <div class="eg-profile-result-hero-inner eg-glass">
+        <div class="container container-xl">
+            <div class="eg-profile-result-hero-inner">
                 <p class="eg-profile-result-eyebrow">{{ $quizName }}</p>
                 <div class="eg-profile-result-type-badge">{{ strtoupper($typeCode) }}</div>
                 <h1 class="eg-display eg-profile-result-title">{{ $report['title'] ?? '' }}</h1>
@@ -51,12 +51,14 @@
         </div>
     </section>
 
-    <section class="container eg-profile-result-content pb-5">
-        @include('partials.quiz-result-details', [
-            'report' => $report,
-            'content' => $content,
-            'theme' => 'dark',
-        ])
+    <section class="container container-xl eg-profile-result-content pb-5">
+        <div class="eg-profile-result-stack">
+            @include('partials.quiz-result-details', [
+                'report' => $report,
+                'content' => $content,
+                'theme' => 'dark',
+            ])
+        </div>
 
         <div class="eg-profile-result-actions">
             <a href="{{ route('quiz.start', $session->quiz->slug) }}" class="btn eg-btn-primary">

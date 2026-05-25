@@ -362,6 +362,15 @@
     line-height: 1.5;
 }
 
+.eg-profile-test-tagline {
+    color: #94a3b8;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
 .eg-profile-test-meta {
     display: flex;
     align-items: center;
@@ -403,15 +412,26 @@
 }
 
 .eg-profile-result-hero {
-    padding: 0 0 var(--eg-space-lg);
+    padding: 0 0 var(--eg-space-xl);
+}
+
+.eg-profile-test-detail .container-xl {
+    max-width: 76rem;
 }
 
 .eg-profile-result-hero-inner {
     text-align: center;
-    padding: var(--eg-space-xl) var(--eg-space-lg);
+    padding: var(--eg-space-xl) clamp(1.5rem, 4vw, 3rem);
     border-radius: var(--eg-radius-lg);
-    max-width: 44rem;
-    margin-inline: auto;
+    background: linear-gradient(
+        145deg,
+        rgba(255, 255, 255, 0.07) 0%,
+        rgba(255, 255, 255, 0.03) 100%
+    );
+    border: 1px solid var(--eg-border-strong);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
 }
 
 .eg-profile-result-eyebrow {
@@ -457,49 +477,70 @@
 }
 
 .eg-profile-result-content {
-    max-width: 52rem;
+    width: 100%;
+}
+
+.eg-profile-result-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+}
+
+.eg-profile-result-stack > .row {
+    --bs-gutter-x: 1.5rem;
+    --bs-gutter-y: 1.5rem;
+    margin-bottom: 0;
 }
 
 .eg-profile-result-actions {
     display: flex;
     flex-wrap: wrap;
     gap: var(--eg-space-sm);
-    margin-top: var(--eg-space-lg);
-    padding-top: var(--eg-space-lg);
+    margin-top: 2rem;
+    padding-top: 1.75rem;
     border-top: 1px solid var(--eg-border);
 }
 
-/* Dark-themed result panels inside profile */
-.eg-profile-result-page .eg-result-panel,
-.eg-profile-test-detail .eg-result-panel.eg-glass {
-    margin-bottom: var(--eg-space-md);
-    padding: var(--eg-space-lg);
-    border-radius: var(--eg-radius);
+/* Profile test detail — override light quiz-result.css tokens */
+.eg-profile-test-detail .eg-result-panel {
+    background: linear-gradient(
+        160deg,
+        rgba(30, 41, 59, 0.92) 0%,
+        rgba(15, 23, 42, 0.88) 100%
+    );
+    border: 1px solid var(--eg-border-strong);
+    border-radius: var(--eg-radius-lg);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.22);
+    margin-bottom: 0;
+    padding: clamp(1.35rem, 2.5vw, 2rem);
 }
 
 .eg-profile-test-detail .eg-result-panel-title {
-    color: var(--eg-text-muted);
+    color: #94a3b8;
+    margin-bottom: 1.25rem;
 }
 
 .eg-profile-test-detail .eg-result-panel-title i {
     color: var(--eg-result-accent);
 }
 
-.eg-profile-test-detail .eg-result-body-text,
-.eg-profile-test-detail .eg-axis-pref {
-    color: var(--eg-text-muted);
+.eg-profile-test-detail .eg-result-body-text {
+    color: #cbd5e1;
+    line-height: 1.75;
+    font-size: 1rem;
 }
 
 .eg-profile-test-detail .eg-axis-card {
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.04);
     border: 1px solid var(--eg-border);
-    border-radius: var(--eg-radius-sm);
-    padding: var(--eg-space-md);
+    border-radius: var(--eg-radius);
+    padding: 1.15rem 1.25rem;
+    height: 100%;
 }
 
 .eg-profile-test-detail .eg-axis-letter {
-    color: var(--eg-text-muted);
-    font-weight: 600;
+    color: #64748b;
+    font-weight: 700;
     font-size: 0.85rem;
 }
 
@@ -508,31 +549,99 @@
 }
 
 .eg-profile-test-detail .eg-axis-pct {
-    color: var(--eg-text);
+    color: #e2e8f0;
     font-weight: 700;
 }
 
+.eg-profile-test-detail .eg-axis-names,
+.eg-profile-test-detail .eg-axis-names .text-body-secondary {
+    color: #94a3b8 !important;
+}
+
 .eg-profile-test-detail .eg-axis-track {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .eg-profile-test-detail .eg-axis-fill {
     background: linear-gradient(90deg, var(--eg-result-accent), var(--eg-accent-bright));
 }
 
-.eg-profile-test-detail .eg-result-chip-card,
-.eg-profile-test-detail .eg-result-note-card {
-    background: rgba(255, 255, 255, 0.04);
+.eg-profile-test-detail .eg-axis-pref,
+.eg-profile-test-detail .eg-axis-desc {
+    color: #94a3b8;
+}
+
+.eg-profile-test-detail .eg-result-chip-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    background: rgba(255, 255, 255, 0.06);
     border: 1px solid var(--eg-border);
-    color: var(--eg-text);
+    border-radius: var(--eg-radius);
+    padding: 1rem 1.15rem;
+    height: 100%;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #e2e8f0;
 }
 
 .eg-profile-test-detail .eg-result-chip-card i {
     color: var(--eg-result-accent);
+    margin-top: 0.15rem;
+}
+
+.eg-profile-test-detail .eg-result-note-card {
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.28);
+    border-radius: var(--eg-radius);
+    padding: 1rem 1.15rem;
+    height: 100%;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #fde68a;
+}
+
+.eg-profile-test-detail .eg-famous-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--eg-border);
+    border-radius: var(--eg-radius);
+    padding: 1.15rem 1.25rem;
+    height: 100%;
+}
+
+.eg-profile-test-detail .eg-famous-avatar {
+    background: color-mix(in srgb, var(--eg-result-accent) 22%, transparent);
+    color: var(--eg-result-accent);
+}
+
+.eg-profile-test-detail .eg-famous-name {
+    color: #f1f5f9;
+}
+
+.eg-profile-test-detail .eg-famous-role,
+.eg-profile-test-detail .eg-famous-era {
+    color: #94a3b8;
+}
+
+.eg-profile-test-detail .eg-famous-bio {
+    color: #cbd5e1;
+    line-height: 1.6;
+}
+
+.eg-profile-test-detail .eg-famous-match {
+    background: color-mix(in srgb, var(--eg-result-accent) 18%, transparent);
+    color: var(--eg-accent-bright);
 }
 
 .eg-profile-test-detail .eg-famous-pill {
-    background: var(--eg-accent-soft);
-    color: var(--eg-accent-bright);
+    background: rgba(255, 255, 255, 0.06);
+    color: #e2e8f0;
     border: 1px solid var(--eg-border);
+}
+
+@media (min-width: 992px) {
+    .eg-profile-test-detail .eg-profile-result-stack .row.g-3,
+    .eg-profile-test-detail .eg-profile-result-stack .row.g-4 {
+        --bs-gutter-y: 1.5rem;
+    }
 }

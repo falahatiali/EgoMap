@@ -2,12 +2,9 @@
 
 namespace App\Livewire\Profile;
 
-use App\Enums\SessionStatus;
-use App\Models\QuizSession;
 use App\Models\User;
-use App\Services\Quiz\QuizSessionClaimService;
+use App\Services\Profile\UserQuizHistoryService;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
@@ -21,10 +18,9 @@ class Show extends Component
     #[Url(as: 'tab', history: true)]
     public string $filter = 'all';
 
-    public function mount(QuizSessionClaimService $claimService): void
+    public function mount(UserQuizHistoryService $historyService): void
     {
         $this->user = Auth::user();
-        $claimService->claimForUser($this->user);
     }
 
     public function setFilter(string $filter): void
@@ -36,44 +32,27 @@ class Show extends Component
         $this->filter = $filter;
     }
 
-    public function render(): View
+    public function render(UserQuizHistoryService $historyService): View
     {
-        $sessions = $this->loadSessions();
+        $records = $historyService->recordsForUser($this->user);
 
-        $inProgress = $sessions->where('status', SessionStatus::InProgress)->values();
-        $completed = $sessions->where('status', SessionStatus::Completed)->values();
+        $inProgress = $records->where('is_in_progress', true)->values();
+        $completed = $records->where('is_in_progress', false)->values();
 
         $filtered = match ($this->filter) {
             'in_progress' => $inProgress,
             'completed' => $completed,
-            default => $sessions,
+            default => $records,
         };
 
         return view('livewire.profile.show', [
-            'sessions' => $sessions,
-            'filteredSessions' => $filtered,
-            'inProgressSessions' => $inProgress,
-            'completedSessions' => $completed,
+            'records' => $records,
+            'filteredRecords' => $filtered,
+            'inProgressRecords' => $inProgress,
+            'completedRecords' => $completed,
             'totalCompleted' => $completed->count(),
             'totalInProgress' => $inProgress->count(),
-            'totalTests' => $sessions->count(),
+            'totalTests' => $records->count(),
         ]);
-    }
-
-    /**
-     * @return Collection<int, QuizSession>
-     */
-    private function loadSessions(): Collection
-    {
-        return QuizSession::query()
-            ->where('user_id', $this->user->id)
-            ->with([
-                'quiz' => fn ($query) => $query->withCount([
-                    'questions' => fn ($questions) => $questions->where('is_active', true),
-                ]),
-                'result.outcomeProfile',
-            ])
-            ->latest('updated_at')
-            ->get();
     }
 }
