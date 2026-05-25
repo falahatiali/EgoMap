@@ -1,4 +1,16 @@
 <div class="container py-5">
+    <div class="mb-4">
+        @include('partials.page-nav-actions', [
+            'links' => [
+                [
+                    'href' => route('home'),
+                    'label' => __('quiz.back_home'),
+                    'icon' => 'fa-house',
+                ],
+            ],
+        ])
+    </div>
+
     <div class="row justify-content-center">
         <div class="col-lg-6 text-center">
             <div class="eg-quiz-card card border-0 shadow-lg">

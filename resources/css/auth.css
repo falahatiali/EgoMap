@@ -9,7 +9,12 @@
 }
 
 .eg-auth-container {
+    position: relative;
     max-width: 28rem;
+}
+
+.eg-auth-page-nav {
+    margin-bottom: var(--eg-space-md);
 }
 
 .eg-auth-card {

@@ -7,4 +7,6 @@ return [
     'start_test' => 'شروع تست رایگان',
     'login' => 'ورود',
     'register' => 'ساخت حساب',
+    'home' => 'خانه',
+    'page_navigation' => 'ناوبری صفحه',
 ];

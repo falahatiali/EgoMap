@@ -1,4 +1,16 @@
 <section class="container eg-auth-container">
+    <div class="eg-auth-page-nav">
+        @include('partials.page-nav-actions', [
+            'links' => [
+                [
+                    'href' => route('home'),
+                    'label' => __('quiz.back_home'),
+                    'icon' => 'fa-house',
+                ],
+            ],
+        ])
+    </div>
+
     <div class="eg-auth-card eg-glass">
         <div class="eg-auth-icon" aria-hidden="true">
             <i class="fa-solid fa-right-to-bracket"></i>

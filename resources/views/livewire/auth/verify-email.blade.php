@@ -3,6 +3,24 @@
     wire:key="verify-{{ $this->expiresAtTimestamp ?? 'none' }}"
     x-data="egVerifyPage(@js($this->expiresAtTimestamp))"
 >
+    <div class="eg-auth-page-nav">
+        @include('partials.page-nav-actions', [
+            'links' => [
+                [
+                    'href' => route('home'),
+                    'label' => __('quiz.back_home'),
+                    'icon' => 'fa-house',
+                ],
+                [
+                    'href' => route('login'),
+                    'label' => __('auth.back_to_login'),
+                    'icon' => 'fa-arrow-left',
+                    'directional' => true,
+                ],
+            ],
+        ])
+    </div>
+
     <div class="eg-auth-card eg-glass eg-auth-card--verify">
         <div class="eg-auth-icon eg-auth-icon--verify" aria-hidden="true">
             <i class="fa-solid fa-envelope-circle-check"></i>

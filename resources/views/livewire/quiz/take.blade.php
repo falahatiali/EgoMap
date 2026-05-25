@@ -16,13 +16,15 @@
         @if ($question)
             <header class="eg-quiz-topbar">
                 <div class="eg-quiz-topbar-start">
-                    <span class="eg-quiz-brand-icon" aria-hidden="true">
-                        <i class="fa-solid fa-puzzle-piece"></i>
-                    </span>
-                    <div>
-                        <span class="eg-quiz-counter">{{ $currentNumber }} / {{ $totalQuestions }}</span>
-                        <span class="eg-quiz-counter-label">{{ __('quiz.question_label') }}</span>
-                    </div>
+                    <a href="{{ route('home') }}" class="eg-quiz-topbar-brand">
+                        <span class="eg-quiz-brand-icon" aria-hidden="true">
+                            <i class="fa-solid fa-compass"></i>
+                        </span>
+                        <div>
+                            <span class="eg-quiz-counter">{{ $currentNumber }} / {{ $totalQuestions }}</span>
+                            <span class="eg-quiz-counter-label">{{ __('quiz.question_label') }}</span>
+                        </div>
+                    </a>
                 </div>
 
                 <div class="eg-quiz-segments" role="progressbar" aria-valuenow="{{ $progress }}" aria-valuemin="0" aria-valuemax="100" aria-label="{{ __('quiz.progress') }}">
@@ -141,6 +143,11 @@
                 @else
                     <span></span>
                 @endif
+
+                <a href="{{ route('home') }}" class="eg-quiz-exit-btn">
+                    <i class="fa-solid fa-house"></i>
+                    <span>{{ __('quiz.back_home') }}</span>
+                </a>
             </footer>
 
             <div wire:loading wire:target="selectAnswer,goBack" class="eg-quiz-saving" aria-live="polite">

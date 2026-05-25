@@ -23,13 +23,13 @@
             <div class="collapse navbar-collapse" id="egNav">
                 <ul class="navbar-nav mx-lg-auto gap-lg-4 mt-3 mt-lg-0">
                     <li class="nav-item">
-                        <a class="eg-nav-link nav-link px-0 eg-transition" href="#tests" data-i18n="nav.tests">{{ __('nav.tests') }}</a>
+                        <a class="eg-nav-link nav-link px-0 eg-transition" href="{{ route('home') }}#tests" data-i18n="nav.tests">{{ __('nav.tests') }}</a>
                     </li>
                     <li class="nav-item">
-                        <a class="eg-nav-link nav-link px-0 eg-transition" href="#how-it-works" data-i18n="nav.how_it_works">{{ __('nav.how_it_works') }}</a>
+                        <a class="eg-nav-link nav-link px-0 eg-transition" href="{{ route('home') }}#how-it-works" data-i18n="nav.how_it_works">{{ __('nav.how_it_works') }}</a>
                     </li>
                     <li class="nav-item">
-                        <a class="eg-nav-link nav-link px-0 eg-transition" href="#report-preview" data-i18n="nav.report_preview">{{ __('nav.report_preview') }}</a>
+                        <a class="eg-nav-link nav-link px-0 eg-transition" href="{{ route('home') }}#report-preview" data-i18n="nav.report_preview">{{ __('nav.report_preview') }}</a>
                     </li>
                 </ul>
 

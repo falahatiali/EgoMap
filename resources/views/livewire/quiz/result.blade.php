@@ -1,12 +1,43 @@
 @php
     $typeCode = $report['type_code'] ?? '—';
-    $locale = app()->getLocale();
 @endphp
 
 <div
     class="eg-result-page"
     style="--eg-result-accent: {{ $palette['accent'] }}; --eg-result-soft: {{ $palette['soft'] }}; --eg-result-glow: {{ $palette['glow'] }};"
 >
+    @php
+        $resultNavLinks = [
+            [
+                'href' => route('home'),
+                'label' => __('quiz.back_home'),
+                'icon' => 'fa-house',
+                'primary' => true,
+            ],
+            [
+                'href' => route('home').'#tests',
+                'label' => __('profile.browse_tests'),
+                'icon' => 'fa-flask',
+            ],
+        ];
+
+        if (auth()->check()) {
+            array_unshift($resultNavLinks, [
+                'href' => route('profile'),
+                'label' => __('profile.page_title'),
+                'icon' => 'fa-user',
+                'wireNavigate' => true,
+            ]);
+        }
+    @endphp
+
+    <section class="container eg-result-shell-bar">
+        @include('partials.page-nav-actions', [
+            'variant' => 'light',
+            'links' => $resultNavLinks,
+        ])
+    </section>
+
     <div class="eg-result-hero">
         <div class="container">
             <div class="eg-result-hero-inner">
@@ -77,11 +108,12 @@
             </section>
         @endguest
 
-        <div class="text-center pb-5">
-            <a href="{{ route('home') }}" class="eg-result-home-link">
-                <i class="fa-solid fa-arrow-{{ $locale === 'fa' ? 'right' : 'left' }}" data-icon-directional></i>
-                {{ __('quiz.back_home') }}
-            </a>
-        </div>
+        <section class="pb-5">
+            @include('partials.page-nav-actions', [
+                'variant' => 'light',
+                'align' => 'center',
+                'links' => $resultNavLinks,
+            ])
+        </section>
     </div>
 </div>

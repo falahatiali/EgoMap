@@ -1,4 +1,21 @@
 <div class="eg-profile-page">
+    <section class="container pt-3">
+        @include('partials.page-nav-actions', [
+            'links' => [
+                [
+                    'href' => route('home'),
+                    'label' => __('quiz.back_home'),
+                    'icon' => 'fa-house',
+                ],
+                [
+                    'href' => route('home').'#tests',
+                    'label' => __('profile.browse_tests'),
+                    'icon' => 'fa-flask',
+                ],
+            ],
+        ])
+    </section>
+
     {{-- Hero --}}
     <section class="eg-profile-hero">
         <div class="container">

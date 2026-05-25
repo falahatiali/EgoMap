@@ -245,6 +245,11 @@ body.eg-result-body {
     margin-top: 0.15rem;
 }
 
+.eg-result-shell-bar {
+    padding-top: 1.25rem;
+    padding-bottom: 0.25rem;
+}
+
 .eg-result-home-link {
     display: inline-flex;
     align-items: center;

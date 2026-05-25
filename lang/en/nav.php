@@ -7,4 +7,6 @@ return [
     'start_test' => 'Start free test',
     'login' => 'Sign in',
     'register' => 'Create account',
+    'home' => 'Home',
+    'page_navigation' => 'Page navigation',
 ];

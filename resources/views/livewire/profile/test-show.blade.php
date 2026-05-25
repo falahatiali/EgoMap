@@ -8,10 +8,27 @@
     style="--eg-result-accent: {{ $palette['accent'] }}; --eg-result-soft: {{ $palette['soft'] }}; --eg-result-glow: {{ $palette['glow'] }};"
 >
     <section class="container pt-4">
-        <a href="{{ route('profile') }}" class="eg-profile-back-link" wire:navigate>
-            <i class="fa-solid fa-arrow-{{ $locale === 'fa' ? 'right' : 'left' }}" data-icon-directional></i>
-            {{ __('profile.back_to_profile') }}
-        </a>
+        @include('partials.page-nav-actions', [
+            'links' => [
+                [
+                    'href' => route('profile'),
+                    'label' => __('profile.back_to_profile'),
+                    'icon' => 'fa-arrow-left',
+                    'directional' => true,
+                    'wireNavigate' => true,
+                ],
+                [
+                    'href' => route('home'),
+                    'label' => __('quiz.back_home'),
+                    'icon' => 'fa-house',
+                ],
+                [
+                    'href' => route('home').'#tests',
+                    'label' => __('profile.browse_tests'),
+                    'icon' => 'fa-flask',
+                ],
+            ],
+        ])
     </section>
 
     <section
@@ -48,6 +65,10 @@
             </a>
             <a href="{{ route('quiz.result', $session->uuid) }}" class="btn eg-btn-ghost">
                 {{ __('profile.open_full_result') }}
+            </a>
+            <a href="{{ route('home') }}" class="btn eg-btn-ghost">
+                <i class="fa-solid fa-house me-1"></i>
+                {{ __('quiz.back_home') }}
             </a>
         </div>
     </section>
