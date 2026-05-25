@@ -2,7 +2,7 @@
 
 return [
     'brand' => 'EgoMap',
-    'tagline' => 'Know yourself. Transform your relationships.',
+    'tagline' => 'A calm recovery home for men rebuilding after toxic love.',
     'language' => 'Language',
     'english' => 'English',
     'persian' => 'Persian',

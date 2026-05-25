@@ -2,8 +2,9 @@
 
 return [
     'tests' => 'تست‌ها',
-    'how_it_works' => 'چطور کار می‌کند',
-    'report_preview' => 'نمونه گزارش',
+    'no_contact' => 'نو-کانتکت',
+    'how_it_works' => 'مسیر ریکاوری',
+    'report_preview' => 'امکانات',
     'start_test' => 'شروع تست رایگان',
     'login' => 'ورود',
     'register' => 'ساخت حساب',

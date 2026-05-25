@@ -22,11 +22,14 @@ class HomePageTest extends TestCase
         $response = $this->get(route('home'));
 
         $response->assertOk();
-        $response->assertSee('See your relationship patterns clearly.', false);
+        $response->assertSee('She left? Stop chasing a ghost. Build your empire.', false);
+        $response->assertSee('Diagnose. Detox. Deliver.', false);
         $response->assertSee('MBTI Personality Type', false);
         $response->assertSee('70 questions', false);
         $response->assertSee(route('quiz.start', 'mbti-personality'), false);
-        $response->assertSee('Start test', false);
+        $response->assertSee('Start relationship debug (free)', false);
+        $response->assertSee('The Civilian', false);
+        $response->assertSee('The Sovereign', false);
         $response->assertSee('dir="ltr"', false);
         $response->assertSee('id="eg-i18n"', false);
     }
@@ -41,7 +44,8 @@ class HomePageTest extends TestCase
         $response = $this->get(route('home'));
 
         $response->assertOk();
-        $response->assertSee('الگوهای رابطه‌ات را شفاف ببین.', false);
+        $response->assertSee('رفت؟ دنبال روح لاشی ندو. امپراتوری خودت را بساز.', false);
+        $response->assertSee('تشخیص. سم‌زدایی. ساختن.', false);
         $response->assertSee('dir="rtl"', false);
     }
 

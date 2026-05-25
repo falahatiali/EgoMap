@@ -6,6 +6,7 @@
     @php
         $primaryQuiz = $featuredQuizzes->first();
         $locale = app()->getLocale();
+        $quizCta = $primaryQuiz ? route('quiz.start', $primaryQuiz->slug) : '#tests';
     @endphp
 
     @if (session('quiz_notice'))
@@ -17,12 +18,12 @@
         </div>
     @endif
 
-    <section class="eg-hero" id="start">
+    <section class="eg-hero eg-hero--home" id="start">
         <div class="container">
             <div class="row align-items-center g-5">
-                <div class="col-lg-6">
+                <div class="col-lg-7">
                     <span class="eg-badge mb-4 eg-shadow-sm">
-                        <i class="fa-solid fa-sparkles"></i>
+                        <i class="fa-solid fa-house-heart"></i>
                         <span data-i18n="home.hero_badge">{{ __('home.hero_badge') }}</span>
                     </span>
                     <h1 class="eg-display eg-hero-title mb-4" data-i18n="home.hero_title">{{ __('home.hero_title') }}</h1>
@@ -35,24 +36,22 @@
                         </p>
                     @endif
 
-                    <div class="d-flex flex-column flex-sm-row gap-3">
-                        @if ($primaryQuiz)
-                            <a href="{{ route('quiz.start', $primaryQuiz->slug) }}" class="eg-btn-primary eg-transition eg-shadow-glow eg-hover-lift">
-                                <i class="fa-solid fa-play"></i>
-                                <span data-i18n="home.test_card_start">{{ __('home.test_card_start') }}</span>
-                                <i class="fa-solid fa-arrow-{{ $locale === 'fa' ? 'left' : 'right' }}" data-icon-directional></i>
-                            </a>
-                        @endif
-                        <a href="#tests" class="eg-btn-ghost eg-transition">
-                            <span data-i18n="home.cta_browse_tests">{{ __('home.cta_browse_tests') }}</span>
+                    <div class="d-flex flex-column flex-sm-row flex-wrap gap-3">
+                        <a href="{{ $quizCta }}" class="eg-btn-primary eg-btn-pulse eg-transition eg-shadow-glow eg-hover-lift">
+                            <i class="fa-solid fa-stethoscope"></i>
+                            <span data-i18n="home.cta_start">{{ __('home.cta_start') }}</span>
+                            <i class="fa-solid fa-arrow-{{ $locale === 'fa' ? 'left' : 'right' }}" data-icon-directional></i>
                         </a>
-                        <a href="#how-it-works" class="eg-btn-ghost eg-transition d-none d-sm-inline-flex">
+                        <a href="#framework" class="eg-btn-ghost eg-transition">
                             <span data-i18n="home.cta_learn">{{ __('home.cta_learn') }}</span>
+                        </a>
+                        <a href="#tests" class="eg-btn-ghost eg-transition d-none d-md-inline-flex">
+                            <span data-i18n="home.cta_browse_tests">{{ __('home.cta_browse_tests') }}</span>
                         </a>
                     </div>
                 </div>
 
-                <div class="col-lg-6">
+                <div class="col-lg-5">
                     @if ($primaryQuiz)
                         <div class="eg-hero-test-panel">
                             @include('partials.quiz-card', ['quiz' => $primaryQuiz, 'featured' => true])
@@ -63,6 +62,88 @@
                         </div>
                     @endif
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="eg-section eg-section-anchor" id="pain">
+        <div class="container">
+            <div class="text-center mb-5">
+                <span class="eg-badge mb-3">
+                    <i class="fa-solid fa-heart-crack"></i>
+                    <span data-i18n="home.pain_badge">{{ __('home.pain_badge') }}</span>
+                </span>
+                <h2 class="eg-display eg-section-title mb-3" data-i18n="home.pain_title">{{ __('home.pain_title') }}</h2>
+                <p class="eg-text-muted mx-auto mb-0" style="max-width: 46ch;" data-i18n="home.pain_subtitle">{{ __('home.pain_subtitle') }}</p>
+            </div>
+
+            <div class="eg-pain-grid">
+                @foreach ([1, 2, 3] as $n)
+                    <article class="eg-pain-card eg-transition">
+                        <div class="eg-pain-icon" aria-hidden="true">
+                            <i class="fa-solid fa-{{ $n === 1 ? 'mask' : ($n === 2 ? 'bolt' : 'shield-halved') }}"></i>
+                        </div>
+                        <h3 class="h5 fw-semibold mb-2" data-i18n="home.pain_{{ $n }}_title">{{ __("home.pain_{$n}_title") }}</h3>
+                        <p class="eg-text-muted small mb-0" data-i18n="home.pain_{{ $n }}_desc">{{ __("home.pain_{$n}_desc") }}</p>
+                    </article>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <section class="eg-section eg-section-anchor eg-whitespace-section" id="framework">
+        <div class="container">
+            <div class="text-center mb-5 pb-2">
+                <span class="eg-badge mb-3">
+                    <i class="fa-solid fa-route"></i>
+                    <span data-i18n="home.framework_badge">{{ __('home.framework_badge') }}</span>
+                </span>
+                <h2 class="eg-display eg-section-title mb-3" data-i18n="home.framework_title">{{ __('home.framework_title') }}</h2>
+                <p class="eg-text-muted mx-auto" style="max-width: 44ch;" data-i18n="home.framework_subtitle">{{ __('home.framework_subtitle') }}</p>
+            </div>
+
+            <div class="eg-framework-track">
+                @foreach ([1, 2, 3] as $step)
+                    <article class="eg-framework-step">
+                        <span class="eg-framework-num" aria-hidden="true">0{{ $step }}</span>
+                        <span class="eg-framework-label" data-i18n="home.framework_{{ $step }}_label">{{ __("home.framework_{$step}_label") }}</span>
+                        <h3 class="h5 fw-semibold mb-2" data-i18n="home.framework_{{ $step }}_title">{{ __("home.framework_{$step}_title") }}</h3>
+                        <p class="eg-text-muted small mb-0" data-i18n="home.framework_{{ $step }}_desc">{{ __("home.framework_{$step}_desc") }}</p>
+                    </article>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <section class="eg-section eg-section-anchor" id="features">
+        <div class="container">
+            <div class="text-center mb-5">
+                <span class="eg-badge mb-3">
+                    <i class="fa-solid fa-toolbox"></i>
+                    <span data-i18n="home.features_badge">{{ __('home.features_badge') }}</span>
+                </span>
+                <h2 class="eg-display eg-section-title mb-3" data-i18n="home.features_title">{{ __('home.features_title') }}</h2>
+                <p class="eg-text-muted mx-auto mb-0" style="max-width: 44ch;" data-i18n="home.features_subtitle">{{ __('home.features_subtitle') }}</p>
+            </div>
+
+            <div class="eg-features-grid">
+                @foreach ([
+                    ['icon' => 'file-pdf', 'n' => 1, 'href' => null],
+                    ['icon' => 'robot', 'n' => 2, 'href' => null],
+                    ['icon' => 'hourglass-half', 'n' => 3, 'href' => route('no-contact')],
+                    ['icon' => 'dumbbell', 'n' => 4, 'href' => null],
+                ] as $feature)
+                    <article class="eg-feature-card @if (! empty($feature['href'])) eg-feature-card--link @endif">
+                        @if (! empty($feature['href']))
+                            <a href="{{ $feature['href'] }}" class="eg-feature-card-link stretched-link" wire:navigate></a>
+                        @endif
+                        <div class="eg-feature-icon" aria-hidden="true">
+                            <i class="fa-solid fa-{{ $feature['icon'] }}"></i>
+                        </div>
+                        <h3 class="h6 fw-semibold mb-2" data-i18n="home.feature_{{ $feature['n'] }}_title">{{ __("home.feature_{$feature['n']}_title") }}</h3>
+                        <p class="eg-text-muted small mb-0" data-i18n="home.feature_{{ $feature['n'] }}_desc">{{ __("home.feature_{$feature['n']}_desc") }}</p>
+                    </article>
+                @endforeach
             </div>
         </div>
     </section>
@@ -88,134 +169,108 @@
         </section>
     @endif
 
-    <section class="pb-5">
+    <section class="eg-section eg-section-anchor" id="home">
         <div class="container">
-            <div class="eg-trust-scroll">
-                <div class="eg-glass eg-shadow-sm eg-transition eg-trust-card">
-                    <div class="eg-trust-icon"><i class="fa-solid fa-user-secret"></i></div>
-                    <h3 class="h6 fw-semibold mb-2" data-i18n="home.trust_anonymous">{{ __('home.trust_anonymous') }}</h3>
-                    <p class="eg-text-muted small mb-0" data-i18n="home.trust_anonymous_desc">{{ __('home.trust_anonymous_desc') }}</p>
-                </div>
-                <div class="eg-glass eg-shadow-sm eg-transition eg-trust-card">
-                    <div class="eg-trust-icon"><i class="fa-solid fa-chart-simple"></i></div>
-                    <h3 class="h6 fw-semibold mb-2" data-i18n="home.trust_science">{{ __('home.trust_science') }}</h3>
-                    <p class="eg-text-muted small mb-0" data-i18n="home.trust_science_desc">{{ __('home.trust_science_desc') }}</p>
-                </div>
-                <div class="eg-glass eg-shadow-sm eg-transition eg-trust-card">
-                    <div class="eg-trust-icon"><i class="fa-solid fa-bolt"></i></div>
-                    <h3 class="h6 fw-semibold mb-2" data-i18n="home.trust_fast">{{ __('home.trust_fast') }}</h3>
-                    <p class="eg-text-muted small mb-0" data-i18n="home.trust_fast_desc">{{ __('home.trust_fast_desc') }}</p>
-                </div>
+            <div class="text-center mb-5">
+                <span class="eg-badge mb-3">
+                    <i class="fa-solid fa-door-open"></i>
+                    <span data-i18n="home.home_badge">{{ __('home.home_badge') }}</span>
+                </span>
+                <h2 class="eg-display eg-section-title mb-3" data-i18n="home.home_title">{{ __('home.home_title') }}</h2>
+                <p class="eg-text-muted mx-auto mb-0" style="max-width: 46ch;" data-i18n="home.home_subtitle">{{ __('home.home_subtitle') }}</p>
             </div>
-        </div>
-    </section>
 
-    <section class="eg-section eg-section-anchor eg-whitespace-section" id="how-it-works">
-        <div class="container">
-            <div class="text-center mb-5 pb-2">
-                <h2 class="eg-display eg-section-title mb-3" data-i18n="home.steps_title">{{ __('home.steps_title') }}</h2>
-                <p class="eg-text-muted mx-auto" style="max-width: 36ch;" data-i18n="home.steps_subtitle">{{ __('home.steps_subtitle') }}</p>
-            </div>
-            <div class="row g-4">
-                @foreach ([1, 2, 3] as $step)
-                    <div class="col-md-4">
-                        <div class="eg-glass eg-shadow-sm eg-transition h-100 p-4">
-                            <div class="eg-step-num">{{ $step }}</div>
-                            <h3 class="h5 fw-semibold mb-2" data-i18n="home.step_{{ $step }}_title">{{ __("home.step_{$step}_title") }}</h3>
-                            <p class="eg-text-muted small mb-0" data-i18n="home.step_{{ $step }}_desc">{{ __("home.step_{$step}_desc") }}</p>
-                        </div>
-                    </div>
+            <div class="eg-home-grid">
+                @foreach ([
+                    ['icon' => 'user-secret', 'n' => 1],
+                    ['icon' => 'brain', 'n' => 2],
+                    ['icon' => 'moon', 'n' => 3],
+                ] as $pillar)
+                    <article class="eg-home-card eg-transition">
+                        <div class="eg-trust-icon mb-3"><i class="fa-solid fa-{{ $pillar['icon'] }}"></i></div>
+                        <h3 class="h6 fw-semibold mb-2" data-i18n="home.home_{{ $pillar['n'] }}_title">{{ __("home.home_{$pillar['n']}_title") }}</h3>
+                        <p class="eg-text-muted small mb-0" data-i18n="home.home_{{ $pillar['n'] }}_desc">{{ __("home.home_{$pillar['n']}_desc") }}</p>
+                    </article>
                 @endforeach
             </div>
         </div>
     </section>
 
-    <section class="eg-section eg-section-anchor" id="report-preview">
+    <section class="eg-section eg-section-anchor" id="pricing">
         <div class="container">
             <div class="text-center mb-5">
-                <h2 class="eg-display eg-section-title mb-3" data-i18n="home.report_title">{{ __('home.report_title') }}</h2>
-                <p class="eg-text-muted" data-i18n="home.report_subtitle">{{ __('home.report_subtitle') }}</p>
+                <span class="eg-badge mb-3">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span data-i18n="home.pricing_badge">{{ __('home.pricing_badge') }}</span>
+                </span>
+                <h2 class="eg-display eg-section-title mb-3" data-i18n="home.pricing_title">{{ __('home.pricing_title') }}</h2>
+                <p class="eg-text-muted mx-auto mb-0" style="max-width: 44ch;" data-i18n="home.pricing_subtitle">{{ __('home.pricing_subtitle') }}</p>
             </div>
-            <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    <div class="eg-glass eg-shadow-lg eg-report-card">
-                        <p class="eg-text-muted small text-uppercase fw-semibold mb-2" style="letter-spacing: 0.08em;" data-i18n="home.report_type_label">{{ __('home.report_type_label') }}</p>
-                        <p class="eg-type-pill mb-4">ENTP</p>
 
-                        <h3 class="h6 fw-semibold mb-3" data-i18n="home.report_strengths_title">{{ __('home.report_strengths_title') }}</h3>
-                        <div class="mb-3">
-                            @foreach ([1, 2, 3] as $n)
-                                <div class="eg-strength-item">
-                                    <i class="fa-solid fa-circle-check"></i>
-                                    <span class="small" data-i18n="home.report_strength_{{ $n }}">{{ __("home.report_strength_{$n}") }}</span>
-                                </div>
-                            @endforeach
-                        </div>
+            <div class="eg-pricing-grid">
+                <article class="eg-pricing-card">
+                    <h3 class="h4 fw-semibold mb-1" data-i18n="home.pricing_free_name">{{ __('home.pricing_free_name') }}</h3>
+                    <p class="eg-pricing-price mb-0" data-i18n="home.pricing_free_price">{{ __('home.pricing_free_price') }}</p>
+                    <p class="eg-text-muted small mb-4" data-i18n="home.pricing_free_desc">{{ __('home.pricing_free_desc') }}</p>
+                    <ul class="eg-pricing-list">
+                        @foreach (range(1, 4) as $n)
+                            <li>
+                                <i class="fa-solid fa-check" aria-hidden="true"></i>
+                                <span data-i18n="home.pricing_free_{{ $n }}">{{ __("home.pricing_free_{$n}") }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                    <a href="{{ $quizCta }}" class="eg-btn-ghost eg-transition w-100 text-center">
+                        <span data-i18n="home.pricing_cta_free">{{ __('home.pricing_cta_free') }}</span>
+                    </a>
+                </article>
 
-                        <div class="eg-blindspot">
-                            <h3 class="h6 fw-semibold mb-2">
-                                <i class="fa-solid fa-triangle-exclamation me-2"></i>
-                                <span data-i18n="home.report_blindspot_title">{{ __('home.report_blindspot_title') }}</span>
-                            </h3>
-                            <p class="small mb-0 eg-text-muted" data-i18n="home.report_blindspot_desc">{{ __('home.report_blindspot_desc') }}</p>
-                        </div>
-
-                        <x-access-gate permission="reports.section.traps">
-                            <div class="eg-pro-unlocked mt-4 p-4 eg-glass">
-                                <h3 class="h6 fw-semibold mb-2" data-i18n="home.report_pro_title">{{ __('home.report_pro_title') }}</h3>
-                                <p class="small eg-text-muted mb-0" data-i18n="home.report_pro_teaser">{{ __('home.report_pro_teaser') }}</p>
-                            </div>
-                            <x-slot:denied>
-                                <div class="eg-pro-locked">
-                                    <div class="eg-pro-blur">
-                                        <h3 class="h6 fw-semibold mb-2" data-i18n="home.report_pro_title">{{ __('home.report_pro_title') }}</h3>
-                                        <p class="small eg-text-muted mb-0" data-i18n="home.report_pro_teaser">{{ __('home.report_pro_teaser') }}</p>
-                                    </div>
-                                    <div class="eg-pro-overlay">
-                                        <span class="eg-lock-badge">
-                                            <i class="fa-solid fa-lock"></i>
-                                            <span data-i18n="home.report_pro_locked">{{ __('home.report_pro_locked') }}</span>
-                                        </span>
-                                        @if ($primaryQuiz)
-                                            <a href="{{ route('quiz.start', $primaryQuiz->slug) }}" class="eg-btn-ghost eg-transition btn-sm">
-                                                <span data-i18n="home.test_card_start">{{ __('home.test_card_start') }}</span>
-                                            </a>
-                                        @endif
-                                    </div>
-                                </div>
-                            </x-slot:denied>
-                        </x-access-gate>
+                <article class="eg-pricing-card eg-pricing-card--pro">
+                    <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                        <h3 class="h4 fw-semibold mb-0" data-i18n="home.pricing_pro_name">{{ __('home.pricing_pro_name') }}</h3>
+                        <span class="eg-badge mb-0">
+                            <span data-i18n="home.pricing_pro_badge">{{ __('home.pricing_pro_badge') }}</span>
+                        </span>
                     </div>
-                </div>
+                    <p class="eg-pricing-price mb-0" data-i18n="home.pricing_pro_price">{{ __('home.pricing_pro_price') }}</p>
+                    <p class="eg-text-muted small mb-4" data-i18n="home.pricing_pro_desc">{{ __('home.pricing_pro_desc') }}</p>
+                    <ul class="eg-pricing-list">
+                        @foreach (range(1, 5) as $n)
+                            <li>
+                                <i class="fa-solid fa-check" aria-hidden="true"></i>
+                                <span data-i18n="home.pricing_pro_{{ $n }}">{{ __("home.pricing_pro_{$n}") }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                    <a href="{{ $quizCta }}" class="eg-btn-primary eg-transition w-100 text-center">
+                        <span data-i18n="home.pricing_cta_pro">{{ __('home.pricing_cta_pro') }}</span>
+                    </a>
+                </article>
             </div>
         </div>
     </section>
 
-    <section class="eg-section">
+    <section class="eg-section eg-section-anchor pb-5" id="roadmap">
         <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-10">
-                    <div class="eg-glass eg-mission eg-shadow-md text-center text-lg-start">
-                        <div class="row align-items-center g-4">
-                            <div class="col-lg-8">
-                                <span class="eg-badge mb-3">
-                                    <i class="fa-solid fa-envelope"></i>
-                                    <span data-i18n="home.mission_badge">{{ __('home.mission_badge') }}</span>
-                                </span>
-                                <h2 class="eg-display h3 mb-3" data-i18n="home.mission_title">{{ __('home.mission_title') }}</h2>
-                                <p class="eg-text-muted mb-0" data-i18n="home.mission_desc">{{ __('home.mission_desc') }}</p>
-                            </div>
-                            <div class="col-lg-4 text-center text-lg-end">
-                                @if ($primaryQuiz)
-                                    <a href="{{ route('quiz.start', $primaryQuiz->slug) }}" class="eg-btn-primary eg-transition eg-shadow-glow">
-                                        <i class="fa-solid fa-play"></i>
-                                        <span data-i18n="home.test_card_start">{{ __('home.test_card_start') }}</span>
-                                    </a>
-                                @endif
-                            </div>
+            <div class="text-center mb-5">
+                <span class="eg-badge mb-3">
+                    <i class="fa-solid fa-map"></i>
+                    <span data-i18n="home.roadmap_badge">{{ __('home.roadmap_badge') }}</span>
+                </span>
+                <h2 class="eg-display eg-section-title mb-3" data-i18n="home.roadmap_title">{{ __('home.roadmap_title') }}</h2>
+                <p class="eg-text-muted mx-auto mb-0" style="max-width: 44ch;" data-i18n="home.roadmap_subtitle">{{ __('home.roadmap_subtitle') }}</p>
+            </div>
+
+            <div class="eg-roadmap-list">
+                @foreach (range(1, 4) as $n)
+                    <article class="eg-roadmap-item">
+                        <div class="flex-grow-1">
+                            <h3 class="h6 fw-semibold mb-1" data-i18n="home.roadmap_{{ $n }}_title">{{ __("home.roadmap_{$n}_title") }}</h3>
+                            <p class="eg-text-muted small mb-0" data-i18n="home.roadmap_{{ $n }}_desc">{{ __("home.roadmap_{$n}_desc") }}</p>
                         </div>
-                    </div>
-                </div>
+                        <span class="eg-roadmap-status" data-i18n="home.roadmap_{{ $n }}_status">{{ __("home.roadmap_{$n}_status") }}</span>
+                    </article>
+                @endforeach
             </div>
         </div>
     </section>
@@ -223,9 +278,9 @@
     <section class="eg-section pb-5">
         <div class="container text-center">
             <h2 class="eg-display eg-section-title mb-3" data-i18n="home.final_title">{{ __('home.final_title') }}</h2>
-            <p class="eg-text-muted mx-auto mb-5" style="max-width: 40ch;" data-i18n="home.final_subtitle">{{ __('home.final_subtitle') }}</p>
+            <p class="eg-text-muted mx-auto mb-5" style="max-width: 44ch;" data-i18n="home.final_subtitle">{{ __('home.final_subtitle') }}</p>
             @if ($primaryQuiz)
-                <a href="{{ route('quiz.start', $primaryQuiz->slug) }}" class="eg-btn-primary eg-transition eg-shadow-glow d-none d-lg-inline-flex">
+                <a href="{{ $quizCta }}" class="eg-btn-primary eg-btn-pulse eg-transition eg-shadow-glow d-inline-flex">
                     <span data-i18n="home.final_cta">{{ __('home.final_cta') }}</span>
                     <i class="fa-solid fa-arrow-{{ $locale === 'fa' ? 'left' : 'right' }}" data-icon-directional></i>
                 </a>
@@ -236,9 +291,9 @@
 
 @section('sticky_cta')
     @if ($primaryQuiz ?? null)
-        <a href="{{ route('quiz.start', $primaryQuiz->slug) }}" class="eg-btn-primary eg-transition w-100">
-            <i class="fa-solid fa-play"></i>
-            <span data-i18n="home.test_card_start">{{ __('home.test_card_start') }}</span>
+        <a href="{{ route('quiz.start', $primaryQuiz->slug) }}" class="eg-btn-primary eg-btn-pulse eg-transition w-100">
+            <i class="fa-solid fa-stethoscope"></i>
+            <span data-i18n="home.cta_start">{{ __('home.cta_start') }}</span>
             <i class="fa-solid fa-arrow-{{ app()->getLocale() === 'fa' ? 'left' : 'right' }}" data-icon-directional></i>
         </a>
     @endif

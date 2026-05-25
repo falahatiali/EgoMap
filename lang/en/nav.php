@@ -2,8 +2,9 @@
 
 return [
     'tests' => 'Tests',
-    'how_it_works' => 'How it works',
-    'report_preview' => 'Sample report',
+    'no_contact' => 'No-contact',
+    'how_it_works' => 'Recovery path',
+    'report_preview' => 'Features',
     'start_test' => 'Start free test',
     'login' => 'Sign in',
     'register' => 'Create account',
