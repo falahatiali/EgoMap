@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6d2f041f16bb7e32654ed8cf0cdae43e",
+    "content-hash": "b074dcb8b95320ad72d17e527230bf30",
     "packages": [
         {
             "name": "brick/math",
@@ -2323,6 +2323,76 @@
                 "source": "https://github.com/Masterminds/html5-php/tree/2.10.0"
             },
             "time": "2025-07-25T09:04:22+00:00"
+        },
+        {
+            "name": "mischasigtermans/laravel-toon",
+            "version": "v1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mischasigtermans/laravel-toon.git",
+                "reference": "5fc94dab16c1ec4f893fc6abcacfd15db3e34e89"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mischasigtermans/laravel-toon/zipball/5fc94dab16c1ec4f893fc6abcacfd15db3e34e89",
+                "reference": "5fc94dab16c1ec4f893fc6abcacfd15db3e34e89",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "^10.0|^11.0|^12.0|^13.0",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "larastan/larastan": "^2.0|^3.0",
+                "laravel/pint": "^1.20",
+                "orchestra/testbench": "^8.0|^9.0|^10.0",
+                "pestphp/pest": "^2.0|^3.0",
+                "pestphp/pest-plugin-laravel": "^2.0|^3.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "Toon": "MischaSigtermans\\Toon\\Facades\\Toon"
+                    },
+                    "providers": [
+                        "MischaSigtermans\\Toon\\ToonServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/helpers.php"
+                ],
+                "psr-4": {
+                    "MischaSigtermans\\Toon\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mischa Sigtermans",
+                    "email": "mischa@sigtermans.me"
+                }
+            ],
+            "description": "Token-Optimized Object Notation encoder/decoder for Laravel with intelligent nested object handling",
+            "keywords": [
+                "ai",
+                "json-alternative",
+                "laravel",
+                "llm",
+                "mcp",
+                "token-optimization",
+                "toon"
+            ],
+            "support": {
+                "issues": "https://github.com/mischasigtermans/laravel-toon/issues",
+                "source": "https://github.com/mischasigtermans/laravel-toon/tree/v1.1.0"
+            },
+            "time": "2026-03-23T15:16:34+00:00"
         },
         {
             "name": "monolog/monolog",
