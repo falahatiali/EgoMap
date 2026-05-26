@@ -16,7 +16,7 @@ class NoContactTimerPageTest extends TestCase
 
     public function test_no_contact_page_renders_setup_mode(): void
     {
-        $response = $this->get(route('no-contact'));
+        $response = $this->get(route('no-contact', ['locale' => 'en']));
 
         $response->assertOk();
         $response->assertSee('No-contact protocol', false);

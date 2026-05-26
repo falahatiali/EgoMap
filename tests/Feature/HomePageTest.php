@@ -2,8 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\Home\Protocol;
 use Database\Seeders\MbtiQuizSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class HomePageTest extends TestCase
@@ -17,35 +19,74 @@ class HomePageTest extends TestCase
         $this->seed(MbtiQuizSeeder::class);
     }
 
-    public function test_home_page_renders_in_english_by_default(): void
+    public function test_home_page_renders_clarity_landing(): void
     {
-        $response = $this->get(route('home'));
+        $response = $this->get(route('home', ['locale' => 'en']));
 
         $response->assertOk();
-        $response->assertSee('She left? Stop chasing a ghost. Build your empire.', false);
-        $response->assertSee('Diagnose. Detox. Deliver.', false);
-        $response->assertSee('MBTI Personality Type', false);
-        $response->assertSee('70 questions', false);
-        $response->assertSee(route('onboarding'), false);
-        $response->assertSee('Start relationship debug (free)', false);
-        $response->assertSee('The Civilian', false);
-        $response->assertSee('The Sovereign', false);
-        $response->assertSee('dir="ltr"', false);
-        $response->assertSee('id="eg-i18n"', false);
+        $response->assertSee('The relationship ended.', false);
+        $response->assertSee('Your rebuild starts now.', false);
+        $response->assertSee('For men after the breakup', false);
+        $response->assertSee('You do not need another motivational quote', false);
+        $response->assertSee('Open Emergency Mode', false);
+        $response->assertSee('Stops the urge. Saves the dignity.', false);
+        $response->assertSee('Where you stand right now', false);
+        $response->assertSee('Unstable but aware', false);
+        $response->assertSee('About to text her?', false);
+        $response->assertSee('wait 20 minutes with you', false);
+        $response->assertSee('Start Step 1', false);
+        $response->assertSee('How it works', false);
+        $response->assertSee('Right now, your only job is not to make it worse', false);
+        $response->assertSee('rh-page', false);
+        $response->assertDontSee('id="pain"', false);
+    }
+
+    public function test_home_nav_has_minimal_links_and_ctas(): void
+    {
+        $response = $this->get(route('home', ['locale' => 'en']));
+
+        preg_match('/<header class="rh-nav.*?<\/header>/s', $response->getContent(), $matches);
+        $navHtml = $matches[0] ?? '';
+
+        $this->assertStringContainsString('rh-nav', $navHtml);
+        $this->assertStringContainsString('How it works', $navHtml);
+        $this->assertStringContainsString('Login', $navHtml);
+        $this->assertStringContainsString('eg-lang-switch--nav', $navHtml);
+        $this->assertStringContainsString('data-locale-switch="fa"', $navHtml);
+        $this->assertStringContainsString(route('login', ['locale' => 'en']), $navHtml);
+        $this->assertStringContainsString(route('onboarding', ['locale' => 'en']), $navHtml);
+    }
+
+    public function test_start_step1_reveals_triage(): void
+    {
+        Livewire::test(Protocol::class)
+            ->assertSet('screen', 'landing')
+            ->call('startCheckIn')
+            ->assertSet('screen', 'triage')
+            ->assertSee('How long were you together?', false);
+    }
+
+    public function test_onboarding_route_opens_triage_directly(): void
+    {
+        $this->get(route('onboarding', ['locale' => 'en']))
+            ->assertOk()
+            ->assertSee('How long were you together?', false);
     }
 
     public function test_locale_can_be_switched_to_persian_via_redirect(): void
     {
-        $response = $this->get(route('locale.switch', 'fa'));
+        $response = $this->get(route('locale.switch', 'fa'), [
+            'HTTP_REFERER' => url('/en'),
+        ]);
 
-        $response->assertRedirect();
+        $response->assertRedirect('/fa');
         $this->assertSame('fa', session('locale'));
 
-        $response = $this->get(route('home'));
+        $response = $this->get('/fa');
 
         $response->assertOk();
-        $response->assertSee('رفت؟ دیگر دنبال خاطره‌اش ندو. امپراتوری خودت را بساز.', false);
-        $response->assertSee('تشخیص. سم‌زدایی. ساختن.', false);
+        $response->assertSee('رابطه تمام شد', false);
+        $response->assertSee('شروع قدم ۱', false);
         $response->assertSee('dir="rtl"', false);
     }
 

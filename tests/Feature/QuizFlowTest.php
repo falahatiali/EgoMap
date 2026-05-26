@@ -66,7 +66,7 @@ class QuizFlowTest extends TestCase
     {
         $response = $this->get(route('quiz.session', ['uuid' => '00000000-0000-0000-0000-000000000000']));
 
-        $response->assertRedirect(route('home'));
+        $response->assertRedirect(route('home', ['locale' => 'en']));
     }
 
     public function test_user_can_complete_mbti_quiz_and_see_result(): void

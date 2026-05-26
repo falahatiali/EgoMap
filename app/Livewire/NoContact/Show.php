@@ -3,6 +3,7 @@
 namespace App\Livewire\NoContact;
 
 use App\Services\NoContact\NoContactTimerService;
+use App\Services\Recovery\RecoveryJourneyService;
 use Illuminate\Contracts\View\View;
 use InvalidArgumentException;
 use Livewire\Attributes\Layout;
@@ -17,9 +18,10 @@ class Show extends Component
 
     public bool $showSetup = false;
 
-    public function mount(NoContactTimerService $timerService): void
+    public function mount(NoContactTimerService $timerService, RecoveryJourneyService $journey): void
     {
         $this->selectedDays = $timerService->recommendedDays();
+        $journey->markNoContactActivated();
     }
 
     public function startProtocol(NoContactTimerService $timerService): void

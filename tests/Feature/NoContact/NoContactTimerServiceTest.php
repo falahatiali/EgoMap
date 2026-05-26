@@ -83,7 +83,7 @@ class NoContactTimerServiceTest extends TestCase
         ]);
 
         $response = $this->withUnencryptedCookie('egomap_guest', $token)
-            ->get(route('no-contact'));
+            ->get(route('no-contact', ['locale' => 'en']));
 
         $response->assertOk();
         $response->assertSee('Time left in protocol', false);

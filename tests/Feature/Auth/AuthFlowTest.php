@@ -157,7 +157,7 @@ class AuthFlowTest extends TestCase
 
     public function test_guest_can_view_register_and_login_pages(): void
     {
-        $this->get(route('register'))->assertOk();
-        $this->get(route('login'))->assertOk();
+        $this->get(route('register', ['locale' => 'en']))->assertOk();
+        $this->get(route('login', ['locale' => 'en']))->assertOk();
     }
 }

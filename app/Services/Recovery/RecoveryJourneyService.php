@@ -3,16 +3,23 @@
 namespace App\Services\Recovery;
 
 use App\Enums\BreakupDuration;
+use App\Enums\BreakupInitiator;
 use App\Enums\NoContactStatus;
 use App\Enums\PrimaryStruggle;
 use App\Enums\RecoveryPhase;
+use App\Enums\RelationshipDuration;
 use App\Enums\SessionStatus;
 use App\Models\NoContactProtocol;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 
 class RecoveryJourneyService
 {
     private const SESSION_KEY = 'recovery.journey';
+
+    private const SESSION_NO_CONTACT_ACTIVATED = 'recovery.no_contact_activated';
+
+    public const ADVANCED_UNLOCK_HOURS = 24;
 
     public function hasCompletedTriage(?User $user = null): bool
     {
@@ -25,6 +32,47 @@ class RecoveryJourneyService
         $data = session(self::SESSION_KEY, []);
 
         return is_array($data) && isset($data['completed_at']);
+    }
+
+    public function hasActivatedNoContact(?User $user = null): bool
+    {
+        if (session(self::SESSION_NO_CONTACT_ACTIVATED, false) === true) {
+            return true;
+        }
+
+        return $this->activeNoContactProtocol($user) !== null;
+    }
+
+    public function markNoContactActivated(): void
+    {
+        session([self::SESSION_NO_CONTACT_ACTIVATED => true]);
+    }
+
+    public function hasAdvancedFeaturesUnlocked(?User $user = null): bool
+    {
+        $protocol = $this->activeNoContactProtocol($user);
+
+        if ($protocol === null) {
+            return false;
+        }
+
+        $startedAt = CarbonImmutable::parse($protocol->streak_started_at);
+
+        return $startedAt->diffInHours(CarbonImmutable::now()) >= self::ADVANCED_UNLOCK_HOURS;
+    }
+
+    /**
+     * @return array{show_explore_links: bool, show_no_contact_link: bool, show_profile_link: bool}
+     */
+    public function navigationState(?User $user = null): array
+    {
+        $user ??= auth()->user();
+
+        return [
+            'show_explore_links' => $this->hasAdvancedFeaturesUnlocked($user),
+            'show_no_contact_link' => $this->hasActivatedNoContact($user),
+            'show_profile_link' => $user !== null && $this->hasCompletedTriage($user),
+        ];
     }
 
     public function currentPhase(?User $user = null): ?RecoveryPhase
@@ -41,11 +89,18 @@ class RecoveryJourneyService
         return is_string($phase) ? RecoveryPhase::tryFrom($phase) : null;
     }
 
-    public function saveTriage(BreakupDuration $duration, PrimaryStruggle $struggle, ?User $user = null): RecoveryPhase
-    {
+    public function saveTriage(
+        RelationshipDuration $relationshipDuration,
+        BreakupDuration $breakupDuration,
+        BreakupInitiator $initiator,
+        PrimaryStruggle $struggle,
+        ?User $user = null,
+    ): RecoveryPhase {
         $phase = $this->phaseForStruggle($struggle);
         $payload = [
-            'breakup_duration' => $duration->value,
+            'relationship_duration' => $relationshipDuration->value,
+            'breakup_duration' => $breakupDuration->value,
+            'breakup_initiator' => $initiator->value,
             'primary_struggle' => $struggle->value,
             'phase' => $phase->value,
             'completed_at' => now()->toIso8601String(),
@@ -57,7 +112,9 @@ class RecoveryJourneyService
 
         if ($user !== null) {
             $user->update([
-                'breakup_duration' => $duration->value,
+                'relationship_duration' => $relationshipDuration->value,
+                'breakup_duration' => $breakupDuration->value,
+                'breakup_initiator' => $initiator->value,
                 'primary_struggle' => $struggle->value,
                 'recovery_phase' => $phase->value,
                 'recovery_triage_completed_at' => now(),
@@ -80,7 +137,9 @@ class RecoveryJourneyService
         $data = session(self::SESSION_KEY);
 
         $user->update([
+            'relationship_duration' => $data['relationship_duration'] ?? null,
             'breakup_duration' => $data['breakup_duration'] ?? null,
+            'breakup_initiator' => $data['breakup_initiator'] ?? null,
             'primary_struggle' => $data['primary_struggle'] ?? null,
             'recovery_phase' => $data['phase'] ?? null,
             'recovery_triage_completed_at' => isset($data['completed_at']) ? now() : null,
@@ -90,21 +149,37 @@ class RecoveryJourneyService
     /**
      * @return array<string, mixed>
      */
-    public function recommendationForStruggle(PrimaryStruggle $struggle): array
+    public function actionPlanForStruggle(PrimaryStruggle $struggle): array
     {
-        /** @var array<string, array<string, mixed>> $map */
-        $map = config('recovery_journey.recommendations', []);
+        /** @var array<string, array<string, string>> $map */
+        $map = config('recovery_journey.action_plans', []);
         $config = $map[$struggle->value] ?? $map[PrimaryStruggle::Stalking->value];
 
-        $routeName = (string) ($config['route'] ?? 'no-contact');
-        $params = $config['route_params'] ?? [];
+        return [
+            'icon' => (string) ($config['icon'] ?? 'hourglass-half'),
+            'status_label' => __((string) ($config['status_key'] ?? 'recovery.plan_status_red')),
+            'diagnosis_title' => __((string) ($config['diagnosis_title_key'] ?? '')),
+            'diagnosis_body' => __((string) ($config['diagnosis_body_key'] ?? '')),
+            'priority_title' => __((string) ($config['priority_title_key'] ?? 'recovery.plan_priority_title')),
+            'priority_why' => __((string) ($config['priority_why_key'] ?? '')),
+            'cta' => __((string) ($config['cta_key'] ?? 'recovery.plan_activate_cta')),
+            'url' => route('no-contact'),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function recommendationForStruggle(PrimaryStruggle $struggle): array
+    {
+        $plan = $this->actionPlanForStruggle($struggle);
 
         return [
-            'icon' => (string) ($config['icon'] ?? 'compass'),
-            'title' => __((string) ($config['title_key'] ?? '')),
-            'body' => __((string) ($config['body_key'] ?? '')),
-            'cta' => __((string) ($config['cta_key'] ?? '')),
-            'url' => route($routeName, $params),
+            'icon' => $plan['icon'],
+            'title' => $plan['priority_title'],
+            'body' => $plan['priority_why'],
+            'cta' => $plan['cta'],
+            'url' => $plan['url'],
         ];
     }
 
@@ -117,17 +192,19 @@ class RecoveryJourneyService
 
         $current = $this->currentPhase($user) ?? RecoveryPhase::Diagnose;
         $struggle = $this->primaryStruggle($user);
+        $advancedUnlocked = $this->hasAdvancedFeaturesUnlocked($user);
 
         return [
             'current_phase' => $current,
             'struggle' => $struggle,
             'steps' => $this->buildSteps($current, $user),
-            'show_tests' => $current === RecoveryPhase::Diagnose,
+            'show_tests' => $advancedUnlocked,
             'show_no_contact' => $current === RecoveryPhase::Detox,
-            'show_ai_coach' => $current === RecoveryPhase::Detox,
-            'show_deliver' => $current === RecoveryPhase::Deliver,
+            'show_ai_coach' => $current === RecoveryPhase::Detox && $this->hasActivatedNoContact($user),
+            'show_deliver' => $advancedUnlocked && $current === RecoveryPhase::Deliver,
             'needs_triage' => ! $this->hasCompletedTriage($user),
-            'primary_tool' => $this->primaryToolForPhase($current, $struggle),
+            'advanced_locked' => ! $advancedUnlocked,
+            'primary_tool' => $this->primaryToolForPhase($current, $struggle, $user),
         ];
     }
 
@@ -152,6 +229,31 @@ class RecoveryJourneyService
         $value = is_array($data) ? ($data['primary_struggle'] ?? null) : null;
 
         return is_string($value) ? PrimaryStruggle::tryFrom($value) : null;
+    }
+
+    public function activeNoContactProtocol(?User $user = null): ?NoContactProtocol
+    {
+        $user ??= auth()->user();
+
+        if ($user !== null) {
+            return NoContactProtocol::query()
+                ->where('user_id', $user->id)
+                ->where('status', NoContactStatus::Active)
+                ->latest('updated_at')
+                ->first();
+        }
+
+        $guestToken = request()->cookie('egomap_guest');
+
+        if (! is_string($guestToken) || $guestToken === '') {
+            return null;
+        }
+
+        return NoContactProtocol::query()
+            ->where('guest_token', $guestToken)
+            ->where('status', NoContactStatus::Active)
+            ->latest('updated_at')
+            ->first();
     }
 
     /**
@@ -223,8 +325,17 @@ class RecoveryJourneyService
     /**
      * @return array{title: string, body: string, url: string, icon: string}|null
      */
-    private function primaryToolForPhase(RecoveryPhase $current, ?PrimaryStruggle $struggle): ?array
+    private function primaryToolForPhase(RecoveryPhase $current, ?PrimaryStruggle $struggle, User $user): ?array
     {
+        if ($current === RecoveryPhase::Detox && ! $this->hasActivatedNoContact($user)) {
+            return [
+                'title' => __('recovery.tool_detox_title'),
+                'body' => __('recovery.tool_detox_activate_body'),
+                'url' => route('no-contact'),
+                'icon' => 'hourglass-half',
+            ];
+        }
+
         return match ($current) {
             RecoveryPhase::Diagnose => [
                 'title' => __('recovery.tool_diagnose_title'),

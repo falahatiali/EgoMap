@@ -1,11 +1,6 @@
 const SUPPORTED = ['en', 'fa'];
 
-/**
- * @returns {string}
- */
-function getBootstrapLink() {
-    return document.getElementById('eg-bootstrap');
-}
+let localeDelegationBound = false;
 
 /**
  * @returns {Record<string, Record<string, string>>|null}
@@ -32,38 +27,17 @@ export function switchLocale(locale) {
         return;
     }
 
-    const html = document.documentElement;
-    const current = html.getAttribute('lang')?.startsWith('fa') ? 'fa' : 'en';
+    const link = document.querySelector(`[data-locale-switch="${locale}"]`);
 
-    if (current === locale) {
+    if (link instanceof HTMLAnchorElement && link.href) {
+        window.location.assign(link.href);
+
         return;
     }
 
-    html.classList.add('eg-locale-switching');
+    const path = window.location.pathname.replace(/^\/(en|fa)(?=\/|$)/, `/${locale}`);
 
-    const isRtl = locale === 'fa';
-    html.setAttribute('lang', locale === 'fa' ? 'fa' : 'en');
-    html.setAttribute('dir', isRtl ? 'rtl' : 'ltr');
-
-    const bootstrap = getBootstrapLink();
-
-    if (bootstrap) {
-        const href = isRtl ? bootstrap.dataset.rtl : bootstrap.dataset.ltr;
-
-        if (href && bootstrap.getAttribute('href') !== href) {
-            bootstrap.setAttribute('href', href);
-        }
-    }
-
-    applyTranslations(locale);
-    updateLangButtons(locale);
-    updateDirectionalIcons(isRtl);
-    updateDocumentMeta(locale);
-    persistLocale(locale);
-
-    requestAnimationFrame(() => {
-        html.classList.remove('eg-locale-switching');
-    });
+    window.location.assign(path === window.location.pathname ? `/${locale}` : path);
 }
 
 /**
@@ -107,12 +81,15 @@ function applyTranslations(locale) {
  * @param {string} locale
  */
 function updateLangButtons(locale) {
-    document.querySelectorAll('[data-locale-switch]').forEach((btn) => {
-        const target = btn.getAttribute('data-locale-switch');
+    document.querySelectorAll('[data-locale-switch]').forEach((link) => {
+        const target = link.getAttribute('data-locale-switch');
         const isActive = target === locale;
 
-        btn.classList.toggle('active', isActive);
-        btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        link.classList.toggle('active', isActive);
+
+        if (link instanceof HTMLAnchorElement) {
+            link.setAttribute('aria-current', isActive ? 'page' : 'false');
+        }
     });
 }
 
@@ -150,37 +127,41 @@ function updateDocumentMeta(locale) {
     }
 }
 
-/**
- * @param {string} locale
- */
-function persistLocale(locale) {
-    const url = document.querySelector('meta[name="locale-url"]')?.getAttribute('content');
-
-    if (! url) {
+export function initLocale() {
+    if (localeDelegationBound) {
         return;
     }
 
-    const endpoint = url.replace('__LOCALE__', locale);
+    localeDelegationBound = true;
 
-    fetch(endpoint, {
-        method: 'GET',
-        headers: {
-            Accept: 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-        },
-        credentials: 'same-origin',
-    }).catch(() => {});
+    document.addEventListener('click', (event) => {
+        const link = event.target instanceof Element
+            ? event.target.closest('[data-locale-switch]')
+            : null;
+
+        if (! link || ! (link instanceof HTMLAnchorElement)) {
+            return;
+        }
+
+        const locale = link.getAttribute('data-locale-switch');
+        const current = document.documentElement.getAttribute('lang')?.startsWith('fa') ? 'fa' : 'en';
+
+        if (! locale || locale === current) {
+            return;
+        }
+
+        event.preventDefault();
+        switchLocale(locale);
+    });
 }
 
-export function initLocale() {
-    document.querySelectorAll('[data-locale-switch]').forEach((btn) => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            const locale = btn.getAttribute('data-locale-switch');
+/**
+ * After Livewire navigation, sync icons only (copy comes from the server).
+ */
+export function syncLocaleFromDocument() {
+    const locale = document.documentElement.getAttribute('lang')?.startsWith('fa') ? 'fa' : 'en';
+    const isRtl = locale === 'fa';
 
-            if (locale) {
-                switchLocale(locale);
-            }
-        });
-    });
+    updateLangButtons(locale);
+    updateDirectionalIcons(isRtl);
 }

@@ -33,8 +33,8 @@ class AppServiceProvider extends ServiceProvider
             fallbackAny: false,
         );
 
-        View::composer('layouts.app', function ($view): void {
-            $view->with('i18nBundle', TranslationBundle::forGroups(['common', 'nav', 'home', 'no_contact', 'recovery', 'profile']));
+        View::composer(['layouts.app', 'layouts.guided', 'layouts.protocol'], function ($view): void {
+            $view->with('i18nBundle', TranslationBundle::forGroups(['common', 'nav', 'home', 'landing', 'no_contact', 'recovery', 'profile']));
         });
 
         Event::listen(Login::class, ClaimGuestQuizSessions::class);

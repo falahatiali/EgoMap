@@ -1,6 +1,22 @@
 <?php
 
 return [
+    'protocol_title' => 'Recovery protocol',
+    'protocol_kicker' => 'The protocol',
+    'terminal_aria' => 'Recovery diagnostic terminal',
+    'terminal_label' => 'Diagnostic terminal',
+    'insight_1' => 'When clarity disappears, structure becomes medicine.',
+    'insight_2' => 'The urge to reach out is often attachment—not love returning.',
+    'insight_3' => 'First mission: stabilize. Then rebuild with discipline.',
+    'terminal_line_1' => 'When clarity disappears, structure becomes medicine.',
+    'terminal_line_2' => 'The urge to reach out is often attachment chemistry—not love returning.',
+    'terminal_line_3' => 'Your first mission is simple: stabilize. Then rebuild with discipline.',
+    'terminal_subhead' => 'She played you with breadcrumbs. Now you are glitching yourself. Diagnostics complete. Time to reboot.',
+    'terminal_cta' => '[ EXECUTE REBOOT PROTOCOL ]',
+    'typewriter_1' => 'Feel like you got played?',
+    'typewriter_2' => 'Feel like you are not worth staying for?',
+    'typewriter_3' => "Let's debug this relationship's data.",
+    'cta_protocol' => 'Start recovery protocol',
     'hero_badge' => 'Your recovery home',
     'hero_title' => 'She left? Stop chasing a ghost. Build your empire.',
     'hero_subtitle' => 'A calm, data-driven recovery OS for men who were hurt in toxic relationships. We do not sell fake sympathy — we give you diagnostics, steel boundaries, and a path back to power. You can breathe here.',

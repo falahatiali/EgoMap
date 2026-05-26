@@ -118,6 +118,14 @@
                     <p class="eg-text-muted small mb-0">{{ __('recovery.ai_coach_soon_body') }}</p>
                 </div>
             @endif
+
+            @if (($journey['advanced_locked'] ?? false) && ! ($journey['show_tests'] ?? false))
+                <div class="eg-glass p-4 text-center opacity-75">
+                    <i class="fa-solid fa-lock mb-2 eg-text-muted"></i>
+                    <h3 class="h6 fw-semibold mb-1">{{ __('recovery.advanced_locked_title') }}</h3>
+                    <p class="eg-text-muted small mb-0">{{ __('recovery.advanced_locked_body') }}</p>
+                </div>
+            @endif
         @endif
     </section>
 

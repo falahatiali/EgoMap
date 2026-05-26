@@ -26,4 +26,23 @@ return [
 
     'rtl' => ['fa'],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Display labels (native names for language switcher)
+    |--------------------------------------------------------------------------
+    |
+    | Add an entry when you add a locale to "supported".
+    |
+    */
+
+    'labels' => [
+        'en' => 'English',
+        'fa' => 'فارسی',
+    ],
+
+    'short_labels' => [
+        'en' => 'EN',
+        'fa' => 'FA',
+    ],
+
 ];

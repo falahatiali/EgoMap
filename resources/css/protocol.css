@@ -1,0 +1,174 @@
+/* Recovery OS — premium shell */
+
+.eg-body--recovery {
+    --rh-font-display: "Manrope", system-ui, sans-serif;
+    --rh-font-body: "Inter", system-ui, sans-serif;
+    --rh-font-mono: "JetBrains Mono", ui-monospace, monospace;
+    --eg-font-display: var(--rh-font-display);
+    --eg-font-body: var(--rh-font-body);
+    --eg-font-sans: var(--rh-font-body);
+    --eg-accent: #34d399;
+    --eg-accent-bright: #6ee7b7;
+    --eg-accent-soft: rgba(52, 211, 153, 0.14);
+    --eg-text: #f8fafc;
+    --eg-text-muted: #94a3b8;
+    --eg-surface: rgba(17, 24, 39, 0.72);
+    --eg-border: rgba(148, 163, 184, 0.12);
+    --eg-line-height: 1.65;
+    font-family: var(--rh-font-body);
+    font-size: 1rem;
+    color: #cbd5e1;
+    background: #0b1020;
+    -webkit-font-smoothing: antialiased;
+}
+
+[dir="rtl"].eg-body--recovery,
+html[dir="rtl"] .eg-body--recovery {
+    --rh-font-display: "Vazirmatn", system-ui, sans-serif;
+    --rh-font-body: "Vazirmatn", system-ui, sans-serif;
+    --eg-line-height: 1.88;
+}
+
+.eg-body--recovery::after {
+    display: none;
+}
+
+.eg-recovery-main {
+    min-height: 100vh;
+    background:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(52, 211, 153, 0.08), transparent 50%),
+        radial-gradient(ellipse 60% 40% at 100% 0%, rgba(96, 165, 250, 0.06), transparent 45%),
+        #0b1020;
+}
+
+.rh-shell {
+    width: 100%;
+}
+
+.eg-protocol:has(.rh-page) {
+    display: block;
+    min-height: auto;
+    padding: 0;
+}
+
+.rh-notice {
+    position: fixed;
+    top: 4.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: 28rem;
+    width: calc(100% - 2rem);
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    color: #6ee7b7;
+    background: rgba(17, 24, 39, 0.9);
+    border: 1px solid rgba(52, 211, 153, 0.35);
+    border-radius: 1rem;
+    backdrop-filter: blur(12px);
+}
+
+/* Triage */
+.rh-triage-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 32rem;
+    margin: 1.5rem auto 0;
+    padding: 0 1.25rem;
+}
+
+.rh-triage {
+    max-width: 32rem;
+    margin: 0 auto 3rem;
+    padding: 0 1.25rem 2rem;
+}
+
+.rh-link-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-decoration: none;
+}
+
+.rh-link-back:hover {
+    color: #34d399;
+}
+
+.rh-fade-in {
+    animation: rh-fade-in 0.4s ease both;
+}
+
+@keyframes rh-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.rh-triage .eg-triage-question {
+    font-family: var(--rh-font-display);
+    font-size: clamp(1.4rem, 4vw, 1.85rem);
+    font-weight: 800;
+    color: #f8fafc;
+    text-align: center;
+    line-height: 1.3;
+}
+
+.rh-triage .eg-triage-hint,
+.rh-triage .eg-triage-step-label {
+    color: #94a3b8;
+}
+
+.rh-triage .eg-triage-option {
+    background: rgba(17, 24, 39, 0.8);
+    border: 1px solid rgba(148, 163, 184, 0.14);
+    border-radius: 1rem;
+    color: #f1f5f9;
+    font-weight: 600;
+    backdrop-filter: blur(8px);
+}
+
+.rh-triage .eg-triage-option:hover,
+.rh-triage .eg-triage-option:focus-visible {
+    border-color: rgba(52, 211, 153, 0.45);
+    background: rgba(52, 211, 153, 0.1);
+}
+
+.rh-triage .eg-btn-protocol,
+.rh-triage .eg-triage-btn-primary {
+    padding: 0.95rem 1.65rem;
+    font-weight: 700;
+    color: #042f2e;
+    background: linear-gradient(135deg, #6ee7b7 0%, #34d399 55%, #10b981 100%);
+    border: none;
+    border-radius: 1rem;
+    cursor: pointer;
+    box-shadow: 0 12px 32px rgba(52, 211, 153, 0.35);
+}
+
+.rh-triage .eg-lang-switch {
+    background: rgba(17, 24, 39, 0.8);
+    border-color: rgba(148, 163, 184, 0.14);
+}
+
+.rh-triage .eg-lang-switch a.active {
+    background: rgba(52, 211, 153, 0.18);
+    color: #6ee7b7;
+}
+
+.eg-terminal__scanlines,
+.eg-terminal__caret {
+    display: none;
+}

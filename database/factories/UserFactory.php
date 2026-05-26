@@ -3,8 +3,11 @@
 namespace Database\Factories;
 
 use App\Enums\BreakupDuration;
+use App\Enums\BreakupInitiator;
 use App\Enums\PrimaryStruggle;
 use App\Enums\RecoveryPhase;
+use App\Enums\RelationshipDuration;
+use App\Models\NoContactProtocol;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -49,9 +52,11 @@ class UserFactory extends Factory
     public function recoveryDiagnose(): static
     {
         return $this->state(fn (array $attributes) => [
+            'relationship_duration' => RelationshipDuration::OneToThreeYears->value,
             'breakup_duration' => BreakupDuration::Months->value,
+            'breakup_initiator' => BreakupInitiator::Them->value,
             'primary_struggle' => PrimaryStruggle::Worthless->value,
-            'recovery_phase' => RecoveryPhase::Diagnose->value,
+            'recovery_phase' => RecoveryPhase::Detox->value,
             'recovery_triage_completed_at' => now(),
         ]);
     }
@@ -59,10 +64,25 @@ class UserFactory extends Factory
     public function recoveryDetox(): static
     {
         return $this->state(fn (array $attributes) => [
+            'relationship_duration' => RelationshipDuration::OneToThreeYears->value,
             'breakup_duration' => BreakupDuration::Weeks->value,
+            'breakup_initiator' => BreakupInitiator::Them->value,
             'primary_struggle' => PrimaryStruggle::Stalking->value,
             'recovery_phase' => RecoveryPhase::Detox->value,
             'recovery_triage_completed_at' => now(),
         ]);
+    }
+
+    public function recoveryWithAdvancedUnlocked(): static
+    {
+        return $this->recoveryDiagnose()->afterCreating(function (User $user): void {
+            $startedAt = now()->subHours(25);
+
+            NoContactProtocol::factory()->create([
+                'user_id' => $user->id,
+                'streak_started_at' => $startedAt,
+                'target_ends_at' => $startedAt->copy()->addDays(90),
+            ]);
+        });
     }
 }

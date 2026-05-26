@@ -18,33 +18,50 @@ class RecoveryTriageTest extends TestCase
 
     public function test_triage_page_renders_first_question(): void
     {
-        $this->get(route('onboarding'))
+        $this->get(route('onboarding', ['locale' => 'en']))
             ->assertOk()
-            ->assertSee('How long since the breakup?', false);
+            ->assertSee('How long were you together?', false);
     }
 
-    public function test_stalking_recommends_no_contact_timer(): void
+    public function test_guest_nav_is_minimal_on_home(): void
+    {
+        $response = $this->get(route('home', ['locale' => 'en']));
+
+        $response->assertOk();
+
+        preg_match('/<header class="rh-nav.*?<\/header>/s', $response->getContent(), $matches);
+        $navHtml = $matches[0] ?? '';
+
+        $this->assertStringNotContainsString(route('no-contact'), $navHtml);
+    }
+
+    public function test_triage_draft_survives_session_after_mid_flow(): void
     {
         Livewire::test(Triage::class)
-            ->call('selectDuration', 'weeks')
+            ->call('selectRelationshipDuration', 'one_to_three_years')
+            ->call('selectBreakupDuration', 'weeks')
+            ->assertSet('step', 3);
+
+        Livewire::test(Triage::class)
+            ->assertSet('step', 3)
+            ->assertSet('relationshipDuration', 'one_to_three_years')
+            ->assertSet('breakupDuration', 'weeks');
+    }
+
+    public function test_stalking_flow_shows_action_plan_with_activate_cta(): void
+    {
+        Livewire::test(Triage::class)
+            ->call('selectRelationshipDuration', 'one_to_three_years')
+            ->call('selectBreakupDuration', 'weeks')
+            ->call('selectInitiator', 'them')
             ->call('selectStruggle', PrimaryStruggle::Stalking->value)
-            ->assertSee('Start the no-contact protocol', false)
+            ->assertSet('step', 5)
+            ->call('finishDiagnosis')
+            ->assertSee('Your priority', false)
+            ->assertSee('Activate no-contact timer', false)
             ->assertSee(route('no-contact'), false);
 
-        $phase = app(RecoveryJourneyService::class)->currentPhase();
-
-        $this->assertSame(RecoveryPhase::Detox, $phase);
-    }
-
-    public function test_worthless_recommends_quiz_debug(): void
-    {
-        Livewire::test(Triage::class)
-            ->call('selectDuration', 'months')
-            ->call('selectStruggle', PrimaryStruggle::Worthless->value)
-            ->assertSee('Run relationship debug', false)
-            ->assertSee(route('quiz.start', 'mbti-personality'), false);
-
-        $this->assertSame(RecoveryPhase::Diagnose, app(RecoveryJourneyService::class)->currentPhase());
+        $this->assertSame(RecoveryPhase::Detox, app(RecoveryJourneyService::class)->currentPhase());
     }
 
     public function test_authenticated_triage_persists_on_user(): void
@@ -53,7 +70,9 @@ class RecoveryTriageTest extends TestCase
 
         Livewire::actingAs($user)
             ->test(Triage::class)
-            ->call('selectDuration', 'days')
+            ->call('selectRelationshipDuration', 'six_to_twelve')
+            ->call('selectBreakupDuration', 'days')
+            ->call('selectInitiator', 'them')
             ->call('selectStruggle', PrimaryStruggle::GetBack->value);
 
         $user->refresh();
@@ -61,6 +80,8 @@ class RecoveryTriageTest extends TestCase
         $this->assertNotNull($user->recovery_triage_completed_at);
         $this->assertSame(RecoveryPhase::Detox->value, $user->recovery_phase);
         $this->assertSame(PrimaryStruggle::GetBack->value, $user->primary_struggle);
+        $this->assertSame('six_to_twelve', $user->relationship_duration);
+        $this->assertSame('them', $user->breakup_initiator);
     }
 
     public function test_profile_hides_tests_when_user_is_in_detox_phase(): void
@@ -71,5 +92,14 @@ class RecoveryTriageTest extends TestCase
             ->test(Show::class)
             ->assertSee('No-contact command center', false)
             ->assertDontSee('eg-profile-tests-section', false);
+    }
+
+    public function test_no_contact_link_appears_after_activation(): void
+    {
+        $this->get(route('no-contact', ['locale' => 'en']))->assertOk();
+
+        $this->get(route('home', ['locale' => 'en']))
+            ->assertOk()
+            ->assertSee(__('nav.no_contact'), false);
     }
 }

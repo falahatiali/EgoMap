@@ -97,7 +97,8 @@ body.eg-body {
     gap: 0.15rem;
 }
 
-.eg-lang-switch button {
+.eg-lang-switch button,
+.eg-lang-switch a {
     padding: 0.35rem 0.85rem;
     border-radius: var(--eg-radius-pill);
     font-size: 0.8rem;
@@ -106,15 +107,22 @@ body.eg-body {
     background: transparent;
     border: none;
     cursor: pointer;
+    text-decoration: none;
 }
 
-.eg-lang-switch button:hover {
+.eg-lang-switch button:hover,
+.eg-lang-switch a:hover {
     color: var(--eg-text);
 }
 
-.eg-lang-switch button.active {
+.eg-lang-switch button.active,
+.eg-lang-switch a.active {
     background: var(--eg-accent-soft);
     color: var(--eg-accent-bright);
+}
+
+.eg-lang-switch:not(.eg-lang-switch--nav) .eg-lang-switch__short {
+    display: none;
 }
 
 .eg-btn-primary {

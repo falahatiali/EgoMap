@@ -22,6 +22,8 @@ use Spatie\Permission\Traits\HasRoles;
     'password',
     'recovery_phase',
     'breakup_duration',
+    'relationship_duration',
+    'breakup_initiator',
     'primary_struggle',
     'recovery_triage_completed_at',
 ])]
