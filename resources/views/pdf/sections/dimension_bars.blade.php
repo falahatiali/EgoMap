@@ -16,7 +16,7 @@
                         <table class="axis-labels" cellpadding="0" cellspacing="0">
                             <tr>
                                 <td @class(['active' => ! ($item['prefers_right'] ?? false)])>{{ $item['left'] ?? '' }}</td>
-                                <td class="percent">{{ $item['percent'] ?? 0 }}%</td>
+                                <td class="percent">{{ eg_num_pct($item['percent'] ?? 0, $locale ?? null) }}</td>
                                 <td @class(['active' => ($item['prefers_right'] ?? false)]) style="text-align: {{ $direction === 'rtl' ? 'left' : 'right' }};">{{ $item['right'] ?? '' }}</td>
                             </tr>
                         </table>

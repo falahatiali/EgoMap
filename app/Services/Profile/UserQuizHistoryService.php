@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\Quiz\QuizSessionClaimService;
 use App\Services\Quiz\QuizSessionService;
 use App\Support\LocaleConfig;
+use App\Support\LocalizedNumbers;
 use App\Support\MbtiTypePalette;
 use App\Support\QuizResultViewData;
 use App\Support\RebootProtocolQuiz;
@@ -154,7 +155,7 @@ class UserQuizHistoryService
                 ? route('quiz.session', ['uuid' => $session->uuid])
                 : route('profile.test.show', ['uuid' => $session->uuid]),
             'completed_at_label' => $session->completed_at
-                ? $session->completed_at->locale($sessionLocale)->translatedFormat('j M Y')
+                ? LocalizedNumbers::formatDate($session->completed_at, 'j M Y', $sessionLocale)
                 : null,
             'started_at_label' => $session->started_at
                 ? $session->started_at->locale($sessionLocale)->diffForHumans()

@@ -9,9 +9,12 @@
 >
     <p class="eg-quiz-selection-hint" aria-live="polite">
         @if ($selectedCount === 0)
-            {{ __('quiz.select_up_to', ['max' => $maxSelections]) }}
+            {{ __('quiz.select_up_to', ['max' => eg_num($maxSelections)]) }}
         @else
-            {{ __('quiz.selection_count', ['current' => $selectedCount, 'max' => $maxSelections]) }}
+            {{ __('quiz.selection_count', [
+                'current' => eg_num($selectedCount),
+                'max' => eg_num($maxSelections),
+            ]) }}
         @endif
     </p>
 
@@ -52,7 +55,7 @@
                     <i class="fa-solid fa-check eg-quiz-option-check"></i>
                 </span>
                 <span class="eg-quiz-option-label">{{ $option->getTranslation('label', $quizLocale) }}</span>
-                <span class="eg-quiz-option-key">{{ $hotkey }}</span>
+                <span class="eg-quiz-option-key">{{ eg_num($hotkey) }}</span>
                 @if ($isChecked)
                     <span class="eg-quiz-option-selected-ring" aria-hidden="true"></span>
                 @endif

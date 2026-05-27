@@ -18,7 +18,7 @@
     <h2 class="eg-result-panel-title">{{ __('quiz.reboot.stability_title') }}</h2>
     <div class="d-flex align-items-center gap-4">
         <div class="eg-reboot-score-ring" style="--score: {{ $score }};">
-            <span class="eg-reboot-score-value">{{ $score }}%</span>
+            <span class="eg-reboot-score-value">{{ eg_num_pct($score) }}</span>
         </div>
         <p class="eg-result-body-text mb-0">
             {{ LocaleConfig::pick($phase, $locale) }}
@@ -55,8 +55,8 @@
         <div class="vstack gap-3">
             @foreach ($steps as $index => $step)
                 <div class="eg-result-chip-card flex-row align-items-start gap-3">
-                    <span class="fw-bold">{{ $index + 1 }}</span>
-                    <span>{{ LocaleConfig::pick($step, $locale) }}</span>
+                    <span>{{ eg_num($index + 1) }}</span>
+                    <span>{{ eg_num(\App\Support\LocaleConfig::pick($step, $locale)) }}</span>
                 </div>
             @endforeach
         </div>

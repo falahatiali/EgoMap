@@ -21,6 +21,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // Ensure global helper functions (eg_num / eg_num_pct) are available in Blade.
+        // We intentionally require it here (runtime) so Blade doesn't fail when composer autoload "files"
+        // hasn't been rebuilt yet.
+        $helpersPath = app_path('helpers.php');
+
+        if (is_file($helpersPath)) {
+            require_once $helpersPath;
+        }
+
         $this->app->singleton('laravel-pdf.driver.dompdf', function () {
             return new RtlAwareDomPdfDriver(config('laravel-pdf.dompdf', []));
         });

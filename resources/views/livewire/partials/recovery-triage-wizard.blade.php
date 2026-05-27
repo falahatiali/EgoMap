@@ -8,7 +8,10 @@
         </div>
 
         <p class="eg-triage-step-label text-center">
-            {{ __('recovery.question_label', ['current' => $questionStep, 'total' => $questionTotal]) }}
+            {{ __('recovery.question_label', [
+                'current' => eg_num($questionStep),
+                'total' => eg_num($questionTotal),
+            ]) }}
         </p>
     @endif
 

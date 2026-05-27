@@ -8,6 +8,7 @@ use App\DataTransferObjects\Pdf\PdfMeta;
 use App\DataTransferObjects\Pdf\PdfTheme;
 use App\Enums\Pdf\PdfSectionType;
 use App\Models\QuizSession;
+use App\Support\LocalizedNumbers;
 use App\Support\LocaleConfig;
 use App\Support\QuizResultViewData;
 use App\Support\RebootProtocolQuiz;
@@ -59,7 +60,7 @@ class QuizResultPdfDefinitionFactory
         $groupLabel = __('pdf.group_'.$groupKey, locale: $locale);
         $questionCount = $session->quiz->questions()->where('is_active', true)->count();
         $completedLabel = $session->completed_at
-            ? $session->completed_at->locale($locale)->translatedFormat('j M Y')
+            ? LocalizedNumbers::formatDate($session->completed_at, 'j M Y', $locale)
             : '—';
 
         $theme = new PdfTheme(
@@ -80,7 +81,7 @@ class QuizResultPdfDefinitionFactory
             actionLabel: __('pdf.view_online', locale: $locale),
             generatedAtLabel: $session->completed_at
                 ? __('pdf.generated_at', [
-                    'date' => $session->completed_at->locale($locale)->translatedFormat('j F Y'),
+                    'date' => LocalizedNumbers::formatDate($session->completed_at, 'j F Y', $locale),
                 ], locale: $locale)
                 : null,
         );
@@ -117,7 +118,7 @@ class QuizResultPdfDefinitionFactory
                     ],
                     [
                         'label' => __('pdf.stat_questions', locale: $locale),
-                        'value' => (string) $questionCount,
+                        'value' => LocalizedNumbers::format($questionCount, $locale),
                         'tone' => 'neutral',
                     ],
                     [
@@ -400,7 +401,7 @@ class QuizResultPdfDefinitionFactory
                 'intro' => '',
                 'tone' => 'neutral',
                 'items' => collect($nextSteps)
-                    ->map(fn (array $step): string => LocaleConfig::pick($step, $locale))
+                    ->map(fn (array $step): string => LocalizedNumbers::format(LocaleConfig::pick($step, $locale), $locale))
                     ->values()
                     ->all(),
             ];

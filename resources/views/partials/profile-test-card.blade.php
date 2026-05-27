@@ -42,9 +42,9 @@
             @elseif ($record['is_in_progress'])
                 <p class="eg-profile-test-result eg-text-muted">
                     {{ __('profile.progress_label', [
-                        'percent' => $record['progress_percent'],
-                        'current' => $record['current_question'],
-                        'total' => $record['total_questions'],
+                        'percent' => eg_num($record['progress_percent']),
+                        'current' => eg_num($record['current_question']),
+                        'total' => eg_num($record['total_questions']),
                     ]) }}
                 </p>
                 <div class="eg-profile-progress">

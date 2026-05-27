@@ -2,19 +2,19 @@
     <div class="row g-3">
         <div class="col-md-4">
             <div class="eg-profile-stat eg-glass">
-                <span class="eg-profile-stat-value">{{ $totalTests }}</span>
+                <span class="eg-profile-stat-value">{{ eg_num($totalTests) }}</span>
                 <span class="eg-profile-stat-label">{{ __('profile.stat_total') }}</span>
             </div>
         </div>
         <div class="col-md-4">
             <div class="eg-profile-stat eg-glass">
-                <span class="eg-profile-stat-value">{{ $totalInProgress }}</span>
+                <span class="eg-profile-stat-value">{{ eg_num($totalInProgress) }}</span>
                 <span class="eg-profile-stat-label">{{ __('profile.stat_in_progress') }}</span>
             </div>
         </div>
         <div class="col-md-4">
             <div class="eg-profile-stat eg-glass">
-                <span class="eg-profile-stat-value">{{ $totalCompleted }}</span>
+                <span class="eg-profile-stat-value">{{ eg_num($totalCompleted) }}</span>
                 <span class="eg-profile-stat-label">{{ __('profile.stat_completed') }}</span>
             </div>
         </div>
@@ -40,7 +40,7 @@
             @class(['eg-profile-filter', 'is-active' => $filter === 'all'])
         >
             {{ __('profile.filter_all') }}
-            <span class="eg-profile-filter-count">{{ $totalTests }}</span>
+            <span class="eg-profile-filter-count">{{ eg_num($totalTests) }}</span>
         </button>
         <button
             type="button"
@@ -48,7 +48,7 @@
             @class(['eg-profile-filter', 'is-active' => $filter === 'in_progress'])
         >
             {{ __('profile.filter_in_progress') }}
-            <span class="eg-profile-filter-count">{{ $totalInProgress }}</span>
+            <span class="eg-profile-filter-count">{{ eg_num($totalInProgress) }}</span>
         </button>
         <button
             type="button"
@@ -56,7 +56,7 @@
             @class(['eg-profile-filter', 'is-active' => $filter === 'completed'])
         >
             {{ __('profile.filter_completed') }}
-            <span class="eg-profile-filter-count">{{ $totalCompleted }}</span>
+            <span class="eg-profile-filter-count">{{ eg_num($totalCompleted) }}</span>
         </button>
     </div>
 

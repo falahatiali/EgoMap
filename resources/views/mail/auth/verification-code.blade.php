@@ -7,7 +7,7 @@
 ## {{ $code }}
 </x-mail::panel>
 
-{{ __('auth.verification_email_expires', ['minutes' => $expiresMinutes]) }}
+{{ __('auth.verification_email_expires', ['minutes' => eg_num($expiresMinutes)]) }}
 
 {{ config('app.name') }}
 </x-mail::message>

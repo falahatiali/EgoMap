@@ -12,7 +12,7 @@ return [
     'status_in_progress' => 'در حال انجام',
     'status_completed' => 'تکمیل شده',
     'started_at' => 'شروع :date',
-    'progress_label' => ':percent٪ پیشرفت · سوال :current از :total',
+    'progress_label' => ':percent پیشرفت · سوال :current از :total',
     'continue_test' => 'ادامه تست',
     'history_title' => 'تاریخچه تست‌ها',
     'history_subtitle' => 'هر بار که تست بدهی ذخیره می‌شود — هر وقت خواستی دوباره انجام بده.',

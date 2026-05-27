@@ -622,6 +622,27 @@
     color: #94a3b8;
 }
 
+.eg-profile-test-detail .eg-reboot-dimension-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--eg-border);
+}
+
+.eg-profile-test-detail .eg-reboot-dimension-label {
+    color: #e2e8f0;
+}
+
+.eg-profile-test-detail .eg-reboot-dimension-pct {
+    color: var(--eg-result-accent);
+}
+
+.eg-profile-test-detail .eg-reboot-dimension-track {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.eg-profile-test-detail .eg-reboot-dimension-desc {
+    color: #94a3b8;
+}
+
 .eg-profile-test-detail .eg-result-chip-card {
     display: flex;
     align-items: flex-start;
