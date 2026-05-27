@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Models\User;
 use App\Services\NoContact\NoContactTimerService;
 use Illuminate\Auth\Events\Login;
 
@@ -13,6 +14,9 @@ class ClaimGuestNoContactProtocols
 
     public function handle(Login $event): void
     {
-        $this->timerService->claimForUser($event->user);
+        /** @var User $user */
+        $user = $event->user;
+
+        $this->timerService->claimForUser($user);
     }
 }

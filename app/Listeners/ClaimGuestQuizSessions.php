@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Models\User;
 use App\Services\Quiz\QuizSessionClaimService;
 use Illuminate\Auth\Events\Login;
 
@@ -13,6 +14,9 @@ class ClaimGuestQuizSessions
 
     public function handle(Login $event): void
     {
-        $this->claimService->claimForUser($event->user);
+        /** @var User $user */
+        $user = $event->user;
+
+        $this->claimService->claimForUser($user);
     }
 }
