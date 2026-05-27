@@ -37,6 +37,11 @@ class TestShow extends Component
             403,
         );
 
+        // Deleted sessions (soft deleted as Abandoned) should not be accessible.
+        if ($this->session->status === SessionStatus::Abandoned) {
+            abort(404);
+        }
+
         if ($this->session->status === SessionStatus::InProgress) {
             $this->redirectRoute('quiz.session', ['uuid' => $this->session->uuid], navigate: true);
 

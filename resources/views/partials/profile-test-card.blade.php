@@ -29,6 +29,17 @@
             ])>
                 {{ $record['is_in_progress'] ? __('profile.status_in_progress') : __('profile.status_completed') }}
             </span>
+
+            <button
+                type="button"
+                class="eg-profile-delete-btn"
+                wire:click.prevent.stop="deleteSession('{{ $record['session']->uuid }}')"
+                onclick="return confirm(@js(__('profile.delete_test_confirm')))"
+                aria-label="{{ __('profile.delete_test') }}"
+                title="{{ __('profile.delete_test') }}"
+            >
+                <i class="fa-solid fa-trash" aria-hidden="true"></i>
+            </button>
         </header>
 
         <div class="eg-profile-test-card-body">

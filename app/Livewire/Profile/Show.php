@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Profile;
 
+use App\Enums\SessionStatus;
 use App\Models\User;
+use App\Models\QuizSession;
 use App\Services\Profile\UserQuizHistoryService;
 use App\Services\Recovery\RecoveryJourneyService;
 use Illuminate\Contracts\View\View;
@@ -31,6 +33,24 @@ class Show extends Component
         }
 
         $this->filter = $filter;
+    }
+
+    public function deleteSession(string $uuid): void
+    {
+        $user = Auth::user();
+        abort_unless($user !== null, 401);
+
+        $session = QuizSession::query()
+            ->where('uuid', $uuid)
+            ->firstOrFail();
+
+        $ownsSession = $session->user_id === $user->id
+            || ($session->email !== null && $user->email !== null && $session->email === $user->email);
+
+        abort_unless($ownsSession, 403);
+
+        // Soft delete behavior: mark the session as abandoned so it disappears from history.
+        $session->update(['status' => SessionStatus::Abandoned]);
     }
 
     public function render(UserQuizHistoryService $historyService, RecoveryJourneyService $journeyService): View

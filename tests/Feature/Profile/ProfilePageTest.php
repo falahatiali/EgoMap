@@ -145,6 +145,23 @@ class ProfilePageTest extends TestCase
         $this->assertSame($user->id, $orphan->fresh()->user_id);
     }
 
+    public function test_profile_soft_deletes_session_from_history(): void
+    {
+        $user = User::factory()->recoveryWithAdvancedUnlocked()->create();
+        $session = $this->completeSessionFor($user);
+
+        Livewire::actingAs($user)
+            ->test(Show::class)
+            ->call('deleteSession', $session->uuid)
+            ->assertViewHas('totalTests', 0)
+            ->assertSee(__('profile.no_tests_title'), false);
+
+        $this->assertSame(
+            SessionStatus::Abandoned,
+            $session->fresh()->status,
+        );
+    }
+
     private function completeSessionFor(User $user): QuizSession
     {
         $quiz = Quiz::query()->where('slug', 'mbti-personality')->firstOrFail();

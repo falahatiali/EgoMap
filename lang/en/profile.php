@@ -34,4 +34,6 @@ return [
     'no_tests_body' => 'Take your first personality test and it will show up here automatically.',
     'back_to_profile' => 'Back to profile',
     'open_full_result' => 'Open full report page',
+    'delete_test' => 'Delete test',
+    'delete_test_confirm' => 'Are you sure you want to delete this test session?',
 ];

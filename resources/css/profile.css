@@ -445,6 +445,31 @@
     flex-shrink: 0;
 }
 
+.eg-profile-delete-btn {
+    width: 2.05rem;
+    height: 2.05rem;
+    border-radius: 0.65rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fecaca;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform var(--eg-duration) var(--eg-ease), background var(--eg-duration) var(--eg-ease), border-color var(--eg-duration) var(--eg-ease);
+}
+
+.eg-profile-delete-btn:hover {
+    background: rgba(239, 68, 68, 0.14);
+    border-color: rgba(239, 68, 68, 0.32);
+    transform: translateY(-1px);
+}
+
+.eg-profile-delete-btn:active {
+    transform: translateY(0);
+}
+
 /* Test detail page */
 .eg-profile-back-link {
     display: inline-flex;
