@@ -6,6 +6,7 @@ use App\DataTransferObjects\Pdf\PdfDocumentDefinition;
 use App\DataTransferObjects\Pdf\PdfTheme;
 use App\Support\LocaleConfig;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
 use Spatie\LaravelPdf\Facades\Pdf;
 
@@ -27,11 +28,19 @@ class PdfGeneratorService
 
             $path = $directory.'/'.Str::uuid()->toString().'.pdf';
 
+            $direction = LocaleConfig::isRtl($document->locale) ? 'rtl' : 'ltr';
+
+            $html = View::make('pdf.document', [
+                'document' => $document,
+                'direction' => $direction,
+            ])->render();
+
+            if ($direction === 'rtl') {
+                $html = app(RtlPdfHtmlProcessor::class)->process($html, $document->locale);
+            }
+
             Pdf::driver(config('laravel-pdf.driver', 'dompdf'))
-                ->view('pdf.document', [
-                    'document' => $document,
-                    'direction' => LocaleConfig::isRtl($document->locale) ? 'rtl' : 'ltr',
-                ])
+                ->html($html)
                 ->format('a4')
                 ->margins(10, 12, 14, 12)
                 ->meta(

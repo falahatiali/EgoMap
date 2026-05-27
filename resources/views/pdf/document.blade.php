@@ -12,7 +12,9 @@
         body {
             margin: 0;
             padding: 0;
-            font-family: DejaVu Sans, sans-serif;
+            font-family: {{ $direction === 'rtl' ? 'vazirmatn' : 'DejaVu Sans' }}, sans-serif;
+            direction: {{ $direction }};
+            unicode-bidi: embed;
             color: {{ $document->theme->text }};
             background: {{ $document->theme->background }};
             font-size: 10.5pt;

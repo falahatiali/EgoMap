@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Listeners\ClaimGuestNoContactProtocols;
 use App\Listeners\ClaimGuestQuizSessions;
 use App\Listeners\SyncRecoveryJourneyOnLogin;
+use App\Services\Pdf\Drivers\RtlAwareDomPdfDriver;
 use App\Support\LocaleConfig;
 use App\Support\TranslationBundle;
 use Illuminate\Auth\Events\Login;
@@ -20,7 +21,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton('laravel-pdf.driver.dompdf', function () {
+            return new RtlAwareDomPdfDriver(config('laravel-pdf.dompdf', []));
+        });
     }
 
     /**

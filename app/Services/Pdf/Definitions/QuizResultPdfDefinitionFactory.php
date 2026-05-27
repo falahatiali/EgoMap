@@ -10,6 +10,7 @@ use App\Enums\Pdf\PdfSectionType;
 use App\Models\QuizSession;
 use App\Support\LocaleConfig;
 use App\Support\QuizResultViewData;
+use App\Support\RebootProtocolQuiz;
 use Illuminate\Support\Str;
 
 class QuizResultPdfDefinitionFactory
@@ -43,6 +44,8 @@ class QuizResultPdfDefinitionFactory
         $report = $resultData['report'];
         $content = $resultData['content'];
         $palette = $resultData['palette'];
+
+        $isRebootProtocol = $session->quiz->slug === RebootProtocolQuiz::SLUG;
 
         $typeCode = (string) ($report['type_code'] ?? '');
         $title = (string) ($report['title'] ?? $typeCode);
@@ -83,7 +86,9 @@ class QuizResultPdfDefinitionFactory
             [
                 'type' => PdfSectionType::Hero->value,
                 'eyebrow' => $quizName,
-                'ribbon' => __('pdf.report_badge', locale: $locale),
+                'ribbon' => $isRebootProtocol
+                    ? __('pdf.report_badge_reboot', locale: $locale)
+                    : __('pdf.report_badge', locale: $locale),
                 'badge' => strtoupper($typeCode),
                 'title' => $title,
                 'subtitle' => $tagline,
@@ -94,12 +99,16 @@ class QuizResultPdfDefinitionFactory
                 'type' => PdfSectionType::StatRow->value,
                 'items' => [
                     [
-                        'label' => __('pdf.stat_type', locale: $locale),
+                        'label' => $isRebootProtocol
+                            ? __('pdf.stat_type_reboot', locale: $locale)
+                            : __('pdf.stat_type', locale: $locale),
                         'value' => strtoupper($typeCode),
                         'tone' => 'primary',
                     ],
                     [
-                        'label' => __('pdf.stat_group', locale: $locale),
+                        'label' => $isRebootProtocol
+                            ? __('pdf.stat_group_reboot', locale: $locale)
+                            : __('pdf.stat_group', locale: $locale),
                         'value' => $groupLabel,
                         'tone' => 'group',
                     ],
@@ -117,12 +126,16 @@ class QuizResultPdfDefinitionFactory
             ],
             [
                 'type' => PdfSectionType::Overview->value,
-                'title' => __('pdf.overview_title', locale: $locale),
+                'title' => $isRebootProtocol
+                    ? __('pdf.overview_title_reboot', locale: $locale)
+                    : __('pdf.overview_title', locale: $locale),
                 'body' => trim((string) ($content['narrative'] ?? '')) !== ''
                     ? (string) $content['narrative']
                     : (trim($summary) !== '' && $summary !== $tagline
                         ? $summary
-                        : __('pdf.overview_intro', locale: $locale)),
+                        : ($isRebootProtocol
+                            ? __('pdf.overview_intro_reboot', locale: $locale)
+                            : __('pdf.overview_intro', locale: $locale))),
             ],
         ];
 

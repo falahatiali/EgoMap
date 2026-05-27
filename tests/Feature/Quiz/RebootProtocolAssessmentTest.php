@@ -6,6 +6,7 @@ use App\Enums\QuestionType;
 use App\Livewire\Quiz\Take;
 use App\Models\Quiz;
 use App\Services\Pdf\Definitions\QuizResultPdfDefinitionFactory;
+use App\Services\Pdf\PdfGeneratorService;
 use App\Services\Quiz\QuizSessionService;
 use App\Services\Quiz\RebootProtocol\RebootProtocolFlow;
 use App\Services\Quiz\RebootProtocol\RebootProtocolReportBuilder;
@@ -129,6 +130,50 @@ class RebootProtocolAssessmentTest extends TestCase
         $this->assertNotContains('type_letters', $types);
         $this->assertNotContains('dimension_bars', $types);
         $this->assertNotEmpty($document->sections);
+
+        $groupSection = collect($document->sections)
+            ->firstWhere('type', 'stat_row');
+
+        $this->assertNotNull($groupSection);
+        $groupValue = collect($groupSection['items'] ?? [])
+            ->firstWhere('tone', 'group')['value'] ?? '';
+
+        $this->assertSame(__('pdf.group_reboot', locale: 'fa'), $groupValue);
+        $this->assertStringNotContainsString('pdf.group_', $groupValue);
+    }
+
+    public function test_reboot_farsi_pdf_generates_successfully(): void
+    {
+        $quiz = Quiz::query()
+            ->where('slug', RebootProtocolQuiz::SLUG)
+            ->with(['questions.options'])
+            ->firstOrFail();
+        $service = app(QuizSessionService::class);
+        $session = $service->start($quiz);
+
+        foreach ($quiz->questions as $question) {
+            $firstOption = (string) $question->options()->orderBy('sort_order')->value('value');
+
+            if ($question->type === QuestionType::MultipleChoice) {
+                $service->saveAnswer($session, $question, ['value' => [$firstOption]]);
+            } else {
+                $service->saveAnswer($session, $question, $firstOption);
+            }
+
+            $session->refresh();
+        }
+
+        $service->complete($session->fresh(['responses.question']));
+        $session->refresh()->load(['result.outcomeProfile', 'quiz']);
+
+        $document = QuizResultPdfDefinitionFactory::fromSession($session, 'fa');
+        $path = app(PdfGeneratorService::class)->generate($document);
+
+        $this->assertFileExists($path);
+        $this->assertGreaterThan(1000, filesize($path) ?: 0);
+        $this->assertSame('%PDF', substr((string) file_get_contents($path), 0, 4));
+
+        app(PdfGeneratorService::class)->delete($path);
     }
 
     public function test_emotional_collapse_triggers_safety_prompt(): void

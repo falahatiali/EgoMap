@@ -83,7 +83,14 @@ return [
          * The base path for local file access.
          * Defaults to DOMPDF's built-in chroot setting when null.
          */
-        'chroot' => env('LARAVEL_PDF_DOMPDF_CHROOT'),
+        'chroot' => env('LARAVEL_PDF_DOMPDF_CHROOT', base_path()),
+
+        /*
+         * Custom font directory (Vazirmatn for Persian/Arabic PDF text).
+         */
+        'font_dir' => storage_path('app/pdf/fonts'),
+
+        'font_cache' => storage_path('app/pdf/fonts'),
     ],
 
     /*
