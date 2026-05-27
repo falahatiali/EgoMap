@@ -57,13 +57,15 @@ class HomePageTest extends TestCase
         $this->assertStringContainsString(route('onboarding', ['locale' => 'en']), $navHtml);
     }
 
-    public function test_start_step1_reveals_triage(): void
+    public function test_start_step1_redirects_to_reboot_protocol_quiz(): void
     {
         Livewire::test(Protocol::class)
             ->assertSet('screen', 'landing')
             ->call('startCheckIn')
-            ->assertSet('screen', 'triage')
-            ->assertSee('How long were you together?', false);
+            ->assertRedirect(route('quiz.start', [
+                'slug' => 'reboot-protocol',
+                'locale' => 'en',
+            ]));
     }
 
     public function test_onboarding_route_opens_triage_directly(): void

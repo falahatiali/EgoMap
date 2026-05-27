@@ -50,11 +50,15 @@ export function playTick() {
 }
 
 function pulseOption(button) {
+    if (button.classList.contains('is-active')) {
+        return;
+    }
+
     button.classList.add('is-selected');
 
     window.setTimeout(() => {
         button.classList.remove('is-selected');
-    }, 220);
+    }, 180);
 }
 
 function bindOption(button) {

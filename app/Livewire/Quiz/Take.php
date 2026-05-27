@@ -7,10 +7,12 @@ use App\Enums\SessionStatus;
 use App\Models\Question;
 use App\Models\QuestionOption;
 use App\Models\Quiz;
-use App\Models\QuizSession;
 use App\Models\QuizResponse;
+use App\Models\QuizSession;
 use App\Services\Quiz\QuizSessionClaimService;
 use App\Services\Quiz\QuizSessionService;
+use App\Services\Quiz\RebootProtocol\RebootProtocolFlow;
+use App\Support\LocaleConfig;
 use App\Support\QuizResultViewData;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
@@ -36,9 +38,12 @@ class Take extends Component
     /** @var list<string> */
     public array $multiSelection = [];
 
+    public ?string $singleSelection = null;
+
     public function mount(?string $slug = null, ?string $uuid = null): void
     {
         $quizSessionService = app(QuizSessionService::class);
+        $slug = $slug ?? request()->route('slug');
 
         if ($uuid !== null) {
             $this->uuid = $uuid;
@@ -55,7 +60,7 @@ class Take extends Component
             $this->session = $session;
             $this->slug = $session->quiz->slug;
             $this->soundEnabled = (bool) ($session->quiz->settings['sound_enabled'] ?? true);
-            $this->syncMultiSelection();
+            $this->syncSelections();
 
             $claimService = app(QuizSessionClaimService::class);
             $claimService->rememberGuestSession($session);
@@ -74,8 +79,16 @@ class Take extends Component
             return;
         }
 
-        if ($slug !== null) {
+        if (is_string($slug) && $slug !== '') {
             $this->slug = $slug;
+
+            if ($quizSessionService->findActiveQuizBySlugOrNull($slug) === null) {
+                session()->flash('quiz_notice', __('quiz.quiz_unavailable'));
+
+                $this->redirectRoute('home', navigate: true);
+
+                return;
+            }
 
             if (Auth::check()) {
                 $this->applyAuthenticatedEntry($quizSessionService);
@@ -189,7 +202,7 @@ class Take extends Component
         $this->redirectRoute('quiz.session', ['uuid' => $session->uuid], navigate: true);
     }
 
-    public function selectAnswer(string $value, QuizSessionService $quizSessionService): void
+    public function selectAnswer(string $value, QuizSessionService $quizSessionService, RebootProtocolFlow $flow): void
     {
         if ($this->session === null) {
             return;
@@ -197,13 +210,116 @@ class Take extends Component
 
         $question = $this->currentQuestion;
 
-        if ($question === null) {
+        if ($question === null || $question->type === QuestionType::MultipleChoice) {
             return;
         }
 
         $quizSessionService->saveAnswer($this->session, $question, $value);
-        $this->session->refresh()->load(['quiz.questions' => fn ($q) => $q->with('options')]);
-        $this->syncMultiSelection();
+        $this->reloadSession();
+
+        if ($flow->isRebootQuiz($this->slug) && $flow->shouldPromptSafety($this->session, $question)) {
+            $flow->markSafetyPending($this->session);
+            $this->reloadSession();
+
+            return;
+        }
+
+        $this->advanceOrComplete($quizSessionService);
+    }
+
+    public function pickSingleChoice(string $value): void
+    {
+        if ($this->session === null || $this->isMultipleChoice) {
+            return;
+        }
+
+        $this->singleSelection = $value;
+    }
+
+    public function submitSingleChoice(QuizSessionService $quizSessionService, RebootProtocolFlow $flow): void
+    {
+        if ($this->session === null || $this->singleSelection === null || $this->singleSelection === '') {
+            return;
+        }
+
+        $question = $this->currentQuestion;
+
+        if ($question === null || $question->type !== QuestionType::SingleChoice) {
+            return;
+        }
+
+        $quizSessionService->saveAnswer($this->session, $question, $this->singleSelection);
+        $this->reloadSession();
+
+        if ($flow->isRebootQuiz($this->slug) && $flow->shouldPromptSafety($this->session, $question)) {
+            $flow->markSafetyPending($this->session);
+            $this->reloadSession();
+
+            return;
+        }
+
+        $this->advanceOrComplete($quizSessionService);
+    }
+
+    public function submitSafetyAnswer(string $value, RebootProtocolFlow $flow, QuizSessionService $quizSessionService): void
+    {
+        if ($this->session === null || ! $this->isRebootProtocol) {
+            return;
+        }
+
+        $numeric = (int) $value;
+
+        if ($numeric < 1 || $numeric > 4) {
+            return;
+        }
+
+        $result = $flow->recordSafetyAnswer($this->session, $numeric);
+        $flow->clearSafetyPrompt($this->session);
+        $this->session->refresh();
+
+        if ($result['crisis']) {
+            return;
+        }
+
+        $this->advanceOrComplete($quizSessionService);
+    }
+
+    public function cancelSafetyCheck(RebootProtocolFlow $flow): void
+    {
+        if ($this->session === null) {
+            return;
+        }
+
+        $flow->clearSafetyPrompt($this->session);
+
+        if ($this->session->current_sort_order > 1) {
+            $this->session->update([
+                'current_sort_order' => $this->session->current_sort_order - 1,
+            ]);
+        }
+
+        $this->reloadSession();
+    }
+
+    public function resetAfterCrisis(QuizSessionService $quizSessionService): void
+    {
+        if ($this->slug === null) {
+            return;
+        }
+
+        $this->dispatch('quiz-clear-stored-session', slug: $this->slug);
+
+        $quiz = $quizSessionService->findActiveQuizBySlug($this->slug);
+        $session = $quizSessionService->start($quiz);
+
+        $this->redirectRoute('quiz.session', ['uuid' => $session->uuid], navigate: true);
+    }
+
+    private function advanceOrComplete(QuizSessionService $quizSessionService): void
+    {
+        if ($this->session === null) {
+            return;
+        }
 
         $lastSort = (int) $this->session->quiz->questions->max('sort_order');
 
@@ -225,17 +341,24 @@ class Take extends Component
             return;
         }
 
+        $value = (string) $value;
         $this->multiSelection = array_values(array_unique(array_map('strval', $this->multiSelection)));
 
         if (in_array($value, $this->multiSelection, true)) {
             $this->multiSelection = array_values(array_filter($this->multiSelection, fn ($item) => $item !== $value));
-            return;
+        } else {
+            $maxSelections = (int) ($question->config['max_selections'] ?? 0);
+
+            if ($maxSelections > 0 && count($this->multiSelection) >= $maxSelections) {
+                return;
+            }
+
+            $this->multiSelection[] = $value;
         }
 
-        $this->multiSelection[] = $value;
     }
 
-    public function submitMultiChoice(QuizSessionService $quizSessionService): void
+    public function submitMultiChoice(QuizSessionService $quizSessionService, RebootProtocolFlow $flow): void
     {
         if ($this->session === null) {
             return;
@@ -247,19 +370,28 @@ class Take extends Component
             return;
         }
 
+        $selections = array_values(array_unique(array_map('strval', $this->multiSelection)));
+
+        if ($selections === []) {
+            return;
+        }
+
+        $this->multiSelection = $selections;
+
         $quizSessionService->saveAnswer($this->session, $question, [
-            'value' => array_values($this->multiSelection),
+            'value' => $selections,
         ]);
 
-        $this->session->refresh()->load(['quiz.questions' => fn ($q) => $q->with('options')]);
-        $this->syncMultiSelection();
+        $this->reloadSession();
 
-        $lastSort = (int) $this->session->quiz->questions->max('sort_order');
+        if ($flow->isRebootQuiz($this->slug) && $flow->shouldPromptSafety($this->session, $question)) {
+            $flow->markSafetyPending($this->session);
+            $this->reloadSession();
 
-        if ($this->session->current_sort_order > $lastSort) {
-            $quizSessionService->complete($this->session);
-            $this->redirectRoute('quiz.result', ['uuid' => $this->session->uuid], navigate: true);
+            return;
         }
+
+        $this->advanceOrComplete($quizSessionService);
     }
 
     public function skipQuestion(QuizSessionService $quizSessionService): void
@@ -279,15 +411,9 @@ class Take extends Component
             'skipped' => true,
         ]);
 
-        $this->session->refresh()->load(['quiz.questions' => fn ($q) => $q->with('options')]);
-        $this->syncMultiSelection();
+        $this->reloadSession();
 
-        $lastSort = (int) $this->session->quiz->questions->max('sort_order');
-
-        if ($this->session->current_sort_order > $lastSort) {
-            $quizSessionService->complete($this->session);
-            $this->redirectRoute('quiz.result', ['uuid' => $this->session->uuid], navigate: true);
-        }
+        $this->advanceOrComplete($quizSessionService);
     }
 
     public function toggleSound(): void
@@ -305,13 +431,40 @@ class Take extends Component
             'current_sort_order' => $this->session->current_sort_order - 1,
         ]);
 
-        $this->session->refresh()->load(['quiz.questions' => fn ($q) => $q->with('options')]);
-        $this->syncMultiSelection();
+        $this->reloadSession();
+    }
+
+    public function getRequiresContinueProperty(): bool
+    {
+        return $this->isMultipleChoice;
     }
 
     public function getCanGoBackProperty(): bool
     {
-        return $this->session !== null && $this->session->current_sort_order > 1;
+        return $this->session !== null && $this->session->current_sort_order > 1 && ! $this->showSafety && ! $this->isCrisis;
+    }
+
+    public function getIsRebootProtocolProperty(): bool
+    {
+        return app(RebootProtocolFlow::class)->isRebootQuiz($this->slug);
+    }
+
+    public function getShowSafetyProperty(): bool
+    {
+        if ($this->session === null || ! $this->isRebootProtocol) {
+            return false;
+        }
+
+        return app(RebootProtocolFlow::class)->isSafetyPending($this->session);
+    }
+
+    public function getIsCrisisProperty(): bool
+    {
+        if ($this->session === null || ! $this->isRebootProtocol) {
+            return false;
+        }
+
+        return app(RebootProtocolFlow::class)->isCrisis($this->session);
     }
 
     public function getCurrentQuestionProperty(): ?Question
@@ -356,10 +509,31 @@ class Take extends Component
         return $this->currentQuestion?->type === QuestionType::MultipleChoice;
     }
 
+    private function reloadSession(): void
+    {
+        if ($this->session === null) {
+            return;
+        }
+
+        $this->session = $this->session->fresh([
+            'quiz.questions' => fn ($query) => $query->with('options'),
+            'responses',
+        ]);
+
+        $this->syncSelections();
+    }
+
+    private function syncSelections(): void
+    {
+        $this->syncMultiSelection();
+        $this->syncSingleSelection();
+    }
+
     private function syncMultiSelection(): void
     {
         if ($this->session === null) {
             $this->multiSelection = [];
+
             return;
         }
 
@@ -367,6 +541,7 @@ class Take extends Component
 
         if ($question === null || $question->type !== QuestionType::MultipleChoice) {
             $this->multiSelection = [];
+
             return;
         }
 
@@ -375,6 +550,7 @@ class Take extends Component
 
         if (! $response instanceof QuizResponse) {
             $this->multiSelection = [];
+
             return;
         }
 
@@ -382,22 +558,64 @@ class Take extends Component
 
         if (! is_array($raw)) {
             $this->multiSelection = [];
+
             return;
         }
 
         $this->multiSelection = array_values(array_filter(array_map('strval', $raw), fn ($item) => $item !== ''));
     }
 
+    private function syncSingleSelection(): void
+    {
+        if ($this->session === null) {
+            $this->singleSelection = null;
+
+            return;
+        }
+
+        $question = $this->currentQuestion;
+
+        if ($question === null || $question->type !== QuestionType::SingleChoice) {
+            $this->singleSelection = null;
+
+            return;
+        }
+
+        $response = $this->session->responses
+            ?->firstWhere('question_id', $question->id);
+
+        if (! $response instanceof QuizResponse) {
+            $this->singleSelection = null;
+
+            return;
+        }
+
+        $raw = $response->value['value'] ?? null;
+
+        if (is_array($raw) || $raw === null || $raw === '') {
+            $this->singleSelection = null;
+
+            return;
+        }
+
+        $this->singleSelection = (string) $raw;
+    }
+
     /**
      * @return list<string>
      */
+    public function getQuizLocaleProperty(): string
+    {
+        return LocaleConfig::resolve($this->session?->locale ?? app()->getLocale());
+    }
+
     public function getLikertLabelsProperty(): array
     {
         if ($this->session === null) {
             return [];
         }
 
-        $locale = $this->session->locale;
+        $locale = $this->quizLocale;
 
         return $this->session->quiz->settings['likert_labels'][$locale]
             ?? $this->session->quiz->settings['likert_labels']['en']
@@ -421,8 +639,13 @@ class Take extends Component
         }
 
         if ($this->session === null) {
+            $quiz = $this->slug !== null
+                ? Quiz::query()->where('slug', $this->slug)->where('is_active', true)->first()
+                : null;
+
             return view('livewire.quiz.starting', [
                 'slug' => $this->slug,
+                'quiz' => $quiz,
             ]);
         }
 
@@ -431,13 +654,19 @@ class Take extends Component
             'options' => $this->currentOptions,
             'isLikert' => $this->isLikert,
             'isMultipleChoice' => $this->isMultipleChoice,
+            'requiresContinue' => $this->requiresContinue,
             'multiSelection' => $this->multiSelection,
+            'singleSelection' => $this->singleSelection,
             'progress' => $this->progressPercent,
             'likertLabels' => $this->likertLabels,
             'totalQuestions' => $this->session->quiz->questions->count(),
             'currentNumber' => min($this->session->current_sort_order, $this->session->quiz->questions->count()),
             'estimatedMinutes' => $this->session->quiz->estimated_minutes,
             'canGoBack' => $this->canGoBack,
+            'isRebootProtocol' => $this->isRebootProtocol,
+            'showSafety' => $this->showSafety,
+            'isCrisis' => $this->isCrisis,
+            'quizLocale' => $this->quizLocale,
         ]);
     }
 }

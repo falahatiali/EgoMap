@@ -5,6 +5,7 @@ namespace App\Services\Quiz\Scoring;
 use App\Enums\QuizType;
 use App\Models\Quiz;
 use App\Services\Quiz\Scoring\Engines\MbtiAxisScoringEngine;
+use App\Services\Quiz\Scoring\Engines\RebootProtocolScoringEngine;
 use App\Services\Quiz\Scoring\Engines\WeightedSumScoringEngine;
 use InvalidArgumentException;
 
@@ -21,6 +22,7 @@ class ScoringEngineFactory
         return match ($engine) {
             'mbti_axis' => app(MbtiAxisScoringEngine::class),
             'weighted_sum' => app(WeightedSumScoringEngine::class),
+            'reboot_protocol' => app(RebootProtocolScoringEngine::class),
             default => throw new InvalidArgumentException("Unknown scoring engine: {$engine}"),
         };
     }

@@ -4,6 +4,7 @@ namespace App\Livewire\Home;
 
 use App\Livewire\Concerns\HandlesRecoveryTriage;
 use App\Services\Recovery\RecoveryJourneyService;
+use App\Support\RebootProtocolQuiz;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -37,11 +38,7 @@ class Protocol extends Component
 
     public function startCheckIn(): void
     {
-        $this->screen = 'triage';
-
-        if ($this->step < 1) {
-            $this->step = 1;
-        }
+        $this->redirect(route('quiz.start', ['slug' => RebootProtocolQuiz::SLUG, 'locale' => app()->getLocale()]), navigate: true);
     }
 
     public function render(RecoveryJourneyService $journey): View

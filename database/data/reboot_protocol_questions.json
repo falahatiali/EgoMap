@@ -1,0 +1,199 @@
+[
+  {
+    "key": "situation_type",
+    "sort_order": 1,
+    "text": { "en": "What is your current situation with her?", "fa": "وضعیت فعلی‌ات با او چیه؟" },
+    "help_text": {
+      "en": "Choose the closest answer. It does not need to be perfect.",
+      "fa": "نزدیک‌ترین جواب را انتخاب کن. لازم نیست کاملاً دقیق باشد."
+    },
+    "options": [
+      { "value": "1", "en": "We officially broke up", "fa": "رسماً از هم جدا شدیم" },
+      { "value": "2", "en": "She ended it, and I didn't want it", "fa": "اون تمومش کرد و من نمی‌خواستم" },
+      { "value": "3", "en": "I ended it, but I still feel broken", "fa": "من تمومش کردم، ولی هنوز داغونم" },
+      { "value": "4", "en": "Nothing official happened, but she became cold and distant", "fa": "جدایی رسمی نبود، ولی اون سرد و دور شد" },
+      { "value": "5", "en": "I was rejected before the relationship became serious", "fa": "قبل از اینکه رابطه جدی بشه، رد شدم" },
+      { "value": "6", "en": "We are still together, but I feel trapped or emotionally exhausted", "fa": "هنوز با همیم، ولی من گیر کردم یا از نظر احساسی خسته‌ام" },
+      { "value": "7", "en": "It is complicated / on and off", "fa": "پیچیده‌ست / هی قطع و وصل می‌شیم" }
+    ]
+  },
+  {
+    "key": "time_since_event",
+    "sort_order": 2,
+    "text": { "en": "How long has it been like this?", "fa": "چند وقته این وضعیت شروع شده؟" },
+    "help_text": {
+      "en": "Choose the closest answer. It does not need to be perfect.",
+      "fa": "نزدیک‌ترین جواب را انتخاب کن. لازم نیست کاملاً دقیق باشد."
+    },
+    "options": [
+      { "value": "1", "en": "Less than 24 hours", "fa": "کمتر از ۲۴ ساعت" },
+      { "value": "2", "en": "2–7 days", "fa": "۲ تا ۷ روز" },
+      { "value": "3", "en": "1–4 weeks", "fa": "۱ تا ۴ هفته" },
+      { "value": "4", "en": "1–3 months", "fa": "۱ تا ۳ ماه" },
+      { "value": "5", "en": "More than 3 months", "fa": "بیشتر از ۳ ماه" },
+      { "value": "6", "en": "There was no clear ending — it slowly faded", "fa": "پایان مشخصی نداشت، کم‌کم سرد شد" }
+    ]
+  },
+  {
+    "key": "pain_focus",
+    "sort_order": 3,
+    "selection": "multiple",
+    "max_selections": 2,
+    "text": { "en": "What hurts the most right now? Pick up to 2.", "fa": "الان چی بیشتر از همه اذیتت می‌کنه؟ حداکثر ۲ گزینه انتخاب کن." },
+    "help_text": {
+      "en": "Pick up to 2. Choose what feels strongest today.",
+      "fa": "حداکثر ۲ گزینه انتخاب کن. چیزهایی را بزن که امروز قوی‌تر حس می‌کنی."
+    },
+    "options": [
+      { "value": "1", "en": "I miss her presence and the emotional connection", "fa": "دلتنگ حضورش و ارتباط عاطفی‌مونم" },
+      { "value": "2", "en": "I feel rejected, unwanted, or not enough", "fa": "حس می‌کنم رد شدم، خواستنی نبودم، یا کافی نبودم" },
+      { "value": "3", "en": "I feel replaced or afraid she moved on faster than me", "fa": "حس می‌کنم جایگزین شدم یا اون زودتر از من عبور کرده" },
+      { "value": "4", "en": "I feel guilty and keep blaming myself", "fa": "احساس گناه دارم و مدام خودم رو مقصر می‌دونم" },
+      { "value": "5", "en": "I feel betrayed, lied to, or disrespected", "fa": "حس می‌کنم بهم خیانت شده، دروغ شنیدم، یا بی‌احترامی دیدم" },
+      { "value": "6", "en": "I feel empty, numb, or disconnected from myself", "fa": "حس پوچی، بی‌حسی، یا جدا شدن از خودم دارم" },
+      { "value": "7", "en": "I keep replaying memories and imaginary scenarios", "fa": "مدام خاطرات و سناریوهای خیالی رو تو ذهنم تکرار می‌کنم" },
+      { "value": "8", "en": "I still don't understand what really happened", "fa": "هنوز واقعاً نمی‌فهمم چی شد" }
+    ]
+  },
+  {
+    "key": "immediate_risk",
+    "sort_order": 4,
+    "selection": "multiple",
+    "max_selections": 2,
+    "text": { "en": "What is your biggest risk right now? Pick up to 2.", "fa": "الان بزرگ‌ترین ریسکت چیه؟ حداکثر ۲ گزینه انتخاب کن." },
+    "help_text": {
+      "en": "Pick up to 2. Choose what feels strongest today.",
+      "fa": "حداکثر ۲ گزینه انتخاب کن. چیزهایی را بزن که امروز قوی‌تر حس می‌کنی."
+    },
+    "options": [
+      { "value": "1", "en": "I want to text or call her", "fa": "می‌خوام بهش پیام بدم یا زنگ بزنم" },
+      { "value": "2", "en": "I keep checking her profile, last seen, or stories", "fa": "هی پروفایل، آنلاین بودن، یا استوری‌هاش رو چک می‌کنم" },
+      { "value": "3", "en": "I want to ask mutual friends about her", "fa": "می‌خوام از دوستای مشترک درباره‌اش بپرسم" },
+      { "value": "4", "en": "I want to post something indirect so she notices", "fa": "می‌خوام چیزی غیرمستقیم بذارم که اون ببینه" },
+      { "value": "5", "en": "I cannot sleep, eat, or focus normally", "fa": "خواب، اشتها، یا تمرکزم به‌هم ریخته" },
+      { "value": "6", "en": "I feel emotionally unstable and close to breaking down", "fa": "حس می‌کنم از نظر احساسی بی‌ثباتم و نزدیک فروپاشی‌ام" },
+      { "value": "7", "en": "No urgent risk right now — I just need direction", "fa": "الان ریسک فوری ندارم، فقط مسیر می‌خوام" }
+    ]
+  },
+  {
+    "key": "contact_after_breakup",
+    "sort_order": 5,
+    "text": { "en": "Since things ended or became unstable, what has your contact been like?", "fa": "از وقتی رابطه تموم شد یا بی‌ثبات شد، تماس‌ت باهاش چطور بوده؟" },
+    "help_text": {
+      "en": "Choose the closest answer. It does not need to be perfect.",
+      "fa": "نزدیک‌ترین جواب را انتخاب کن. لازم نیست کاملاً دقیق باشد."
+    },
+    "options": [
+      { "value": "1", "en": "Complete silence — I have not contacted her", "fa": "سکوت کامل؛ تماس نگرفتم" },
+      { "value": "2", "en": "I contacted her once, but stopped", "fa": "یک بار تماس گرفتم، ولی بعدش قطع کردم" },
+      { "value": "3", "en": "I contacted her several times", "fa": "چند بار تماس گرفتم" },
+      { "value": "4", "en": "I begged, explained too much, or tried to convince her", "fa": "التماس کردم، زیادی توضیح دادم، یا تلاش کردم قانعش کنم" },
+      { "value": "5", "en": "We still talk regularly", "fa": "هنوز مرتب حرف می‌زنیم" },
+      { "value": "6", "en": "We keep reconnecting, then falling apart again", "fa": "هی دوباره وصل می‌شیم و دوباره خراب می‌شه" },
+      { "value": "7", "en": "I don't know what counts as no contact", "fa": "نمی‌دونم دقیقاً چی No Contact حساب می‌شه" }
+    ]
+  },
+  {
+    "key": "breakup_reason",
+    "sort_order": 6,
+    "selection": "multiple",
+    "max_selections": 2,
+    "text": { "en": "What do you think caused the breakup or emotional distance? Pick up to 2.", "fa": "به نظرت چی باعث جدایی یا سردی شد؟ حداکثر ۲ گزینه انتخاب کن." },
+    "help_text": {
+      "en": "Pick up to 2. Choose what feels strongest today.",
+      "fa": "حداکثر ۲ گزینه انتخاب کن. چیزهایی را بزن که امروز قوی‌تر حس می‌کنی."
+    },
+    "options": [
+      { "value": "1", "en": "Attraction faded — from her side, my side, or both", "fa": "کشش و علاقه کم شد؛ از سمت اون، من، یا هر دو" },
+      { "value": "2", "en": "Too many fights, pressure, or emotional drama", "fa": "دعوا، فشار، یا تنش احساسی زیاد بود" },
+      { "value": "3", "en": "Emotional distance — we stopped feeling close", "fa": "فاصله عاطفی افتاد؛ دیگه نزدیک نبودیم" },
+      { "value": "4", "en": "Physical distance, timing, or life circumstances", "fa": "فاصله جغرافیایی، زمان‌بندی بد، یا شرایط زندگی" },
+      { "value": "5", "en": "Trust was damaged — lies, secrecy, or broken promises", "fa": "اعتماد آسیب دید؛ دروغ، پنهان‌کاری، یا قول‌های شکسته" },
+      { "value": "6", "en": "Cheating or possible betrayal", "fa": "خیانت یا احتمال خیانت" },
+      { "value": "7", "en": "She pulled away when things got serious", "fa": "وقتی رابطه جدی‌تر شد، اون عقب کشید" },
+      { "value": "8", "en": "I became anxious, needy, or afraid of losing her", "fa": "من مضطرب، نیازمند، یا ترسیده از دست دادنش شدم" },
+      { "value": "9", "en": "We wanted different futures", "fa": "آینده‌های متفاوتی می‌خواستیم" },
+      { "value": "10", "en": "Family, culture, friends, or external pressure affected us", "fa": "خانواده، فرهنگ، دوستان، یا فشار بیرونی اثر گذاشت" },
+      { "value": "11", "en": "I honestly don't know", "fa": "واقعاً نمی‌دونم" }
+    ]
+  },
+  {
+    "key": "timing_feeling",
+    "sort_order": 7,
+    "text": { "en": "How do you feel about the timing of this ending?", "fa": "نسبت به زمان این پایان یا سردی چه حسی داری؟" },
+    "help_text": {
+      "en": "Choose the closest answer. It does not need to be perfect.",
+      "fa": "نزدیک‌ترین جواب را انتخاب کن. لازم نیست کاملاً دقیق باشد."
+    },
+    "options": [
+      { "value": "1", "en": "It happened too soon — I was not ready", "fa": "خیلی زود اتفاق افتاد؛ آماده نبودم" },
+      { "value": "2", "en": "It should have ended earlier", "fa": "باید زودتر تموم می‌شد" },
+      { "value": "3", "en": "I stayed too long and ignored myself", "fa": "زیادی موندم و خودم رو نادیده گرفتم" },
+      { "value": "4", "en": "I still believe it can be fixed", "fa": "هنوز فکر می‌کنم می‌شه درستش کرد" },
+      { "value": "5", "en": "I know it is over, but emotionally I cannot accept it", "fa": "می‌دونم تمومه، ولی احساسی نمی‌تونم قبول کنم" },
+      { "value": "6", "en": "I feel relief and pain at the same time", "fa": "هم آرامش دارم، هم درد" },
+      { "value": "7", "en": "I am not sure yet", "fa": "هنوز مطمئن نیستم" }
+    ]
+  },
+  {
+    "key": "relationship_pattern",
+    "sort_order": 8,
+    "text": { "en": "Which dynamic best describes the relationship?", "fa": "کدوم الگو بیشتر رابطه‌تون رو توصیف می‌کنه؟" },
+    "help_text": {
+      "en": "Choose the closest answer. It does not need to be perfect.",
+      "fa": "نزدیک‌ترین جواب را انتخاب کن. لازم نیست کاملاً دقیق باشد."
+    },
+    "options": [
+      { "value": "1", "en": "I moved closer, she moved away", "fa": "من نزدیک‌تر می‌شدم، اون دورتر می‌شد" },
+      { "value": "2", "en": "She moved closer, I moved away", "fa": "اون نزدیک‌تر می‌شد، من دورتر می‌شدم" },
+      { "value": "3", "en": "We kept breaking up and coming back", "fa": "مدام جدا می‌شدیم و برمی‌گشتیم" },
+      { "value": "4", "en": "I gave much more than I received", "fa": "من خیلی بیشتر از چیزی که گرفتم، دادم" },
+      { "value": "5", "en": "We cared about each other, but we were not compatible", "fa": "همدیگه رو دوست داشتیم، ولی با هم سازگار نبودیم" },
+      { "value": "6", "en": "There was attraction, but not enough emotional safety", "fa": "کشش بود، ولی امنیت عاطفی کافی نبود" },
+      { "value": "7", "en": "There were red flags from the beginning", "fa": "از اول پرچم قرمزهایی وجود داشت" },
+      { "value": "8", "en": "I cannot identify the dynamic yet", "fa": "هنوز نمی‌تونم الگو رو تشخیص بدم" }
+    ]
+  },
+  {
+    "key": "self_pattern",
+    "sort_order": 9,
+    "selection": "multiple",
+    "max_selections": 2,
+    "text": { "en": "Which patterns do you recognize in yourself? Pick up to 2.", "fa": "کدوم الگوها رو در خودت می‌بینی؟ حداکثر ۲ گزینه." },
+    "help_text": {
+      "en": "Pick up to 2. Choose what feels strongest today.",
+      "fa": "حداکثر ۲ گزینه انتخاب کن. چیزهایی را بزن که امروز قوی‌تر حس می‌کنی."
+    },
+    "options": [
+      { "value": "1", "en": "When I feel distance, I become anxious", "fa": "وقتی فاصله حس می‌کنم، مضطرب می‌شم" },
+      { "value": "2", "en": "I overthink every message, silence, and detail", "fa": "هر پیام، سکوت، و جزئیات رو زیادی تحلیل می‌کنم" },
+      { "value": "3", "en": "I attach to potential before seeing reality", "fa": "قبل از دیدن واقعیت، به پتانسیل آدم وابسته می‌شم" },
+      { "value": "4", "en": "I try to fix, save, or rescue the other person", "fa": "سعی می‌کنم طرف مقابل رو درست کنم یا نجات بدم" },
+      { "value": "5", "en": "I ignore red flags when I really want someone", "fa": "وقتی کسی رو خیلی می‌خوام، پرچم قرمزها رو نادیده می‌گیرم" },
+      { "value": "6", "en": "I lose my routine, goals, or identity in relationships", "fa": "توی رابطه روتین، هدف‌ها، یا هویتم رو گم می‌کنم" },
+      { "value": "7", "en": "I act cold, but inside I care too much", "fa": "سرد رفتار می‌کنم، ولی درونم زیادی درگیره" },
+      { "value": "8", "en": "I chase harder when I feel I am losing someone", "fa": "وقتی حس می‌کنم دارم کسی رو از دست می‌دم، بیشتر دنبال می‌کنم" },
+      { "value": "9", "en": "I do not know my pattern yet", "fa": "هنوز الگوی خودم رو نمی‌دونم" }
+    ]
+  },
+  {
+    "key": "first_need",
+    "sort_order": 10,
+    "text": { "en": "What do you need first from this system?", "fa": "اول از همه از این سیستم چی می‌خوای؟" },
+    "help_text": {
+      "en": "Choose the closest answer. It does not need to be perfect.",
+      "fa": "نزدیک‌ترین جواب را انتخاب کن. لازم نیست کاملاً دقیق باشد."
+    },
+    "options": [
+      { "value": "1", "en": "Stop me from contacting her tonight", "fa": "کمک کن امشب باهاش تماس نگیرم" },
+      { "value": "2", "en": "Help me start strict no contact", "fa": "کمک کن No Contact جدی شروع کنم" },
+      { "value": "3", "en": "Help me understand why I feel this way", "fa": "کمک کن بفهمم چرا این‌قدر حالم بده" },
+      { "value": "4", "en": "Help me stop obsessing and checking", "fa": "کمک کن از وسواس فکری و چک کردن بیام بیرون" },
+      { "value": "5", "en": "Help me rebuild my daily routine", "fa": "کمک کن روتین روزانه‌ام رو برگردونم" },
+      { "value": "6", "en": "Help me rebuild my body and confidence", "fa": "کمک کن بدن و اعتمادبه‌نفسم رو بسازم" },
+      { "value": "7", "en": "Help me accept it and move on", "fa": "کمک کن قبول کنم و عبور کنم" },
+      { "value": "8", "en": "Help me become stronger, calmer, and more self-respecting", "fa": "کمک کن قوی‌تر، آرام‌تر، و با عزت‌نفس‌تر بشم" },
+      { "value": "9", "en": "I don't know. Just give me the first step.", "fa": "نمی‌دونم. فقط قدم اول رو بهم بده." }
+    ]
+  }
+]

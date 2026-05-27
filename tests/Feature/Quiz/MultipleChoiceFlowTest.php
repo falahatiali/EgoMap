@@ -118,4 +118,3 @@ class MultipleChoiceFlowTest extends TestCase
         $this->assertTrue((bool) ($response->value['skipped'] ?? false));
     }
 }
-

@@ -182,20 +182,35 @@ class QuizSessionService
         return $this->start($quiz, $guestToken);
     }
 
-    public function findActiveQuizBySlug(string $slug): Quiz
+    public function findActiveQuizBySlugOrNull(string $slug): ?Quiz
     {
         return Quiz::query()
             ->where('slug', $slug)
             ->where('is_active', true)
             ->with(['questions' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order')->with('options')])
-            ->firstOrFail();
+            ->first();
+    }
+
+    public function findActiveQuizBySlug(string $slug): Quiz
+    {
+        $quiz = $this->findActiveQuizBySlugOrNull($slug);
+
+        if ($quiz === null) {
+            throw new NotFoundHttpException('Quiz not found.');
+        }
+
+        return $quiz;
     }
 
     /**
      * @param  array{value: int|string|bool|list<int|string>}|int|string|bool  $value
      */
-    public function saveAnswer(QuizSession $session, Question $question, array|int|string|bool $value): void
-    {
+    public function saveAnswer(
+        QuizSession $session,
+        Question $question,
+        array|int|string|bool $value,
+        bool $advance = true,
+    ): void {
         if ($session->status !== SessionStatus::InProgress) {
             return;
         }
@@ -212,6 +227,10 @@ class QuizSessionService
                 'answered_at' => now(),
             ],
         );
+
+        if (! $advance) {
+            return;
+        }
 
         $session->update([
             'current_sort_order' => min($question->sort_order + 1, $this->lastQuestionSortOrder($session) + 1),

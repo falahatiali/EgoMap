@@ -1,6 +1,6 @@
 <div
     class="eg-quiz-immersive"
-    wire:key="quiz-q-{{ $currentNumber }}"
+    wire:key="quiz-q-{{ $question->id ?? 'none' }}-{{ $session->current_sort_order }}"
     data-sound-enabled="{{ $soundEnabled ? '1' : '0' }}"
     data-option-count="{{ $isLikert ? 5 : $options->count() }}"
 >
@@ -51,6 +51,11 @@
                 </div>
             </header>
 
+            @if ($isCrisis ?? false)
+                @include('livewire.quiz.partials.reboot-crisis')
+            @elseif ($showSafety ?? false)
+                @include('livewire.quiz.partials.reboot-safety')
+            @else
             <div class="eg-quiz-stage eg-quiz-animate-in">
                 @if ($estimatedMinutes)
                     <div class="eg-quiz-time-pill">
@@ -61,13 +66,12 @@
 
                 <h1 class="eg-quiz-question">
                     <span class="eg-quiz-question-num" aria-hidden="true">{{ $currentNumber }}</span>
-                    <span
-                        class="eg-quiz-question-text"
-                        data-locale-field
-                        data-en="{{ $question->getTranslation('text', 'en') }}"
-                        data-fa="{{ $question->getTranslation('text', 'fa') }}"
-                    >{{ $question->getTranslation('text', app()->getLocale()) }}</span>
+                    <span class="eg-quiz-question-text">{{ $question->getTranslation('text', $quizLocale) }}</span>
                 </h1>
+
+                @if ($question->getTranslation('help_text', $quizLocale))
+                    <p class="eg-quiz-help">{{ $question->getTranslation('help_text', $quizLocale) }}</p>
+                @endif
 
                 @if ($isLikert)
                     <div class="eg-quiz-options eg-quiz-options-grid">
@@ -88,78 +92,149 @@
                             </button>
                         @endforeach
                     </div>
-                @else
-                    <div @class([
-                        'eg-quiz-options',
-                        'eg-quiz-options-grid' => $options->count() >= 2,
-                    ])>
+                @elseif ($isMultipleChoice)
+                    @php
+                        $maxSelections = (int) ($question->config['max_selections'] ?? 3);
+                        $selectedCount = count($multiSelection ?? []);
+                    @endphp
+                    <p class="eg-quiz-selection-hint" aria-live="polite">
+                        @if ($selectedCount === 0)
+                            {{ __('quiz.select_up_to', ['max' => $maxSelections]) }}
+                        @else
+                            {{ __('quiz.selection_count', ['current' => $selectedCount, 'max' => $maxSelections]) }}
+                        @endif
+                    </p>
+
+                    <div
+                        @class([
+                            'eg-quiz-options',
+                            'eg-quiz-options-grid' => $options->count() >= 2,
+                        ])
+                    >
                         @foreach ($options as $index => $option)
                             @php
                                 $accent = $option->meta['accent'] ?? 'purple';
                                 $icon = $option->meta['icon'] ?? 'fa-circle';
                                 $hotkey = (string) ($index + 1);
+                                $optionValue = (string) $option->value;
+                                $isActive = in_array($optionValue, $multiSelection ?? [], true);
+                                $isLocked = $maxSelections > 0 && $selectedCount >= $maxSelections && ! $isActive;
                             @endphp
                             <button
                                 type="button"
-                                @class(['eg-quiz-option', 'is-active' => $isMultipleChoice && in_array($option->value, $multiSelection ?? [], true)])
+                                @class(['eg-quiz-option', 'is-active' => $isActive])
                                 data-accent="{{ $accent }}"
                                 data-hotkey="{{ $hotkey }}"
-                                @if ($isMultipleChoice)
-                                    wire:click="toggleMultiChoice('{{ $option->value }}')"
-                                @else
-                                    wire:click="selectAnswer('{{ $option->value }}')"
-                                @endif
+                                wire:click.prevent="toggleMultiChoice('{{ $optionValue }}')"
                                 wire:loading.attr="disabled"
-                                wire:target="{{ $isMultipleChoice ? 'toggleMultiChoice,submitMultiChoice,skipQuestion' : 'selectAnswer' }}"
-                                aria-pressed="{{ $isMultipleChoice ? (in_array($option->value, $multiSelection ?? [], true) ? 'true' : 'false') : 'false' }}"
+                                wire:target="toggleMultiChoice"
+                                @disabled($isLocked)
+                                aria-pressed="{{ $isActive ? 'true' : 'false' }}"
                             >
-                                <span class="eg-quiz-option-icon">
-                                    <i class="fa-solid {{ $icon }}"></i>
+                                <span class="eg-quiz-option-icon" aria-hidden="true">
+                                    <i class="fa-solid {{ $icon }} eg-quiz-option-symbol"></i>
+                                    <i class="fa-solid fa-check eg-quiz-option-check"></i>
                                 </span>
-                                <span
-                                    class="eg-quiz-option-label"
-                                    data-locale-field
-                                    data-en="{{ $option->getTranslation('label', 'en') }}"
-                                    data-fa="{{ $option->getTranslation('label', 'fa') }}"
-                                >{{ $option->getTranslation('label', app()->getLocale()) }}</span>
+                                <span class="eg-quiz-option-label">{{ $option->getTranslation('label', $quizLocale) }}</span>
                                 <span class="eg-quiz-option-key">{{ $hotkey }}</span>
+                                @if ($isActive)
+                                    <span class="eg-quiz-option-selected-ring" aria-hidden="true"></span>
+                                @endif
                             </button>
                         @endforeach
                     </div>
 
-                    @if ($isMultipleChoice)
-                        <div class="eg-quiz-multi-actions">
+                    <div class="eg-quiz-multi-actions">
+                        <button
+                            type="button"
+                            @class([
+                                'eg-quiz-next-btn',
+                                'is-muted' => $selectedCount === 0,
+                            ])
+                            wire:click.prevent="submitMultiChoice"
+                            wire:loading.attr="disabled"
+                            wire:target="toggleMultiChoice,submitMultiChoice"
+                            @disabled($selectedCount === 0)
+                        >
+                            <i class="fa-solid fa-arrow-right" data-icon-directional></i>
+                            <span>{{ __('quiz.continue') }}</span>
+                        </button>
+                        <button
+                            type="button"
+                            class="eg-quiz-skip-btn"
+                            wire:click.prevent="skipQuestion"
+                            wire:loading.attr="disabled"
+                            wire:target="submitMultiChoice,skipQuestion"
+                        >
+                            <span>{{ __('quiz.skip') }}</span>
+                        </button>
+                    </div>
+                @else
+                    <div
+                        @class([
+                            'eg-quiz-options',
+                            'eg-quiz-options-grid' => $options->count() >= 2,
+                        ])
+                        wire:loading.class="eg-quiz-options-busy"
+                        wire:target="selectAnswer"
+                    >
+                        @foreach ($options as $index => $option)
+                            @php
+                                $accent = $option->meta['accent'] ?? 'purple';
+                                $icon = $option->meta['icon'] ?? 'fa-circle';
+                                $hotkey = (string) ($index + 1);
+                                $optionValue = (string) $option->value;
+                                $isActive = ($singleSelection ?? '') === $optionValue;
+                            @endphp
                             <button
                                 type="button"
-                                class="eg-quiz-next-btn"
-                                wire:click="submitMultiChoice"
+                                @class(['eg-quiz-option', 'is-active' => $isActive])
+                                data-accent="{{ $accent }}"
+                                data-hotkey="{{ $hotkey }}"
+                                wire:click.prevent="selectAnswer('{{ $optionValue }}')"
                                 wire:loading.attr="disabled"
-                                wire:target="submitMultiChoice,skipQuestion"
+                                wire:target="selectAnswer"
+                                aria-pressed="{{ $isActive ? 'true' : 'false' }}"
                             >
-                                <i class="fa-solid fa-arrow-right" data-icon-directional></i>
-                                <span>{{ __('quiz.continue') }}</span>
+                                <span class="eg-quiz-option-icon" aria-hidden="true">
+                                    <i class="fa-solid {{ $icon }} eg-quiz-option-symbol"></i>
+                                    <i class="fa-solid fa-check eg-quiz-option-check"></i>
+                                </span>
+                                <span class="eg-quiz-option-label">{{ $option->getTranslation('label', $quizLocale) }}</span>
+                                <span class="eg-quiz-option-key">{{ $hotkey }}</span>
+                                @if ($isActive)
+                                    <span class="eg-quiz-option-selected-ring" aria-hidden="true"></span>
+                                @endif
                             </button>
-                            <button
-                                type="button"
-                                class="eg-quiz-skip-btn"
-                                wire:click="skipQuestion"
-                                wire:loading.attr="disabled"
-                                wire:target="submitMultiChoice,skipQuestion"
-                            >
-                                <span>{{ __('quiz.skip') }}</span>
-                            </button>
-                        </div>
-                    @endif
+                        @endforeach
+                    </div>
                 @endif
 
                 <p class="eg-quiz-keyboard-hint">
                     <i class="fa-regular fa-keyboard"></i>
-                    <span>{{ __('quiz.keyboard_hint', ['max' => $isLikert ? 5 : $options->count()]) }}</span>
+                    <span>
+                        @if ($isMultipleChoice)
+                            {{ __('quiz.keyboard_hint_multi', ['max' => $maxSelections]) }}
+                        @else
+                            {{ __('quiz.keyboard_hint', ['max' => $isLikert ? 5 : $options->count()]) }}
+                        @endif
+                    </span>
                 </p>
             </div>
+            @endif
 
             <footer class="eg-quiz-footer">
-                @if ($canGoBack)
+                @if ($showSafety ?? false)
+                    <button
+                        type="button"
+                        class="eg-quiz-back-btn"
+                        wire:click="cancelSafetyCheck"
+                        wire:loading.attr="disabled"
+                    >
+                        <i class="fa-solid fa-chevron-left" data-icon-directional></i>
+                        <span>{{ __('quiz.back') }}</span>
+                    </button>
+                @elseif ($canGoBack)
                     <button
                         type="button"
                         class="eg-quiz-back-btn"
@@ -179,7 +254,7 @@
                 </a>
             </footer>
 
-            <div wire:loading wire:target="selectAnswer,goBack" class="eg-quiz-saving" aria-live="polite">
+            <div wire:loading wire:target="selectAnswer,submitSingleChoice,submitMultiChoice,goBack" class="eg-quiz-saving" aria-live="polite">
                 <i class="fa-solid fa-spinner fa-spin"></i>
             </div>
         @else

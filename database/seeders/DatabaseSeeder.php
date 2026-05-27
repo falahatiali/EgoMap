@@ -36,5 +36,6 @@ class DatabaseSeeder extends Seeder
 
         $this->call(QuizSeeder::class);
         $this->call(MbtiQuizSeeder::class);
+        $this->call(RebootProtocolQuizSeeder::class);
     }
 }

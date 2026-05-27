@@ -30,6 +30,22 @@ final class LocaleConfig
         return in_array($locale, self::supported(), true);
     }
 
+    /**
+     * Pick a localized string from a bilingual pair stored in report/scoring payloads.
+     *
+     * @param  array{en?: string, fa?: string}  $pair
+     */
+    public static function pick(array $pair, ?string $locale = null): string
+    {
+        $locale = self::resolve($locale ?? app()->getLocale());
+
+        if ($locale === 'fa') {
+            return (string) ($pair['fa'] ?? $pair['en'] ?? '');
+        }
+
+        return (string) ($pair['en'] ?? $pair['fa'] ?? '');
+    }
+
     public static function isRtl(?string $locale = null): bool
     {
         $locale ??= app()->getLocale();

@@ -1,4 +1,6 @@
 @php
+    use App\Support\LocaleConfig;
+
     $typeCode = $report['type_code'] ?? '—';
 @endphp
 
@@ -43,8 +45,8 @@
             <div class="eg-result-hero-inner">
                 <p class="eg-result-eyebrow">{{ $content['hero_label'] ?? __('quiz.your_result') }}</p>
                 <div class="eg-result-type-badge">{{ $typeCode }}</div>
-                <h1 class="eg-result-title">{{ $report['title'] ?? ($content['archetype'] ?? '') }}</h1>
-                <p class="eg-result-summary">{{ $content['tagline'] ?? ($report['summary'] ?? '') }}</p>
+                <h1 class="eg-result-title">{{ $content['archetype'] ?? ($report['title'] ?? '') }}</h1>
+                <p class="eg-result-summary">{{ $content['tagline'] ?? LocaleConfig::pick($report['first_prescription'] ?? ['en' => $report['summary'] ?? '', 'fa' => $report['summary'] ?? ''], $session->locale) }}</p>
                 @if (! empty($content['mantra']))
                     <p class="eg-result-mantra">{{ $content['mantra'] }}</p>
                 @endif
@@ -53,11 +55,19 @@
     </div>
 
     <div class="container eg-result-content">
-        @include('partials.quiz-result-details', [
-            'report' => $report,
-            'content' => $content,
-            'theme' => 'light',
-        ])
+        @if (($report['template'] ?? '') === 'reboot_protocol')
+            @include('partials.quiz-result-reboot-protocol', [
+                'report' => $report,
+                'content' => $content,
+                'quizLocale' => $session->locale,
+            ])
+        @else
+            @include('partials.quiz-result-details', [
+                'report' => $report,
+                'content' => $content,
+                'theme' => 'light',
+            ])
+        @endif
 
         <section class="eg-result-panel eg-result-email-panel">
             @if ($emailSent)
