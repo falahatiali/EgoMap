@@ -39,7 +39,8 @@
 
         <form wire:submit="verify" class="eg-auth-form" x-data="egOtpInput()">
             <div
-                class="eg-otp-inputs @error('code') is-invalid @enderror"
+                class="eg-otp-inputs eg-force-ltr @error('code') is-invalid @enderror"
+                dir="ltr"
                 x-on:paste.prevent="handlePaste($event)"
             >
                 @foreach (range(0, 3) as $index)
@@ -48,6 +49,7 @@
                         inputmode="numeric"
                         maxlength="1"
                         pattern="[0-9]"
+                        dir="ltr"
                         class="eg-otp-digit form-control"
                         aria-label="{{ __('auth.digit', ['n' => $index + 1]) }}"
                         x-ref="digit{{ $index }}"

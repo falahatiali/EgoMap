@@ -16,11 +16,9 @@
                 @include('partials.language-switcher')
 
                 @auth
-                    @if ($nav['show_profile_link'])
-                        <a href="{{ route('profile') }}" class="eg-nav-auth-link eg-transition d-none d-sm-inline" wire:navigate>
-                            {{ __('profile.page_title') }}
-                        </a>
-                    @endif
+                    <a href="{{ route('profile') }}" class="eg-nav-auth-link eg-transition d-none d-sm-inline" wire:navigate>
+                        {{ __('profile.page_title') }}
+                    </a>
                     <form method="POST" action="{{ route('logout') }}" class="d-none d-sm-inline">
                         @csrf
                         <button type="submit" class="btn btn-link eg-nav-auth-link px-0">

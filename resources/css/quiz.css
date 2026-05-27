@@ -377,6 +377,12 @@ label.eg-quiz-option {
         inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
+.eg-quiz-option.is-locked {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
 .eg-quiz-option.is-active:hover {
     transform: translateY(-3px) scale(1.025);
 }

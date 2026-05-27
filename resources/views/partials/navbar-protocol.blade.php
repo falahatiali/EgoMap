@@ -20,12 +20,28 @@
         <div class="rh-nav__actions">
             @include('partials.language-switcher', ['variant' => 'nav'])
 
-            <a
-                href="{{ route('login', ['locale' => $locale]) }}"
-                class="rh-nav__btn rh-nav__btn--ghost"
-                wire:navigate
-                data-i18n="landing.nav_login"
-            >{{ __('landing.nav_login') }}</a>
+            @auth
+                <a
+                    href="{{ route('profile', ['locale' => $locale]) }}"
+                    class="rh-nav__btn rh-nav__btn--ghost"
+                    data-i18n="profile.page_title"
+                >
+                    <i class="fa-solid fa-user" aria-hidden="true"></i>
+                    <span>{{ __('profile.page_title') }}</span>
+                </a>
+                <form method="POST" action="{{ route('logout', ['locale' => $locale]) }}" class="d-inline">
+                    @csrf
+                    <button type="submit" class="rh-nav__btn rh-nav__btn--ghost">
+                        {{ __('auth.logout') }}
+                    </button>
+                </form>
+            @else
+                <a
+                    href="{{ route('login', ['locale' => $locale]) }}"
+                    class="rh-nav__btn rh-nav__btn--ghost"
+                    data-i18n="landing.nav_login"
+                >{{ __('landing.nav_login') }}</a>
+            @endauth
             <a
                 href="{{ route('onboarding', ['locale' => $locale]) }}"
                 class="rh-nav__btn rh-nav__btn--cta"

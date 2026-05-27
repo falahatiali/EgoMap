@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Profile;
 
+use App\Enums\QuestionType;
 use App\Enums\SessionStatus;
 use App\Livewire\Profile\Show;
 use App\Models\Quiz;
@@ -9,6 +10,7 @@ use App\Models\QuizSession;
 use App\Models\User;
 use App\Services\Quiz\QuizSessionService;
 use Database\Seeders\MbtiQuizSeeder;
+use Database\Seeders\RebootProtocolQuizSeeder;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -86,6 +88,34 @@ class ProfilePageTest extends TestCase
             ->test(Show::class)
             ->assertSee(__('profile.no_tests_title'), false)
             ->assertViewHas('totalTests', 0);
+    }
+
+    public function test_profile_shows_reboot_quiz_without_advanced_unlock(): void
+    {
+        $this->seed(RebootProtocolQuizSeeder::class);
+
+        $user = User::factory()->create();
+        $quiz = Quiz::query()->where('slug', 'reboot-protocol')->firstOrFail();
+        $service = app(QuizSessionService::class);
+        $session = $service->start($quiz);
+        $session->update(['user_id' => $user->id, 'email' => $user->email]);
+
+        foreach ($quiz->questions as $question) {
+            $value = $question->type === QuestionType::MultipleChoice
+                ? ['value' => [(string) $question->options()->orderBy('sort_order')->value('value')]]
+                : (string) $question->options()->orderBy('sort_order')->value('value');
+
+            $service->saveAnswer($session->fresh(), $question, $value);
+            $session->refresh();
+        }
+
+        $service->complete($session->fresh(['responses.question']));
+
+        $this->actingAs($user)
+            ->get(route('profile', ['locale' => 'en']))
+            ->assertOk()
+            ->assertSee(__('profile.my_tests_title'), false)
+            ->assertSee(__('profile.status_completed'), false);
     }
 
     public function test_profile_test_card_links_to_test_detail_for_completed_session(): void

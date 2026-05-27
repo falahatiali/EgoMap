@@ -52,8 +52,12 @@
         </div>
     </section>
 
+    @if ($showQuizHistory)
+        @include('livewire.profile.partials.quiz-history')
+    @endif
+
     {{-- Recovery journey --}}
-    <section class="container eg-profile-section">
+    <section class="container eg-profile-section pb-5">
         @if ($journey['needs_triage'])
             <div class="eg-profile-primary-tool eg-glass text-center mb-4">
                 <h2 class="h5 fw-semibold mb-2">{{ __('recovery.needs_triage_title') }}</h2>
@@ -129,87 +133,16 @@
         @endif
     </section>
 
-    {{-- Stats --}}
-    @if (! ($journey['needs_triage'] ?? true) && ($journey['show_tests'] ?? false))
-    <section class="container eg-profile-stats-row">
-        <div class="row g-3">
-            <div class="col-md-4">
-                <div class="eg-profile-stat eg-glass">
-                    <span class="eg-profile-stat-value">{{ $totalTests }}</span>
-                    <span class="eg-profile-stat-label">{{ __('profile.stat_total') }}</span>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="eg-profile-stat eg-glass">
-                    <span class="eg-profile-stat-value">{{ $totalInProgress }}</span>
-                    <span class="eg-profile-stat-label">{{ __('profile.stat_in_progress') }}</span>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="eg-profile-stat eg-glass">
-                    <span class="eg-profile-stat-value">{{ $totalCompleted }}</span>
-                    <span class="eg-profile-stat-label">{{ __('profile.stat_completed') }}</span>
-                </div>
-            </div>
-        </div>
-    </section>
-    @endif
-
-    {{-- My Tests --}}
-    @if (! ($journey['needs_triage'] ?? true) && ($journey['show_tests'] ?? false))
-    <section class="container eg-profile-section eg-profile-tests-section pb-5" id="my-tests">
-        <div class="eg-profile-section-head">
-            <div>
-                <h2 class="eg-display h4 mb-1">{{ __('profile.my_tests_title') }}</h2>
-                <p class="eg-text-muted mb-0">{{ __('profile.my_tests_subtitle') }}</p>
-            </div>
-            <a href="{{ route('quiz.start', 'mbti-personality') }}" class="eg-btn-primary btn-sm" wire:navigate>
-                <i class="fa-solid fa-plus me-1"></i>
-                {{ __('profile.take_new_test') }}
-            </a>
-        </div>
-
-        <div class="eg-profile-filters" role="tablist">
-            <button
-                type="button"
-                wire:click="setFilter('all')"
-                @class(['eg-profile-filter', 'is-active' => $filter === 'all'])
-            >
-                {{ __('profile.filter_all') }}
-                <span class="eg-profile-filter-count">{{ $totalTests }}</span>
-            </button>
-            <button
-                type="button"
-                wire:click="setFilter('in_progress')"
-                @class(['eg-profile-filter', 'is-active' => $filter === 'in_progress'])
-            >
-                {{ __('profile.filter_in_progress') }}
-                <span class="eg-profile-filter-count">{{ $totalInProgress }}</span>
-            </button>
-            <button
-                type="button"
-                wire:click="setFilter('completed')"
-                @class(['eg-profile-filter', 'is-active' => $filter === 'completed'])
-            >
-                {{ __('profile.filter_completed') }}
-                <span class="eg-profile-filter-count">{{ $totalCompleted }}</span>
-            </button>
-        </div>
-
-        @if ($filteredRecords->isEmpty())
+    @if (! $showQuizHistory && ! ($journey['needs_triage'] ?? false))
+        <section class="container eg-profile-section pb-5">
             <div class="eg-profile-empty eg-glass">
                 <i class="fa-solid fa-flask"></i>
                 <h3 class="h5 mb-2">{{ __('profile.no_tests_title') }}</h3>
                 <p class="mb-4">{{ __('profile.no_tests_body') }}</p>
-                <a href="{{ route('home') }}#tests" class="btn eg-btn-primary">{{ __('profile.browse_tests') }}</a>
+                <a href="{{ route('quiz.start', ['slug' => 'reboot-protocol']) }}" class="btn eg-btn-primary" wire:navigate>
+                    {{ __('landing.cta_step1') }}
+                </a>
             </div>
-        @else
-            <div class="row g-4">
-                @foreach ($filteredRecords as $record)
-                    @include('partials.profile-test-card', ['record' => $record])
-                @endforeach
-            </div>
-        @endif
-    </section>
+        </section>
     @endif
 </div>

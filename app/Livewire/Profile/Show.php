@@ -54,6 +54,7 @@ class Show extends Component
             'totalCompleted' => $completed->count(),
             'totalInProgress' => $inProgress->count(),
             'totalTests' => $records->count(),
+            'showQuizHistory' => $records->isNotEmpty(),
             'journey' => $journeyService->dashboardState($this->user),
         ]);
     }

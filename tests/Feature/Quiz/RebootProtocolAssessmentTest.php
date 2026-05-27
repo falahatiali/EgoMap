@@ -5,6 +5,7 @@ namespace Tests\Feature\Quiz;
 use App\Enums\QuestionType;
 use App\Livewire\Quiz\Take;
 use App\Models\Quiz;
+use App\Services\Pdf\Definitions\QuizResultPdfDefinitionFactory;
 use App\Services\Quiz\QuizSessionService;
 use App\Services\Quiz\RebootProtocol\RebootProtocolFlow;
 use App\Services\Quiz\RebootProtocol\RebootProtocolReportBuilder;
@@ -96,6 +97,38 @@ class RebootProtocolAssessmentTest extends TestCase
 
         $this->assertSame('reboot_protocol', $result->free_report['template']);
         $this->assertArrayHasKey('stability_score', $result->free_report);
+    }
+
+    public function test_reboot_pdf_definition_skips_mbti_dimension_sections(): void
+    {
+        $quiz = Quiz::query()
+            ->where('slug', RebootProtocolQuiz::SLUG)
+            ->with(['questions.options'])
+            ->firstOrFail();
+        $service = app(QuizSessionService::class);
+        $session = $service->start($quiz);
+
+        foreach ($quiz->questions as $question) {
+            $firstOption = (string) $question->options()->orderBy('sort_order')->value('value');
+
+            if ($question->type === QuestionType::MultipleChoice) {
+                $service->saveAnswer($session, $question, ['value' => [$firstOption]]);
+            } else {
+                $service->saveAnswer($session, $question, $firstOption);
+            }
+
+            $session->refresh();
+        }
+
+        $service->complete($session->fresh(['responses.question']));
+        $session->refresh()->load(['result', 'quiz']);
+
+        $document = QuizResultPdfDefinitionFactory::fromSession($session, 'fa');
+        $types = collect($document->sections)->pluck('type')->all();
+
+        $this->assertNotContains('type_letters', $types);
+        $this->assertNotContains('dimension_bars', $types);
+        $this->assertNotEmpty($document->sections);
     }
 
     public function test_emotional_collapse_triggers_safety_prompt(): void

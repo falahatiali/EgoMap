@@ -101,32 +101,12 @@ function bindKeyboard() {
 
         const button = root.querySelector(`[data-hotkey="${key}"]`);
 
-        if (! button || button.disabled) {
+        if (! button || button.disabled || button.classList.contains('is-locked')) {
             return;
         }
 
         event.preventDefault();
         button.click();
-    });
-}
-
-function observeQuizRoot() {
-    const observer = new MutationObserver(() => {
-        document.querySelectorAll('.eg-quiz-option').forEach((el) => {
-            if (el.dataset.bound === '1') {
-                return;
-            }
-
-            el.dataset.bound = '1';
-            bindOption(el);
-        });
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
-
-    document.querySelectorAll('.eg-quiz-option').forEach((el) => {
-        el.dataset.bound = '1';
-        bindOption(el);
     });
 }
 
@@ -145,7 +125,6 @@ function rebindQuizUi() {
 
 document.addEventListener('livewire:init', () => {
     bindKeyboard();
-    observeQuizRoot();
     rebindQuizUi();
 
     Livewire.hook('morph.updated', () => {

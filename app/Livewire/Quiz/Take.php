@@ -4,10 +4,8 @@ namespace App\Livewire\Quiz;
 
 use App\Enums\QuestionType;
 use App\Enums\SessionStatus;
-use App\Models\Question;
-use App\Models\QuestionOption;
+use App\Livewire\Quiz\Concerns\AnswersQuizQuestions;
 use App\Models\Quiz;
-use App\Models\QuizResponse;
 use App\Models\QuizSession;
 use App\Services\Quiz\QuizSessionClaimService;
 use App\Services\Quiz\QuizSessionService;
@@ -15,7 +13,6 @@ use App\Services\Quiz\RebootProtocol\RebootProtocolFlow;
 use App\Support\LocaleConfig;
 use App\Support\QuizResultViewData;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -23,6 +20,8 @@ use Livewire\Component;
 #[Layout('layouts.quiz')]
 class Take extends Component
 {
+    use AnswersQuizQuestions;
+
     public ?string $slug = null;
 
     public string $uuid = '';
@@ -202,65 +201,6 @@ class Take extends Component
         $this->redirectRoute('quiz.session', ['uuid' => $session->uuid], navigate: true);
     }
 
-    public function selectAnswer(string $value, QuizSessionService $quizSessionService, RebootProtocolFlow $flow): void
-    {
-        if ($this->session === null) {
-            return;
-        }
-
-        $question = $this->currentQuestion;
-
-        if ($question === null || $question->type === QuestionType::MultipleChoice) {
-            return;
-        }
-
-        $quizSessionService->saveAnswer($this->session, $question, $value);
-        $this->reloadSession();
-
-        if ($flow->isRebootQuiz($this->slug) && $flow->shouldPromptSafety($this->session, $question)) {
-            $flow->markSafetyPending($this->session);
-            $this->reloadSession();
-
-            return;
-        }
-
-        $this->advanceOrComplete($quizSessionService);
-    }
-
-    public function pickSingleChoice(string $value): void
-    {
-        if ($this->session === null || $this->isMultipleChoice) {
-            return;
-        }
-
-        $this->singleSelection = $value;
-    }
-
-    public function submitSingleChoice(QuizSessionService $quizSessionService, RebootProtocolFlow $flow): void
-    {
-        if ($this->session === null || $this->singleSelection === null || $this->singleSelection === '') {
-            return;
-        }
-
-        $question = $this->currentQuestion;
-
-        if ($question === null || $question->type !== QuestionType::SingleChoice) {
-            return;
-        }
-
-        $quizSessionService->saveAnswer($this->session, $question, $this->singleSelection);
-        $this->reloadSession();
-
-        if ($flow->isRebootQuiz($this->slug) && $flow->shouldPromptSafety($this->session, $question)) {
-            $flow->markSafetyPending($this->session);
-            $this->reloadSession();
-
-            return;
-        }
-
-        $this->advanceOrComplete($quizSessionService);
-    }
-
     public function submitSafetyAnswer(string $value, RebootProtocolFlow $flow, QuizSessionService $quizSessionService): void
     {
         if ($this->session === null || ! $this->isRebootProtocol) {
@@ -315,128 +255,9 @@ class Take extends Component
         $this->redirectRoute('quiz.session', ['uuid' => $session->uuid], navigate: true);
     }
 
-    private function advanceOrComplete(QuizSessionService $quizSessionService): void
-    {
-        if ($this->session === null) {
-            return;
-        }
-
-        $lastSort = (int) $this->session->quiz->questions->max('sort_order');
-
-        if ($this->session->current_sort_order > $lastSort) {
-            $quizSessionService->complete($this->session);
-            $this->redirectRoute('quiz.result', ['uuid' => $this->session->uuid], navigate: true);
-        }
-    }
-
-    public function toggleMultiChoice(string $value): void
-    {
-        if ($this->session === null) {
-            return;
-        }
-
-        $question = $this->currentQuestion;
-
-        if ($question === null || $question->type !== QuestionType::MultipleChoice) {
-            return;
-        }
-
-        $value = (string) $value;
-        $this->multiSelection = array_values(array_unique(array_map('strval', $this->multiSelection)));
-
-        if (in_array($value, $this->multiSelection, true)) {
-            $this->multiSelection = array_values(array_filter($this->multiSelection, fn ($item) => $item !== $value));
-        } else {
-            $maxSelections = (int) ($question->config['max_selections'] ?? 0);
-
-            if ($maxSelections > 0 && count($this->multiSelection) >= $maxSelections) {
-                return;
-            }
-
-            $this->multiSelection[] = $value;
-        }
-
-    }
-
-    public function submitMultiChoice(QuizSessionService $quizSessionService, RebootProtocolFlow $flow): void
-    {
-        if ($this->session === null) {
-            return;
-        }
-
-        $question = $this->currentQuestion;
-
-        if ($question === null || $question->type !== QuestionType::MultipleChoice) {
-            return;
-        }
-
-        $selections = array_values(array_unique(array_map('strval', $this->multiSelection)));
-
-        if ($selections === []) {
-            return;
-        }
-
-        $this->multiSelection = $selections;
-
-        $quizSessionService->saveAnswer($this->session, $question, [
-            'value' => $selections,
-        ]);
-
-        $this->reloadSession();
-
-        if ($flow->isRebootQuiz($this->slug) && $flow->shouldPromptSafety($this->session, $question)) {
-            $flow->markSafetyPending($this->session);
-            $this->reloadSession();
-
-            return;
-        }
-
-        $this->advanceOrComplete($quizSessionService);
-    }
-
-    public function skipQuestion(QuizSessionService $quizSessionService): void
-    {
-        if ($this->session === null) {
-            return;
-        }
-
-        $question = $this->currentQuestion;
-
-        if ($question === null) {
-            return;
-        }
-
-        $quizSessionService->saveAnswer($this->session, $question, [
-            'value' => [],
-            'skipped' => true,
-        ]);
-
-        $this->reloadSession();
-
-        $this->advanceOrComplete($quizSessionService);
-    }
-
     public function toggleSound(): void
     {
         $this->soundEnabled = ! $this->soundEnabled;
-    }
-
-    public function goBack(): void
-    {
-        if ($this->session === null || $this->session->current_sort_order <= 1) {
-            return;
-        }
-
-        $this->session->update([
-            'current_sort_order' => $this->session->current_sort_order - 1,
-        ]);
-
-        $this->reloadSession();
-    }
-
-    public function getRequiresContinueProperty(): bool
-    {
-        return $this->isMultipleChoice;
     }
 
     public function getCanGoBackProperty(): bool
@@ -467,159 +288,12 @@ class Take extends Component
         return app(RebootProtocolFlow::class)->isCrisis($this->session);
     }
 
-    public function getCurrentQuestionProperty(): ?Question
-    {
-        if ($this->session === null) {
-            return null;
-        }
-
-        $question = $this->session->quiz->questions
-            ->firstWhere('sort_order', $this->session->current_sort_order);
-
-        return $question?->loadMissing('options');
-    }
-
-    public function getProgressPercentProperty(): int
-    {
-        if ($this->session === null) {
-            return 0;
-        }
-
-        $total = max($this->session->quiz->questions->count(), 1);
-        $current = min($this->session->current_sort_order, $total);
-
-        return (int) round(($current / $total) * 100);
-    }
-
-    /**
-     * @return Collection<int, QuestionOption>
-     */
-    public function getCurrentOptionsProperty(): Collection
-    {
-        return $this->currentQuestion?->options ?? collect();
-    }
-
-    public function getIsLikertProperty(): bool
-    {
-        return $this->currentQuestion?->type === QuestionType::Likert;
-    }
-
-    public function getIsMultipleChoiceProperty(): bool
-    {
-        return $this->currentQuestion?->type === QuestionType::MultipleChoice;
-    }
-
-    private function reloadSession(): void
-    {
-        if ($this->session === null) {
-            return;
-        }
-
-        $this->session = $this->session->fresh([
-            'quiz.questions' => fn ($query) => $query->with('options'),
-            'responses',
-        ]);
-
-        $this->syncSelections();
-    }
-
-    private function syncSelections(): void
-    {
-        $this->syncMultiSelection();
-        $this->syncSingleSelection();
-    }
-
-    private function syncMultiSelection(): void
-    {
-        if ($this->session === null) {
-            $this->multiSelection = [];
-
-            return;
-        }
-
-        $question = $this->currentQuestion;
-
-        if ($question === null || $question->type !== QuestionType::MultipleChoice) {
-            $this->multiSelection = [];
-
-            return;
-        }
-
-        $response = $this->session->responses
-            ?->firstWhere('question_id', $question->id);
-
-        if (! $response instanceof QuizResponse) {
-            $this->multiSelection = [];
-
-            return;
-        }
-
-        $raw = $response->value['value'] ?? [];
-
-        if (! is_array($raw)) {
-            $this->multiSelection = [];
-
-            return;
-        }
-
-        $this->multiSelection = array_values(array_filter(array_map('strval', $raw), fn ($item) => $item !== ''));
-    }
-
-    private function syncSingleSelection(): void
-    {
-        if ($this->session === null) {
-            $this->singleSelection = null;
-
-            return;
-        }
-
-        $question = $this->currentQuestion;
-
-        if ($question === null || $question->type !== QuestionType::SingleChoice) {
-            $this->singleSelection = null;
-
-            return;
-        }
-
-        $response = $this->session->responses
-            ?->firstWhere('question_id', $question->id);
-
-        if (! $response instanceof QuizResponse) {
-            $this->singleSelection = null;
-
-            return;
-        }
-
-        $raw = $response->value['value'] ?? null;
-
-        if (is_array($raw) || $raw === null || $raw === '') {
-            $this->singleSelection = null;
-
-            return;
-        }
-
-        $this->singleSelection = (string) $raw;
-    }
-
     /**
      * @return list<string>
      */
     public function getQuizLocaleProperty(): string
     {
         return LocaleConfig::resolve($this->session?->locale ?? app()->getLocale());
-    }
-
-    public function getLikertLabelsProperty(): array
-    {
-        if ($this->session === null) {
-            return [];
-        }
-
-        $locale = $this->quizLocale;
-
-        return $this->session->quiz->settings['likert_labels'][$locale]
-            ?? $this->session->quiz->settings['likert_labels']['en']
-            ?? ['1', '2', '3', '4', '5'];
     }
 
     public function render(): View
@@ -649,12 +323,14 @@ class Take extends Component
             ]);
         }
 
+        $question = $this->resolveCurrentQuestion();
+
         return view('livewire.quiz.take', [
-            'question' => $this->currentQuestion,
-            'options' => $this->currentOptions,
-            'isLikert' => $this->isLikert,
-            'isMultipleChoice' => $this->isMultipleChoice,
-            'requiresContinue' => $this->requiresContinue,
+            'question' => $question,
+            'options' => $question?->options ?? collect(),
+            'isLikert' => $question?->type === QuestionType::Likert,
+            'isMultipleChoice' => $question?->type === QuestionType::MultipleChoice,
+            'requiresContinue' => $question?->type === QuestionType::MultipleChoice,
             'multiSelection' => $this->multiSelection,
             'singleSelection' => $this->singleSelection,
             'progress' => $this->progressPercent,

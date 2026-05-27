@@ -26,6 +26,7 @@
     >
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
 </head>
 <body class="eg-body eg-quiz-body">
 
@@ -33,6 +34,7 @@
         {{ $slot }}
     </main>
 
+    @livewireScripts
     @stack('scripts')
 </body>
 </html>

@@ -53,12 +53,10 @@
                     @include('partials.language-switcher')
 
                     @auth
-                        @if ($nav['show_profile_link'])
-                            <a href="{{ route('profile') }}" class="eg-nav-profile-link eg-transition" wire:navigate>
-                                <span class="eg-nav-profile-avatar">{{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}</span>
-                                <span class="d-none d-xl-inline">{{ __('profile.page_title') }}</span>
-                            </a>
-                        @endif
+                        <a href="{{ route('profile') }}" class="eg-nav-profile-link eg-transition" wire:navigate>
+                            <span class="eg-nav-profile-avatar">{{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}</span>
+                            <span class="d-none d-xl-inline">{{ __('profile.page_title') }}</span>
+                        </a>
                         <form method="POST" action="{{ route('logout') }}" class="d-inline">
                             @csrf
                             <button type="submit" class="btn btn-link eg-nav-auth-link px-0">

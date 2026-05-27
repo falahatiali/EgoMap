@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Livewire\Home\Protocol;
+use App\Models\User;
 use Database\Seeders\MbtiQuizSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -55,6 +56,18 @@ class HomePageTest extends TestCase
         $this->assertStringContainsString('data-locale-switch="fa"', $navHtml);
         $this->assertStringContainsString(route('login', ['locale' => 'en']), $navHtml);
         $this->assertStringContainsString(route('onboarding', ['locale' => 'en']), $navHtml);
+    }
+
+    public function test_home_nav_shows_profile_link_for_authenticated_user(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get(route('home', ['locale' => 'fa']));
+
+        $response->assertOk();
+        $response->assertSee(route('profile', ['locale' => 'fa']), false);
+        $response->assertSee(__('profile.page_title'), false);
+        $response->assertDontSee(__('landing.nav_login'), false);
     }
 
     public function test_start_step1_redirects_to_reboot_protocol_quiz(): void

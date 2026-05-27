@@ -15,6 +15,10 @@ export default defineConfig({
         }),
     ],
     server: {
+        host: 'egomap.test',
+        hmr: {
+            host: 'egomap.test',
+        },
         watch: {
             ignored: ['**/storage/framework/views/**'],
         },

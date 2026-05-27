@@ -71,7 +71,7 @@ class RecoveryJourneyService
         return [
             'show_explore_links' => $this->hasAdvancedFeaturesUnlocked($user),
             'show_no_contact_link' => $this->hasActivatedNoContact($user),
-            'show_profile_link' => $user !== null && $this->hasCompletedTriage($user),
+            'show_profile_link' => $user !== null,
         ];
     }
 

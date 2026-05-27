@@ -126,12 +126,14 @@ class QuizResultPdfDefinitionFactory
             ],
         ];
 
-        if (! empty($report['dimensions'])) {
+        $mbtiDimensions = self::mbtiDimensionRows($report['dimensions'] ?? null);
+
+        if ($mbtiDimensions !== []) {
             $sections[] = [
                 'type' => PdfSectionType::TypeLetters->value,
                 'title' => __('pdf.type_letters_title', locale: $locale),
                 'intro' => __('pdf.type_letters_intro', locale: $locale),
-                'items' => collect($report['dimensions'])->map(function (array $dimension): array {
+                'items' => collect($mbtiDimensions)->map(function (array $dimension): array {
                     return [
                         'left' => (string) ($dimension['left_label'] ?? ''),
                         'right' => (string) ($dimension['right_label'] ?? ''),
@@ -145,7 +147,7 @@ class QuizResultPdfDefinitionFactory
                 'type' => PdfSectionType::DimensionBars->value,
                 'title' => __('quiz.dimension_breakdown', locale: $locale),
                 'intro' => __('pdf.dimensions_intro', locale: $locale),
-                'items' => collect($report['dimensions'])->map(function (array $dimension) use ($locale): array {
+                'items' => collect($mbtiDimensions)->map(function (array $dimension) use ($locale): array {
                     $prefersRight = ($dimension['preference'] ?? '') === ($dimension['right_label'] ?? '');
                     $leftPercent = (int) ($dimension['percent'] ?? 50);
                     $winPercent = $prefersRight ? (100 - $leftPercent) : $leftPercent;
@@ -319,6 +321,27 @@ class QuizResultPdfDefinitionFactory
             actionUrl: route('quiz.result', ['uuid' => $session->uuid]),
             actionLabel: __('pdf.view_online', locale: $locale),
         );
+    }
+
+    /**
+     * MBTI reports use a list of dimension rows; Reboot Protocol uses keyed floats.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private static function mbtiDimensionRows(mixed $dimensions): array
+    {
+        if (! is_array($dimensions) || $dimensions === []) {
+            return [];
+        }
+
+        $first = reset($dimensions);
+
+        if (! is_array($first)) {
+            return [];
+        }
+
+        /** @var list<array<string, mixed>> $dimensions */
+        return array_values($dimensions);
     }
 
     private static function darkenAccent(string $hex): string
