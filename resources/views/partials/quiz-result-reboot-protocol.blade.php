@@ -43,18 +43,8 @@
 @if (! empty($content['sections']))
     @foreach ($content['sections'] as $section)
         <section class="eg-result-panel">
-            <h2 class="eg-result-panel-title">
-                {{ LocaleConfig::pick([
-                    'en' => $section['heading_en'] ?? '',
-                    'fa' => $section['heading_fa'] ?? '',
-                ], $locale) }}
-            </h2>
-            <p class="eg-result-body-text mb-0">
-                {{ LocaleConfig::pick([
-                    'en' => $section['body_en'] ?? '',
-                    'fa' => $section['body_fa'] ?? '',
-                ], $locale) }}
-            </p>
+            <h2 class="eg-result-panel-title">{{ $section['heading'] ?? '' }}</h2>
+            <p class="eg-result-body-text mb-0">{{ $section['body'] ?? '' }}</p>
         </section>
     @endforeach
 @endif

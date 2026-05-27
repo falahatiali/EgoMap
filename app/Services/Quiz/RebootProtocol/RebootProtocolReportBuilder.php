@@ -42,6 +42,7 @@ class RebootProtocolReportBuilder
             'type_code' => $this->phaseCode($phaseKey),
             'title' => $phase['en'],
             'summary' => $prescription['en'],
+            'score_tagline' => $this->scoreTagline($score),
             'report_disclaimer' => $disclaimer,
             'stability_score' => $score,
             'phase' => $phase,
@@ -60,12 +61,12 @@ class RebootProtocolReportBuilder
             'analysis_version' => $analysis['version'],
             'dimensions' => $analysis['dimensions'],
             'content' => [
-                'hero_label' => 'Your first map',
+                'hero_label' => ['en' => 'Your first map', 'fa' => 'نقشه قدم اول تو'],
                 'disclaimer_en' => $disclaimer['en'],
                 'disclaimer_fa' => $disclaimer['fa'],
-                'archetype' => $phase['en'],
-                'tagline' => $this->scoreTagline($score)['en'],
-                'narrative' => $phaseNarrative['en'],
+                'archetype' => $phase,
+                'tagline' => $this->scoreTagline($score),
+                'narrative' => $phaseNarrative,
                 'sections' => $this->contentSections($mainRisk, $noContact, $relationship, $self, $analysis['detected_patterns'], $phaseBlend),
                 'action_steps' => array_map(
                     fn (array $step, int $i) => [
@@ -112,7 +113,7 @@ class RebootProtocolReportBuilder
             $label = $this->engine->phaseLabel($key);
             $pct = (int) round($weight / array_sum($top) * 100);
             $partsEn[] = "{$pct}% {$label['en']}";
-            $partsFa[] = "{$pct}٪ {$label['fa']}";
+            $partsFa[] = "{$pct}% {$label['fa']}";
         }
 
         if ($partsEn === []) {
@@ -178,7 +179,7 @@ class RebootProtocolReportBuilder
 
         if ($patterns !== []) {
             $patternEn = collect($patterns)->map(fn (array $p): string => "{$p['en']} ({$this->confidencePercent($p['confidence'])}%)")->implode('; ');
-            $patternFa = collect($patterns)->map(fn (array $p): string => "{$p['fa']} ({$this->confidencePercent($p['confidence'])}٪)")->implode('؛ ');
+            $patternFa = collect($patterns)->map(fn (array $p): string => "{$p['fa']} ({$this->confidencePercent($p['confidence'])}%)")->implode('؛ ');
 
             $sections[] = [
                 'heading_en' => 'Detected patterns',
@@ -423,7 +424,7 @@ class RebootProtocolReportBuilder
 
         return [
             'en' => "Recovery Stability Score: {$score}%. {$band['en']}",
-            'fa' => "امتیاز ثبات بازیابی: {$score}٪. {$band['fa']}",
+            'fa' => "امتیاز ثبات بازیابی: {$score}%. {$band['fa']}",
         ];
     }
 

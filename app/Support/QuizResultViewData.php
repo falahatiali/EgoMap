@@ -9,19 +9,20 @@ class QuizResultViewData
     /**
      * @return array{report: array<string, mixed>, content: array<string, mixed>, palette: array{accent: string, soft: string, glow: string, group: string}}
      */
-    public static function fromSession(QuizSession $session): array
+    public static function fromSession(QuizSession $session, ?string $locale = null): array
     {
         $session->loadMissing(['result.outcomeProfile', 'quiz']);
+
+        $locale = LocaleConfig::resolve($locale ?? $session->locale ?? app()->getLocale());
 
         $report = $session->result?->free_report ?? [];
         $report = is_array($report) ? $report : [];
 
         if (($report['template'] ?? '') === 'reboot_protocol') {
-            return self::fromRebootProtocolReport($report, $session);
+            return self::fromRebootProtocolReport($report, $locale);
         }
 
         $typeCode = strtolower((string) ($report['type_code'] ?? ''));
-        $locale = LocaleConfig::resolve($session->locale ?? app()->getLocale());
 
         $content = self::resolveContent($session, $report);
         $content = MbtiContentCatalog::buildContentForType($typeCode, $locale, $content);
@@ -53,18 +54,11 @@ class QuizResultViewData
      * @param  array<string, mixed>  $report
      * @return array{report: array<string, mixed>, content: array<string, mixed>, palette: array{accent: string, soft: string, glow: string, group: string}}
      */
-    private static function fromRebootProtocolReport(array $report, QuizSession $session): array
+    private static function fromRebootProtocolReport(array $report, string $locale): array
     {
-        $locale = LocaleConfig::resolve($session->locale ?? app()->getLocale());
-        $content = is_array($report['content'] ?? null) ? $report['content'] : [];
-        $content['hero_label'] = $content['hero_label'] ?? __('quiz.reboot.hero_label', [], $locale);
-        $phase = is_array($report['phase'] ?? null) ? $report['phase'] : [];
-        $content['tagline'] = $content['tagline'] ?? LocaleConfig::pick($phase, $locale);
-        $content['archetype'] = $content['archetype'] ?? LocaleConfig::pick($phase, $locale);
-
         return [
-            'report' => $report,
-            'content' => $content,
+            'report' => RebootProtocolLocalizedCopy::localizeReport($report, $locale),
+            'content' => RebootProtocolLocalizedCopy::localizeContent($report, $locale),
             'palette' => [
                 'accent' => '#34D399',
                 'soft' => 'rgba(52, 211, 153, 0.12)',
