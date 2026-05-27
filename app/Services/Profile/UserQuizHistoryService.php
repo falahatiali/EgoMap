@@ -7,8 +7,10 @@ use App\Models\QuizSession;
 use App\Models\User;
 use App\Services\Quiz\QuizSessionClaimService;
 use App\Services\Quiz\QuizSessionService;
+use App\Support\LocaleConfig;
 use App\Support\MbtiTypePalette;
 use App\Support\QuizResultViewData;
+use App\Support\RebootProtocolQuiz;
 use Illuminate\Support\Collection;
 
 class UserQuizHistoryService
@@ -26,9 +28,11 @@ class UserQuizHistoryService
      *     quiz_name: string,
      *     quiz_slug: string,
      *     type_code: ?string,
+     *     type_label: ?string,
      *     result_title: ?string,
      *     tagline: ?string,
      *     palette: array{accent: string, soft: string, glow: string, group: string},
+     *     is_reboot_protocol: bool,
      *     is_in_progress: bool,
      *     progress_percent: int,
      *     current_question: int,
@@ -75,9 +79,11 @@ class UserQuizHistoryService
      *     quiz_name: string,
      *     quiz_slug: string,
      *     type_code: ?string,
+     *     type_label: ?string,
      *     result_title: ?string,
      *     tagline: ?string,
      *     palette: array{accent: string, soft: string, glow: string, group: string},
+     *     is_reboot_protocol: bool,
      *     is_in_progress: bool,
      *     progress_percent: int,
      *     current_question: int,
@@ -101,32 +107,45 @@ class UserQuizHistoryService
             ? (int) round(($currentQuestion / $totalQuestions) * 100)
             : 100;
 
+        $sessionLocale = LocaleConfig::resolve($session->locale ?? $locale);
         $report = [];
         $tagline = null;
+        $typeLabel = null;
         $palette = MbtiTypePalette::for('');
+        $isRebootProtocol = (string) $session->quiz->slug === RebootProtocolQuiz::SLUG;
 
         if (! $isInProgress) {
-            $resultData = QuizResultViewData::fromSession($session);
+            $resultData = QuizResultViewData::fromSession($session, $sessionLocale);
             $report = $resultData['report'];
             $tagline = (string) ($resultData['content']['tagline'] ?? ($report['summary'] ?? ''));
+            $typeLabel = (string) ($resultData['content']['type_label'] ?? ($report['title'] ?? ''));
             $palette = $resultData['palette'];
         }
 
         $typeCode = isset($report['type_code']) ? (string) $report['type_code'] : null;
-        $resultTitle = isset($report['title']) ? (string) $report['title'] : null;
+        $resultTitle = $typeLabel !== null && $typeLabel !== ''
+            ? $typeLabel
+            : (isset($report['title']) ? (string) $report['title'] : null);
 
-        if ($typeCode !== null && $typeCode !== '') {
+        if (
+            $typeCode !== null
+            && $typeCode !== ''
+            && ($report['template'] ?? '') !== 'reboot_protocol'
+            && ! $isRebootProtocol
+        ) {
             $palette = MbtiTypePalette::for(strtolower($typeCode));
         }
 
         return [
             'session' => $session,
-            'quiz_name' => (string) $session->quiz->getTranslation('name', $locale, true),
+            'quiz_name' => (string) $session->quiz->getTranslation('name', $sessionLocale, true),
             'quiz_slug' => (string) $session->quiz->slug,
             'type_code' => $typeCode,
+            'type_label' => $typeLabel !== '' ? $typeLabel : null,
             'result_title' => $resultTitle,
             'tagline' => $tagline !== '' ? $tagline : null,
             'palette' => $palette,
+            'is_reboot_protocol' => $isRebootProtocol || (($report['template'] ?? '') === 'reboot_protocol'),
             'is_in_progress' => $isInProgress,
             'progress_percent' => $progressPercent,
             'current_question' => $currentQuestion,
@@ -135,10 +154,10 @@ class UserQuizHistoryService
                 ? route('quiz.session', ['uuid' => $session->uuid])
                 : route('profile.test.show', ['uuid' => $session->uuid]),
             'completed_at_label' => $session->completed_at
-                ? $session->completed_at->locale($locale)->translatedFormat('j M Y')
+                ? $session->completed_at->locale($sessionLocale)->translatedFormat('j M Y')
                 : null,
             'started_at_label' => $session->started_at
-                ? $session->started_at->locale($locale)->diffForHumans()
+                ? $session->started_at->locale($sessionLocale)->diffForHumans()
                 : null,
         ];
     }

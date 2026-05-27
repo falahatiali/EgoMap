@@ -114,6 +114,10 @@
     color: var(--eg-accent-bright);
 }
 
+.eg-profile-test-card-body .eg-profile-progress {
+    margin-top: 0.15rem;
+}
+
 .eg-profile-progress {
     height: 0.35rem;
     background: rgba(255, 255, 255, 0.06);
@@ -305,8 +309,10 @@
 .eg-profile-test-card {
     display: flex;
     flex-direction: column;
+    gap: 0;
     height: 100%;
-    padding: var(--eg-space-lg);
+    min-height: 15.5rem;
+    padding: 1.35rem 1.4rem 1.25rem;
     border-radius: var(--eg-radius);
     text-decoration: none;
     color: inherit;
@@ -322,26 +328,43 @@
 
 .eg-profile-test-card-top {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
-    gap: var(--eg-space-sm);
-    margin-bottom: var(--eg-space-md);
+    gap: 0.75rem;
+    margin-bottom: 1.15rem;
+    flex-shrink: 0;
 }
 
 .eg-profile-test-badge {
-    width: 3rem;
-    height: 3rem;
-    border-radius: var(--eg-radius-sm);
-    background: linear-gradient(135deg, var(--eg-test-accent, var(--eg-accent)), transparent);
-    border: 1px solid var(--eg-border);
-    box-shadow: 0 8px 24px var(--eg-test-glow, var(--eg-accent-glow));
+    width: 3.25rem;
+    height: 3.25rem;
+    flex-shrink: 0;
+    border-radius: 0.85rem;
+    background: linear-gradient(145deg, color-mix(in srgb, var(--eg-test-accent, var(--eg-accent)) 42%, transparent), transparent 72%);
+    border: 1px solid color-mix(in srgb, var(--eg-test-accent, var(--eg-accent)) 35%, var(--eg-border));
+    box-shadow: 0 10px 28px var(--eg-test-glow, var(--eg-accent-glow));
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 800;
-    font-size: 0.72rem;
-    letter-spacing: 0.06em;
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+    line-height: 1;
     color: var(--eg-text);
+}
+
+.eg-profile-test-badge i {
+    font-size: 1.15rem;
+    opacity: 0.95;
+}
+
+.eg-profile-test-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    flex: 1 1 auto;
+    min-height: 0;
+    margin-bottom: 1rem;
 }
 
 .eg-profile-status--done {
@@ -350,23 +373,29 @@
 }
 
 .eg-profile-test-name {
-    font-size: 1.05rem;
+    font-family: var(--eg-font-display);
+    font-size: 1.08rem;
     font-weight: 600;
-    margin-bottom: 0.35rem;
+    line-height: 1.45;
+    margin: 0;
     color: var(--eg-text);
 }
 
 .eg-profile-test-result {
-    font-size: 0.9rem;
-    margin-bottom: 0;
-    line-height: 1.5;
+    font-size: 0.92rem;
+    font-weight: 500;
+    margin: 0;
+    line-height: 1.6;
+    color: color-mix(in srgb, var(--eg-text) 92%, var(--eg-text-muted));
 }
 
 .eg-profile-test-tagline {
-    color: #94a3b8;
-    line-height: 1.5;
+    margin: 0;
+    font-size: 0.84rem;
+    color: var(--eg-text-muted);
+    line-height: 1.7;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -375,11 +404,33 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--eg-space-sm);
+    gap: 0.75rem;
     margin-top: auto;
-    padding-top: var(--eg-space-md);
+    padding-top: 1rem;
+    border-top: 1px solid var(--eg-border);
     font-size: 0.8rem;
     color: var(--eg-text-muted);
+    flex-shrink: 0;
+}
+
+.eg-profile-test-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    line-height: 1.4;
+}
+
+.eg-profile-test-date i {
+    opacity: 0.85;
+}
+
+[dir="rtl"] .eg-profile-test-card-body,
+[dir="rtl"] .eg-profile-test-meta {
+    text-align: right;
+}
+
+[dir="rtl"] .eg-profile-test-date {
+    flex-direction: row-reverse;
 }
 
 .eg-profile-test-arrow {
