@@ -101,12 +101,17 @@
                             @endphp
                             <button
                                 type="button"
-                                class="eg-quiz-option"
+                                @class(['eg-quiz-option', 'is-active' => $isMultipleChoice && in_array($option->value, $multiSelection ?? [], true)])
                                 data-accent="{{ $accent }}"
                                 data-hotkey="{{ $hotkey }}"
-                                wire:click="selectAnswer('{{ $option->value }}')"
+                                @if ($isMultipleChoice)
+                                    wire:click="toggleMultiChoice('{{ $option->value }}')"
+                                @else
+                                    wire:click="selectAnswer('{{ $option->value }}')"
+                                @endif
                                 wire:loading.attr="disabled"
-                                wire:target="selectAnswer"
+                                wire:target="{{ $isMultipleChoice ? 'toggleMultiChoice,submitMultiChoice,skipQuestion' : 'selectAnswer' }}"
+                                aria-pressed="{{ $isMultipleChoice ? (in_array($option->value, $multiSelection ?? [], true) ? 'true' : 'false') : 'false' }}"
                             >
                                 <span class="eg-quiz-option-icon">
                                     <i class="fa-solid {{ $icon }}"></i>
@@ -121,6 +126,30 @@
                             </button>
                         @endforeach
                     </div>
+
+                    @if ($isMultipleChoice)
+                        <div class="eg-quiz-multi-actions">
+                            <button
+                                type="button"
+                                class="eg-quiz-next-btn"
+                                wire:click="submitMultiChoice"
+                                wire:loading.attr="disabled"
+                                wire:target="submitMultiChoice,skipQuestion"
+                            >
+                                <i class="fa-solid fa-arrow-right" data-icon-directional></i>
+                                <span>{{ __('quiz.continue') }}</span>
+                            </button>
+                            <button
+                                type="button"
+                                class="eg-quiz-skip-btn"
+                                wire:click="skipQuestion"
+                                wire:loading.attr="disabled"
+                                wire:target="submitMultiChoice,skipQuestion"
+                            >
+                                <span>{{ __('quiz.skip') }}</span>
+                            </button>
+                        </div>
+                    @endif
                 @endif
 
                 <p class="eg-quiz-keyboard-hint">

@@ -8,6 +8,7 @@ use App\Models\Question;
 use App\Models\QuestionOption;
 use App\Models\Quiz;
 use App\Models\QuizSession;
+use App\Models\QuizResponse;
 use App\Services\Quiz\QuizSessionClaimService;
 use App\Services\Quiz\QuizSessionService;
 use App\Support\QuizResultViewData;
@@ -32,6 +33,9 @@ class Take extends Component
 
     public bool $soundEnabled = true;
 
+    /** @var list<string> */
+    public array $multiSelection = [];
+
     public function mount(?string $slug = null, ?string $uuid = null): void
     {
         $quizSessionService = app(QuizSessionService::class);
@@ -51,6 +55,7 @@ class Take extends Component
             $this->session = $session;
             $this->slug = $session->quiz->slug;
             $this->soundEnabled = (bool) ($session->quiz->settings['sound_enabled'] ?? true);
+            $this->syncMultiSelection();
 
             $claimService = app(QuizSessionClaimService::class);
             $claimService->rememberGuestSession($session);
@@ -198,6 +203,84 @@ class Take extends Component
 
         $quizSessionService->saveAnswer($this->session, $question, $value);
         $this->session->refresh()->load(['quiz.questions' => fn ($q) => $q->with('options')]);
+        $this->syncMultiSelection();
+
+        $lastSort = (int) $this->session->quiz->questions->max('sort_order');
+
+        if ($this->session->current_sort_order > $lastSort) {
+            $quizSessionService->complete($this->session);
+            $this->redirectRoute('quiz.result', ['uuid' => $this->session->uuid], navigate: true);
+        }
+    }
+
+    public function toggleMultiChoice(string $value): void
+    {
+        if ($this->session === null) {
+            return;
+        }
+
+        $question = $this->currentQuestion;
+
+        if ($question === null || $question->type !== QuestionType::MultipleChoice) {
+            return;
+        }
+
+        $this->multiSelection = array_values(array_unique(array_map('strval', $this->multiSelection)));
+
+        if (in_array($value, $this->multiSelection, true)) {
+            $this->multiSelection = array_values(array_filter($this->multiSelection, fn ($item) => $item !== $value));
+            return;
+        }
+
+        $this->multiSelection[] = $value;
+    }
+
+    public function submitMultiChoice(QuizSessionService $quizSessionService): void
+    {
+        if ($this->session === null) {
+            return;
+        }
+
+        $question = $this->currentQuestion;
+
+        if ($question === null || $question->type !== QuestionType::MultipleChoice) {
+            return;
+        }
+
+        $quizSessionService->saveAnswer($this->session, $question, [
+            'value' => array_values($this->multiSelection),
+        ]);
+
+        $this->session->refresh()->load(['quiz.questions' => fn ($q) => $q->with('options')]);
+        $this->syncMultiSelection();
+
+        $lastSort = (int) $this->session->quiz->questions->max('sort_order');
+
+        if ($this->session->current_sort_order > $lastSort) {
+            $quizSessionService->complete($this->session);
+            $this->redirectRoute('quiz.result', ['uuid' => $this->session->uuid], navigate: true);
+        }
+    }
+
+    public function skipQuestion(QuizSessionService $quizSessionService): void
+    {
+        if ($this->session === null) {
+            return;
+        }
+
+        $question = $this->currentQuestion;
+
+        if ($question === null) {
+            return;
+        }
+
+        $quizSessionService->saveAnswer($this->session, $question, [
+            'value' => [],
+            'skipped' => true,
+        ]);
+
+        $this->session->refresh()->load(['quiz.questions' => fn ($q) => $q->with('options')]);
+        $this->syncMultiSelection();
 
         $lastSort = (int) $this->session->quiz->questions->max('sort_order');
 
@@ -223,6 +306,7 @@ class Take extends Component
         ]);
 
         $this->session->refresh()->load(['quiz.questions' => fn ($q) => $q->with('options')]);
+        $this->syncMultiSelection();
     }
 
     public function getCanGoBackProperty(): bool
@@ -267,6 +351,43 @@ class Take extends Component
         return $this->currentQuestion?->type === QuestionType::Likert;
     }
 
+    public function getIsMultipleChoiceProperty(): bool
+    {
+        return $this->currentQuestion?->type === QuestionType::MultipleChoice;
+    }
+
+    private function syncMultiSelection(): void
+    {
+        if ($this->session === null) {
+            $this->multiSelection = [];
+            return;
+        }
+
+        $question = $this->currentQuestion;
+
+        if ($question === null || $question->type !== QuestionType::MultipleChoice) {
+            $this->multiSelection = [];
+            return;
+        }
+
+        $response = $this->session->responses
+            ?->firstWhere('question_id', $question->id);
+
+        if (! $response instanceof QuizResponse) {
+            $this->multiSelection = [];
+            return;
+        }
+
+        $raw = $response->value['value'] ?? [];
+
+        if (! is_array($raw)) {
+            $this->multiSelection = [];
+            return;
+        }
+
+        $this->multiSelection = array_values(array_filter(array_map('strval', $raw), fn ($item) => $item !== ''));
+    }
+
     /**
      * @return list<string>
      */
@@ -309,6 +430,8 @@ class Take extends Component
             'question' => $this->currentQuestion,
             'options' => $this->currentOptions,
             'isLikert' => $this->isLikert,
+            'isMultipleChoice' => $this->isMultipleChoice,
+            'multiSelection' => $this->multiSelection,
             'progress' => $this->progressPercent,
             'likertLabels' => $this->likertLabels,
             'totalQuestions' => $this->session->quiz->questions->count(),

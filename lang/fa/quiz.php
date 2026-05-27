@@ -12,6 +12,8 @@ return [
     'toggle_sound' => 'صدا روشن/خاموش',
     'session_not_found' => 'این جلسهٔ تست منقضی شده. از پایین یک تست جدید شروع کن.',
     'back' => 'برگشت',
+    'continue' => 'ادامه',
+    'skip' => 'فعلاً نه',
     'question_of' => 'سؤال :current از :total',
     'your_result' => 'نتیجه شما',
     'dimension_breakdown' => 'جزئیات ابعاد',

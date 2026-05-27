@@ -12,6 +12,8 @@ return [
     'toggle_sound' => 'Toggle sound',
     'session_not_found' => 'That quiz session has expired. Start a new test below.',
     'back' => 'Back',
+    'continue' => 'Continue',
+    'skip' => 'Skip',
     'question_of' => 'Question :current of :total',
     'your_result' => 'Your result',
     'dimension_breakdown' => 'Dimension breakdown',

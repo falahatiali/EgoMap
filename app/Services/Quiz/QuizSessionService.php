@@ -59,7 +59,10 @@ class QuizSessionService
     public function findByUuidOrNull(string $uuid): ?QuizSession
     {
         return QuizSession::query()
-            ->with(['quiz.questions' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order')->with('options')])
+            ->with([
+                'quiz.questions' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order')->with('options'),
+                'responses',
+            ])
             ->where('uuid', $uuid)
             ->first();
     }

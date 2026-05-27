@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\QuestionOption;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -10,6 +11,8 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class QuestionOptionFactory extends Factory
 {
+    protected $model = QuestionOption::class;
+
     /**
      * Define the model's default state.
      *
@@ -17,8 +20,19 @@ class QuestionOptionFactory extends Factory
      */
     public function definition(): array
     {
+        $labelEn = fake()->words(3, true);
+
         return [
-            //
+            'uuid' => (string) Str::uuid(),
+            'question_id' => null,
+            'sort_order' => fake()->numberBetween(1, 20),
+            'label' => [
+                'en' => $labelEn,
+                'fa' => 'گزینه: '.$labelEn,
+            ],
+            'value' => strtoupper(fake()->unique()->lexify('OPT_????')),
+            'scores' => null,
+            'meta' => null,
         ];
     }
 }

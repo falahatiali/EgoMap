@@ -383,6 +383,58 @@
     gap: 0.45rem;
 }
 
+.eg-quiz-multi-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+}
+
+.eg-quiz-next-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1.1rem;
+    border-radius: 999px;
+    border: 1px solid rgba(96, 165, 250, 0.3);
+    background: rgba(96, 165, 250, 0.14);
+    color: rgba(239, 246, 255, 0.95);
+    font-weight: 700;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.eg-quiz-next-btn:hover {
+    transform: translateY(-1px);
+    border-color: rgba(96, 165, 250, 0.45);
+    box-shadow: 0 14px 40px rgba(96, 165, 250, 0.16);
+    background: rgba(96, 165, 250, 0.18);
+}
+
+.eg-quiz-skip-btn {
+    padding: 0.7rem 0.95rem;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    background: rgba(15, 23, 42, 0.35);
+    color: rgba(203, 213, 225, 0.88);
+    font-weight: 600;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.eg-quiz-skip-btn:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(203, 213, 225, 0.3);
+}
+
+.eg-quiz-option.is-active {
+    outline: 2px solid rgba(52, 211, 153, 0.35);
+    box-shadow:
+        0 0 0 1px rgba(52, 211, 153, 0.18) inset,
+        0 24px 60px rgba(16, 185, 129, 0.12);
+}
+
 .eg-quiz-footer {
     margin-top: 2rem;
     min-height: 2.5rem;

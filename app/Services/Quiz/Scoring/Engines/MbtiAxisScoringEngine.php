@@ -47,10 +47,10 @@ class MbtiAxisScoringEngine implements ScoringEngineContract
                 continue;
             }
 
-            $letter = $this->resolveLetterFromResponse($question, $response->value);
-
-            if ($letter !== null && isset($letterCounts[$letter])) {
-                $letterCounts[$letter]++;
+            foreach ($this->resolveLettersFromResponse($question, $response->value) as $letter) {
+                if (isset($letterCounts[$letter])) {
+                    $letterCounts[$letter]++;
+                }
             }
         }
 
@@ -114,27 +114,52 @@ class MbtiAxisScoringEngine implements ScoringEngineContract
     /**
      * @param  array<string, mixed>  $value
      */
-    private function resolveLetterFromResponse(Question $question, array $value): ?string
+    /**
+     * @param  array<string, mixed>  $value
+     * @return list<string>
+     */
+    private function resolveLettersFromResponse(Question $question, array $value): array
     {
         if ($question->type === QuestionType::Likert) {
-            return $this->resolveLikertLetter($question, (int) ($value['value'] ?? 0));
+            $letter = $this->resolveLikertLetter($question, (int) ($value['value'] ?? 0));
+
+            return $letter !== null ? [$letter] : [];
         }
 
-        $chosen = (string) ($value['value'] ?? '');
+        $raw = $value['value'] ?? null;
 
-        if ($chosen === '') {
-            return null;
+        /** @var list<string> $chosen */
+        $chosen = [];
+
+        if (is_array($raw)) {
+            $chosen = array_values(array_filter(array_map(static fn ($item) => (string) $item, $raw), static fn ($item) => $item !== ''));
+        } elseif (is_string($raw) && $raw !== '') {
+            $chosen = [$raw];
+        }
+
+        if ($chosen === []) {
+            return [];
         }
 
         $question->loadMissing('options');
 
-        $option = $question->options->firstWhere('value', $chosen);
+        $letters = [];
 
-        if ($option === null) {
-            return null;
+        foreach ($chosen as $valueKey) {
+            $option = $question->options->firstWhere('value', $valueKey);
+
+            if ($option === null) {
+                continue;
+            }
+
+            $letter = strtoupper((string) ($option->scores['letter'] ?? ''));
+
+            if ($letter !== '') {
+                $letters[] = $letter;
+            }
         }
 
-        return strtoupper((string) ($option->scores['letter'] ?? ''));
+        return $letters;
     }
 
     private function resolveLikertLetter(Question $question, int $value): ?string
