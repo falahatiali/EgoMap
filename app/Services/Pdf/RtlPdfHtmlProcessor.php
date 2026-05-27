@@ -29,6 +29,7 @@ final class RtlPdfHtmlProcessor
             $start = $positions[$i - 1];
             $length = $positions[$i] - $start;
             $segment = substr($html, $start, $length);
+            $segment = str_replace('٪', '%', $segment);
             $reshaped = $this->arabic->utf8Glyphs($segment, 500, true, false);
             $html = substr_replace($html, $reshaped, $start, $length);
         }

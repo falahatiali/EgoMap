@@ -140,6 +140,12 @@ class RebootProtocolAssessmentTest extends TestCase
 
         $this->assertSame(__('pdf.group_reboot', locale: 'fa'), $groupValue);
         $this->assertStringNotContainsString('pdf.group_', $groupValue);
+
+        $overview = collect($document->sections)->firstWhere('type', 'overview');
+        $this->assertNotNull($overview);
+        $this->assertSame(__('pdf.overview_title_reboot', locale: 'fa'), $overview['title']);
+        $this->assertDoesNotMatchRegularExpression('/\b(Your|the|and|is)\b/i', (string) ($overview['body'] ?? ''));
+        $this->assertMatchesRegularExpression('/[\x{0600}-\x{06FF}]/u', (string) ($overview['body'] ?? ''));
     }
 
     public function test_reboot_farsi_pdf_generates_successfully(): void

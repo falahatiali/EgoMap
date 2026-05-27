@@ -44,9 +44,15 @@
         <div class="container">
             <div class="eg-result-hero-inner">
                 <p class="eg-result-eyebrow">{{ $content['hero_label'] ?? __('quiz.your_result') }}</p>
-                <div class="eg-result-type-badge">{{ $typeCode }}</div>
+                <div class="eg-result-type-badge">
+                    @if (($report['template'] ?? '') === 'reboot_protocol')
+                        {{ $content['type_label'] ?? ($report['title'] ?? $typeCode) }}
+                    @else
+                        {{ $typeCode }}
+                    @endif
+                </div>
                 <h1 class="eg-result-title">{{ $content['archetype'] ?? ($report['title'] ?? '') }}</h1>
-                <p class="eg-result-summary">{{ $content['tagline'] ?? LocaleConfig::pick($report['first_prescription'] ?? ['en' => $report['summary'] ?? '', 'fa' => $report['summary'] ?? ''], $session->locale) }}</p>
+                <p class="eg-result-summary">{{ $content['tagline'] ?? ($report['summary'] ?? '') }}</p>
                 @if (! empty($content['mantra']))
                     <p class="eg-result-mantra">{{ $content['mantra'] }}</p>
                 @endif

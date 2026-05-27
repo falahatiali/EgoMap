@@ -40,7 +40,7 @@ class QuizResultPdfDefinitionFactory
         $locale = LocaleConfig::resolve($locale ?? $session->locale ?? app()->getLocale());
         $session->loadMissing(['result.outcomeProfile', 'quiz']);
 
-        $resultData = QuizResultViewData::fromSession($session);
+        $resultData = QuizResultViewData::fromSession($session, $locale);
         $report = $resultData['report'];
         $content = $resultData['content'];
         $palette = $resultData['palette'];
@@ -48,10 +48,13 @@ class QuizResultPdfDefinitionFactory
         $isRebootProtocol = $session->quiz->slug === RebootProtocolQuiz::SLUG;
 
         $typeCode = (string) ($report['type_code'] ?? '');
-        $title = (string) ($report['title'] ?? $typeCode);
+        $title = (string) ($content['archetype'] ?? $report['title'] ?? $typeCode);
         $quizName = $session->quiz->getTranslation('name', $locale, true) ?? $session->quiz->slug;
         $tagline = (string) ($content['tagline'] ?? ($report['summary'] ?? ''));
         $summary = (string) ($report['summary'] ?? '');
+        $typeDisplay = $isRebootProtocol
+            ? (string) ($content['type_label'] ?? $title)
+            : strtoupper($typeCode);
         $groupKey = (string) ($palette['group'] ?? 'analyst');
         $groupLabel = __('pdf.group_'.$groupKey, locale: $locale);
         $questionCount = $session->quiz->questions()->where('is_active', true)->count();
@@ -89,7 +92,7 @@ class QuizResultPdfDefinitionFactory
                 'ribbon' => $isRebootProtocol
                     ? __('pdf.report_badge_reboot', locale: $locale)
                     : __('pdf.report_badge', locale: $locale),
-                'badge' => strtoupper($typeCode),
+                'badge' => $typeDisplay,
                 'title' => $title,
                 'subtitle' => $tagline,
                 'meta' => $meta->generatedAtLabel,
@@ -102,7 +105,7 @@ class QuizResultPdfDefinitionFactory
                         'label' => $isRebootProtocol
                             ? __('pdf.stat_type_reboot', locale: $locale)
                             : __('pdf.stat_type', locale: $locale),
-                        'value' => strtoupper($typeCode),
+                        'value' => $typeDisplay,
                         'tone' => 'primary',
                     ],
                     [
@@ -138,6 +141,10 @@ class QuizResultPdfDefinitionFactory
                             : __('pdf.overview_intro', locale: $locale))),
             ],
         ];
+
+        if ($isRebootProtocol) {
+            $sections = array_merge($sections, self::rebootProtocolSections($report, $content, $locale));
+        }
 
         $mbtiDimensions = self::mbtiDimensionRows($report['dimensions'] ?? null);
 
@@ -325,7 +332,10 @@ class QuizResultPdfDefinitionFactory
         $locale = LocaleConfig::resolve($locale ?? $session->locale ?? app()->getLocale());
         $session->loadMissing('result');
 
-        $title = (string) ($session->result?->free_report['title'] ?? __('quiz.your_result', locale: $locale));
+        $viewData = QuizResultViewData::fromSession($session, $locale);
+        $title = (string) ($viewData['content']['archetype']
+            ?? $viewData['report']['title']
+            ?? __('quiz.your_result', locale: $locale));
 
         return new PdfMailEnvelope(
             subject: __('quiz.email_subject', ['title' => $title], locale: $locale),
@@ -341,6 +351,64 @@ class QuizResultPdfDefinitionFactory
      *
      * @return list<array<string, mixed>>
      */
+    /**
+     * @param  array<string, mixed>  $report
+     * @param  array<string, mixed>  $content
+     * @return list<array<string, mixed>>
+     */
+    private static function rebootProtocolSections(array $report, array $content, string $locale): array
+    {
+        $sections = [];
+
+        if (! empty($content['prescription'])) {
+            $sections[] = [
+                'type' => PdfSectionType::HighlightCard->value,
+                'title' => __('quiz.reboot.first_prescription', locale: $locale),
+                'body' => (string) $content['prescription'],
+                'icon' => 'clipboard',
+                'tone' => 'green',
+            ];
+        }
+
+        foreach ($content['sections'] ?? [] as $section) {
+            if (! is_array($section)) {
+                continue;
+            }
+
+            $heading = trim((string) ($section['heading'] ?? ''));
+            $body = trim((string) ($section['body'] ?? ''));
+
+            if ($heading === '' && $body === '') {
+                continue;
+            }
+
+            $sections[] = [
+                'type' => PdfSectionType::HighlightCard->value,
+                'title' => $heading,
+                'body' => $body,
+                'icon' => 'circle-info',
+                'tone' => 'violet',
+            ];
+        }
+
+        $nextSteps = $report['next_steps'] ?? [];
+
+        if (is_array($nextSteps) && $nextSteps !== []) {
+            $sections[] = [
+                'type' => PdfSectionType::NoteGrid->value,
+                'title' => __('quiz.reboot.next_steps', locale: $locale),
+                'intro' => '',
+                'tone' => 'neutral',
+                'items' => collect($nextSteps)
+                    ->map(fn (array $step): string => LocaleConfig::pick($step, $locale))
+                    ->values()
+                    ->all(),
+            ];
+        }
+
+        return $sections;
+    }
+
     private static function mbtiDimensionRows(mixed $dimensions): array
     {
         if (! is_array($dimensions) || $dimensions === []) {
