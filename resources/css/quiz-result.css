@@ -348,3 +348,68 @@ body.eg-result-body {
     border-color: var(--eg-result-accent);
     box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--eg-result-accent) 18%, transparent);
 }
+
+/* Reboot Protocol dimension bars */
+.eg-reboot-dimension-card {
+    background: #f8fafc;
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    border-radius: 1rem;
+    padding: 1.15rem 1.25rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.eg-reboot-dimension-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.eg-reboot-dimension-label {
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: #0f172a;
+    line-height: 1.45;
+}
+
+.eg-reboot-dimension-pct {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--eg-result-accent);
+    flex-shrink: 0;
+}
+
+.eg-reboot-dimension-track {
+    position: relative;
+    height: 0.55rem;
+    background: #e2e8f0;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.eg-reboot-dimension-track.is-positive .eg-reboot-dimension-fill {
+    background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.eg-reboot-dimension-fill {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: 0;
+    background: linear-gradient(90deg, #f59e0b, #ef4444);
+    border-radius: 999px;
+    transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[dir="rtl"] .eg-reboot-dimension-fill {
+    inset-inline-start: auto;
+    inset-inline-end: 0;
+}
+
+.eg-reboot-dimension-desc {
+    color: #64748b;
+    line-height: 1.55;
+}

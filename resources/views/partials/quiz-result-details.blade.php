@@ -12,7 +12,12 @@
     </section>
 @endif
 
-@if (! empty($report['dimensions']))
+@if (($report['template'] ?? '') === 'reboot_protocol')
+    @include('partials.quiz-result-reboot-dimensions', [
+        'report' => $report,
+        'theme' => $theme ?? 'light',
+    ])
+@elseif (! empty($report['dimensions']))
     <section @class(['eg-result-panel', 'eg-glass' => $isDark])>
         <h2 class="eg-result-panel-title">{{ __('quiz.dimension_breakdown') }}</h2>
         <div class="row g-3">
@@ -27,7 +32,7 @@
                     <div class="eg-axis-card">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <span @class(['eg-axis-letter', 'is-active' => ! $prefersRight])>{{ $dimension['left_label'] ?? '' }}</span>
-                            <span class="eg-axis-pct">{{ $winPercent }}%</span>
+                            <span class="eg-axis-pct">{{ eg_num_pct($winPercent) }}</span>
                             <span @class(['eg-axis-letter', 'is-active' => $prefersRight])>{{ $dimension['right_label'] ?? '' }}</span>
                         </div>
                         @if (! empty($dimension['left_name']) || ! empty($dimension['right_name']))
@@ -176,7 +181,7 @@
                                 <p class="eg-famous-role small mb-0">{{ $person['role'] ?? '' }}</p>
                             </div>
                             @if (! empty($person['match_score']))
-                                <span class="eg-famous-match">{{ $person['match_score'] }}%</span>
+                                <span class="eg-famous-match">{{ eg_num_pct($person['match_score']) }}</span>
                             @endif
                         </div>
                         <p class="eg-famous-bio small mb-2">{{ $person['bio'] ?? '' }}</p>

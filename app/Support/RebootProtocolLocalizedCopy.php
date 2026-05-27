@@ -18,9 +18,13 @@ final class RebootProtocolLocalizedCopy
         $scoreTagline = self::scoreTaglinePair($report);
 
         $localized = $report;
-        $localized['title'] = LocaleConfig::pick($phase, $locale);
-        $localized['summary'] = LocaleConfig::pick($prescription, $locale);
-        $localized['score_tagline'] = $scoreTagline;
+        $localized['title'] = self::displayText(LocaleConfig::pick($phase, $locale), $locale);
+        $localized['summary'] = self::displayText(LocaleConfig::pick($prescription, $locale), $locale);
+        $localized['score_tagline'] = self::displayText(LocaleConfig::pick($scoreTagline, $locale), $locale);
+        $localized['dimension_rows'] = RebootProtocolDimensionCatalog::rows(
+            is_array($report['dimensions'] ?? null) ? $report['dimensions'] : [],
+            $locale,
+        );
 
         return $localized;
     }
@@ -46,14 +50,14 @@ final class RebootProtocolLocalizedCopy
             }
 
             $sections[] = [
-                'heading' => LocaleConfig::pick([
+                'heading' => self::displayText(LocaleConfig::pick([
                     'en' => (string) ($section['heading_en'] ?? ''),
                     'fa' => (string) ($section['heading_fa'] ?? ''),
-                ], $locale),
-                'body' => LocaleConfig::pick([
+                ], $locale), $locale),
+                'body' => self::displayText(LocaleConfig::pick([
                     'en' => (string) ($section['body_en'] ?? ''),
                     'fa' => (string) ($section['body_fa'] ?? ''),
-                ], $locale),
+                ], $locale), $locale),
             ];
         }
 
@@ -64,23 +68,28 @@ final class RebootProtocolLocalizedCopy
                 continue;
             }
 
-            $actionSteps[] = LocaleConfig::pick([
+            $actionSteps[] = self::displayText(LocaleConfig::pick([
                 'en' => (string) ($step['en'] ?? ''),
                 'fa' => (string) ($step['fa'] ?? ''),
-            ], $locale);
+            ], $locale), $locale);
         }
 
         return [
             'hero_label' => __('quiz.reboot.hero_label', [], $locale),
-            'archetype' => LocaleConfig::pick($phase, $locale),
-            'type_label' => LocaleConfig::pick($phase, $locale),
-            'tagline' => LocaleConfig::pick($scoreTagline, $locale),
-            'narrative' => LocaleConfig::pick($phaseNarrative, $locale),
-            'prescription' => LocaleConfig::pick($prescription, $locale),
-            'disclaimer' => LocaleConfig::pick($disclaimer, $locale),
+            'archetype' => self::displayText(LocaleConfig::pick($phase, $locale), $locale),
+            'type_label' => self::displayText(LocaleConfig::pick($phase, $locale), $locale),
+            'tagline' => self::displayText(LocaleConfig::pick($scoreTagline, $locale), $locale),
+            'narrative' => self::displayText(LocaleConfig::pick($phaseNarrative, $locale), $locale),
+            'prescription' => self::displayText(LocaleConfig::pick($prescription, $locale), $locale),
+            'disclaimer' => self::displayText(LocaleConfig::pick($disclaimer, $locale), $locale),
             'sections' => $sections,
             'action_steps' => $actionSteps,
         ];
+    }
+
+    private static function displayText(string $text, string $locale): string
+    {
+        return LocalizedNumbers::format($text, $locale);
     }
 
     /**

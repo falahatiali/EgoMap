@@ -67,6 +67,10 @@
                 'content' => $content,
                 'quizLocale' => $session->locale,
             ])
+            @include('partials.quiz-result-reboot-dimensions', [
+                'report' => $report,
+                'theme' => 'light',
+            ])
         @else
             @include('partials.quiz-result-details', [
                 'report' => $report,

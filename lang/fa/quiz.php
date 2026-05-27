@@ -75,5 +75,7 @@ return [
         'first_prescription' => 'نسخه اول',
         'next_steps' => 'سه قدم بعدی',
         'continue_without_save' => 'ادامه بدون ذخیره',
+        'dimension_breakdown' => 'جزئیات ابعاد بازیابی',
+        'dimension_breakdown_intro' => 'هر نوار شدت همان بعد را در تحلیل شما نشان می‌دهد (۰٪ پایین، ۱۰۰٪ بالا).',
     ],
 ];

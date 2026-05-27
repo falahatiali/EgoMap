@@ -75,5 +75,7 @@ return [
         'first_prescription' => 'Your first prescription',
         'next_steps' => 'Three next steps',
         'continue_without_save' => 'Continue without saving',
+        'dimension_breakdown' => 'Recovery dimension breakdown',
+        'dimension_breakdown_intro' => 'Each bar shows how high that signal scored in your analysis (0% low, 100% high).',
     ],
 ];
