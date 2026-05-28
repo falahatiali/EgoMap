@@ -2,8 +2,10 @@
 
 namespace App\Livewire\Auth;
 
+use App\Enums\Permission;
 use App\Models\User;
 use App\Services\Auth\EmailVerificationService;
+use App\Support\LocaleConfig;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -59,7 +61,18 @@ class Login extends Component
 
         session()->regenerate();
 
-        $this->redirectIntended(default: route('profile'), navigate: true);
+        if ($user->can(Permission::AdminAccess->value)) {
+            $this->redirectRoute('admin.dashboard', navigate: true);
+
+            return;
+        }
+
+        $locale = session('locale');
+        $locale = is_string($locale) && LocaleConfig::isSupported($locale)
+            ? $locale
+            : LocaleConfig::default();
+
+        $this->redirectIntended(default: route('profile', ['locale' => $locale]), navigate: true);
     }
 
     public function render(): View

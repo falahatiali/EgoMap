@@ -9,6 +9,7 @@ use App\Services\Pdf\Drivers\RtlAwareDomPdfDriver;
 use App\Support\LocaleConfig;
 use App\Support\TranslationBundle;
 use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -44,6 +45,16 @@ class AppServiceProvider extends ServiceProvider
             fallbackLocale: LocaleConfig::fallback(),
             fallbackAny: false,
         );
+
+        Authenticate::redirectUsing(function (): string {
+            $locale = session('locale');
+
+            if (! is_string($locale) || ! LocaleConfig::isSupported($locale)) {
+                $locale = LocaleConfig::default();
+            }
+
+            return route('login', ['locale' => $locale]);
+        });
 
         View::composer(['layouts.app', 'layouts.guided', 'layouts.protocol'], function ($view): void {
             $view->with('i18nBundle', TranslationBundle::forGroups(['common', 'nav', 'home', 'landing', 'no_contact', 'recovery', 'profile']));
