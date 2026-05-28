@@ -69,3 +69,6 @@ Route::prefix('{locale}')
         Route::livewire('/quiz/session/{uuid}', Take::class)->name('quiz.session');
         Route::livewire('/quiz/{slug}', Take::class)->name('quiz.start');
     });
+
+
+Route::get('/ali/test', [\App\Http\Controllers\AliController::class, 'ali'])->name('ali.test');
