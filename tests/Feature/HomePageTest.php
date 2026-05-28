@@ -6,6 +6,7 @@ use App\Livewire\Home\Protocol;
 use App\Models\User;
 use Database\Seeders\MbtiQuizSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\URL;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -56,6 +57,16 @@ class HomePageTest extends TestCase
         $this->assertStringContainsString('data-locale-switch="fa"', $navHtml);
         $this->assertStringContainsString(route('login', ['locale' => 'en']), $navHtml);
         $this->assertStringContainsString(route('onboarding', ['locale' => 'en']), $navHtml);
+    }
+
+    public function test_locale_middleware_sets_route_defaults_for_views(): void
+    {
+        URL::defaults([]);
+
+        $response = $this->get('/fa');
+
+        $response->assertOk();
+        $response->assertSee(route('login', ['locale' => 'fa']), false);
     }
 
     public function test_home_nav_shows_profile_link_for_authenticated_user(): void
