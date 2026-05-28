@@ -2,6 +2,7 @@
     use App\Support\LocaleConfig;
 
     $typeCode = $report['type_code'] ?? '—';
+    $quizLocale = LocaleConfig::resolve(request()->route('locale', app()->getLocale()));
 @endphp
 
 <div
@@ -65,7 +66,7 @@
             @include('partials.quiz-result-reboot-protocol', [
                 'report' => $report,
                 'content' => $content,
-                'quizLocale' => $session->locale,
+                'quizLocale' => $quizLocale,
             ])
             @include('partials.quiz-result-reboot-dimensions', [
                 'report' => $report,

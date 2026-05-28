@@ -299,11 +299,12 @@ class Take extends Component
     public function render(): View
     {
         if ($this->returningSession !== null) {
-            $resultData = QuizResultViewData::fromSession($this->returningSession);
+            $locale = LocaleConfig::resolve((string) request()->route('locale', app()->getLocale()));
+            $resultData = QuizResultViewData::fromSession($this->returningSession, $locale);
             $report = $resultData['report'];
 
             return view('livewire.quiz.returning', [
-                'quizName' => $this->returningSession->quiz->getTranslation('name', app()->getLocale(), true),
+                'quizName' => $this->returningSession->quiz->getTranslation('name', $locale, true),
                 'typeCode' => (string) ($report['type_code'] ?? '—'),
                 'title' => (string) ($report['title'] ?? ''),
                 'summary' => (string) ($resultData['content']['tagline'] ?? ($report['summary'] ?? '')),
