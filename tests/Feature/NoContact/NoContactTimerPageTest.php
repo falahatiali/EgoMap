@@ -19,8 +19,8 @@ class NoContactTimerPageTest extends TestCase
         $response = $this->get(route('no-contact', ['locale' => 'en']));
 
         $response->assertOk();
-        $response->assertSee('No-contact protocol', false);
-        $response->assertSee('Lock in protocol', false);
+        $response->assertSee('Ghost Mode', false);
+        $response->assertSee('Activate Ghost Mode', false);
         $response->assertSee('90 days', false);
     }
 
@@ -34,8 +34,8 @@ class NoContactTimerPageTest extends TestCase
             ->test(Show::class)
             ->set('selectedDays', 30)
             ->call('startProtocol')
-            ->assertDontSee('Choose how long you go dark', false)
-            ->assertSee('Time left in protocol', false)
+            ->assertDontSee('Activate Ghost Mode', false)
+            ->assertSee('Time remaining', false)
             ->assertSee('30 days', false);
 
         $this->assertDatabaseHas('no_contact_protocols', [
@@ -58,8 +58,12 @@ class NoContactTimerPageTest extends TestCase
             ->set('selectedDays', 90)
             ->call('startProtocol')
             ->assertSee('زمان باقی‌مانده', false)
+            ->assertSee('ساعت', false)
+            ->assertSee('دقیقه', false)
+            ->assertSee('dir="rtl"', false)
             ->assertSee('dir="ltr"', false)
             ->assertSee('data-digit-locale="fa"', false)
+            ->assertSee('حالت شبح', false)
             ->assertSee('۰', false);
     }
 
