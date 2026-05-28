@@ -13,7 +13,7 @@ class QuizResultViewData
     {
         $session->loadMissing(['result.outcomeProfile', 'quiz']);
 
-        $locale = LocaleConfig::resolve($locale ?? $session->locale ?? app()->getLocale());
+        $locale = LocaleConfig::resolve($locale ?? LocaleConfig::fromRoute());
 
         $report = $session->result?->free_report ?? [];
         $report = is_array($report) ? $report : [];
@@ -24,7 +24,7 @@ class QuizResultViewData
 
         $typeCode = strtolower((string) ($report['type_code'] ?? ''));
 
-        $content = self::resolveContent($session, $report);
+        $content = self::resolveContent($session, $report, $locale);
         $content = MbtiContentCatalog::buildContentForType($typeCode, $locale, $content);
 
         if (! empty($report['dimensions']) && is_array($report['dimensions'])) {
@@ -72,7 +72,7 @@ class QuizResultViewData
      * @param  array<string, mixed>  $report
      * @return array<string, mixed>
      */
-    private static function resolveContent(QuizSession $session, array $report): array
+    private static function resolveContent(QuizSession $session, array $report, string $locale): array
     {
         $fromReport = $report['content'] ?? [];
 
@@ -86,6 +86,6 @@ class QuizResultViewData
             return [];
         }
 
-        return $profile->getTranslation('content', app()->getLocale(), true) ?? [];
+        return $profile->getTranslation('content', $locale, true) ?? [];
     }
 }

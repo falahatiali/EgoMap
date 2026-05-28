@@ -299,7 +299,7 @@ class Take extends Component
     public function render(): View
     {
         if ($this->returningSession !== null) {
-            $locale = LocaleConfig::resolve((string) request()->route('locale', app()->getLocale()));
+            $locale = LocaleConfig::fromRoute();
             $resultData = QuizResultViewData::fromSession($this->returningSession, $locale);
             $report = $resultData['report'];
 

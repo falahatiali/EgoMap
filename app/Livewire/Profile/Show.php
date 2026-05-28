@@ -3,11 +3,12 @@
 namespace App\Livewire\Profile;
 
 use App\Enums\SessionStatus;
-use App\Models\User;
 use App\Models\QuizSession;
+use App\Models\User;
 use App\Services\Auth\UserSessionService;
 use App\Services\Profile\UserQuizHistoryService;
 use App\Services\Recovery\RecoveryJourneyService;
+use App\Support\LocaleConfig;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -87,7 +88,7 @@ class Show extends Component
 
     public function render(UserQuizHistoryService $historyService, RecoveryJourneyService $journeyService): View
     {
-        $records = $historyService->recordsForUser($this->user);
+        $records = $historyService->recordsForUser($this->user, LocaleConfig::fromRoute());
 
         $inProgress = $records->where('is_in_progress', true)->values();
         $completed = $records->where('is_in_progress', false)->values();

@@ -108,7 +108,7 @@ class UserQuizHistoryService
             ? (int) round(($currentQuestion / $totalQuestions) * 100)
             : 100;
 
-        $sessionLocale = LocaleConfig::resolve($session->locale ?? $locale);
+        $sessionLocale = LocaleConfig::resolve($locale);
         $report = [];
         $tagline = null;
         $typeLabel = null;

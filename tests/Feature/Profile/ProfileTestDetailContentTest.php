@@ -45,6 +45,23 @@ class ProfileTestDetailContentTest extends TestCase
             ->assertSee(__('quiz.famous_title'), false);
     }
 
+    public function test_profile_test_detail_follows_route_locale_not_stored_session_locale(): void
+    {
+        $user = User::factory()->create();
+        $session = $this->completeSessionFor($user);
+        $session->update(['locale' => 'en']);
+
+        $this->actingAs($user)
+            ->get(route('profile.test.show', ['locale' => 'fa', 'uuid' => $session->uuid]))
+            ->assertOk()
+            ->assertSee('پروفایل شخصیتی شما', false);
+
+        $this->actingAs($user)
+            ->get(route('profile.test.show', ['locale' => 'en', 'uuid' => $session->uuid]))
+            ->assertOk()
+            ->assertSee('Your personality profile', false);
+    }
+
     public function test_profile_test_detail_http_route_renders_for_owner(): void
     {
         $user = User::factory()->create();

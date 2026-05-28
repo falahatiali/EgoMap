@@ -95,9 +95,7 @@ class Result extends Component
      */
     public function getResultDataProperty(): array
     {
-        $locale = LocaleConfig::resolve((string) request()->route('locale', app()->getLocale()));
-
-        return QuizResultViewData::fromSession($this->session, $locale);
+        return QuizResultViewData::fromSession($this->session, LocaleConfig::fromRoute());
     }
 
     public function render(): View

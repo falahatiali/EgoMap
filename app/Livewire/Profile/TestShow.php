@@ -6,6 +6,7 @@ use App\Enums\SessionStatus;
 use App\Models\QuizSession;
 use App\Services\Quiz\QuizSessionClaimService;
 use App\Services\Quiz\QuizSessionService;
+use App\Support\LocaleConfig;
 use App\Support\QuizResultViewData;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -38,13 +39,16 @@ class TestShow extends Component
         );
 
         if ($this->session->status === SessionStatus::Abandoned) {
-            $this->redirectRoute('profile', navigate: true);
+            $this->redirectRoute('profile', ['locale' => LocaleConfig::fromRoute()], navigate: true);
 
             return;
         }
 
         if ($this->session->status === SessionStatus::InProgress) {
-            $this->redirectRoute('quiz.session', ['uuid' => $this->session->uuid], navigate: true);
+            $this->redirectRoute('quiz.session', [
+                'locale' => LocaleConfig::fromRoute(),
+                'uuid' => $this->session->uuid,
+            ], navigate: true);
 
             return;
         }
@@ -60,18 +64,19 @@ class TestShow extends Component
      */
     public function getResultDataProperty(): array
     {
-        return QuizResultViewData::fromSession($this->session);
+        return QuizResultViewData::fromSession($this->session, LocaleConfig::fromRoute());
     }
 
     public function render(): View
     {
+        $locale = LocaleConfig::fromRoute();
         $data = $this->resultData;
 
         return view('livewire.profile.test-show', [
             'report' => $data['report'],
             'content' => $data['content'],
             'palette' => $data['palette'],
-            'quizName' => $this->session->quiz->getTranslation('name', app()->getLocale(), true),
+            'quizName' => $this->session->quiz->getTranslation('name', $locale, true),
             'completedAt' => $this->session->completed_at,
         ]);
     }

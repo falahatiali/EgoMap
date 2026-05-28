@@ -67,4 +67,18 @@ final class LocaleConfig
 
         return self::default();
     }
+
+    /**
+     * Locale for rendering UI copy: URL segment first, then the active app locale.
+     */
+    public static function fromRoute(): string
+    {
+        $routeLocale = request()->route('locale');
+
+        if (is_string($routeLocale) && self::isSupported($routeLocale)) {
+            return $routeLocale;
+        }
+
+        return self::resolve(app()->getLocale());
+    }
 }

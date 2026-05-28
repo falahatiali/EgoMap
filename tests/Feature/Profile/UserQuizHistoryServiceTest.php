@@ -94,6 +94,26 @@ class UserQuizHistoryServiceTest extends TestCase
         $this->assertSame(route('profile.test.show', ['uuid' => $session->uuid]), $record['detail_url']);
     }
 
+    public function test_records_use_page_locale_over_stored_session_locale(): void
+    {
+        $user = User::factory()->create();
+        $quiz = Quiz::query()->where('slug', 'mbti-personality')->firstOrFail();
+        $service = app(QuizSessionService::class);
+        $session = $service->start($quiz);
+        $session->update(['user_id' => $user->id, 'locale' => 'en']);
+
+        foreach ($quiz->questions()->with('options')->orderBy('sort_order')->get() as $question) {
+            $service->saveAnswer($session, $question, $question->options->first()->value);
+        }
+
+        $service->complete($session->fresh());
+
+        $record = app(UserQuizHistoryService::class)->recordsForUser($user, 'fa')->first();
+
+        $this->assertNotNull($record);
+        $this->assertSame('تیپ شخصیتی MBTI', $record['quiz_name']);
+    }
+
     public function test_record_for_in_progress_session_links_to_quiz_session(): void
     {
         $user = User::factory()->create();
