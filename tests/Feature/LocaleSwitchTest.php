@@ -27,7 +27,7 @@ class LocaleSwitchTest extends TestCase
 
         $this->get('/fa/no-contact')
             ->assertOk()
-            ->assertSee('پروتکل نو-کانتکت', false);
+            ->assertSee('حالت شبح', false);
     }
 
     public function test_locale_switch_endpoint_persists_session(): void

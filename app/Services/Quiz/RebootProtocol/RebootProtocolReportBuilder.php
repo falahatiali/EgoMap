@@ -174,7 +174,7 @@ class RebootProtocolReportBuilder
         $sections = [
             ['heading_en' => 'Profile blend', 'heading_fa' => 'ترکیب پروفایل', 'body_en' => $phaseBlend['en'], 'body_fa' => $phaseBlend['fa']],
             ['heading_en' => 'Main risk', 'heading_fa' => 'ریسک اصلی', 'body_en' => $mainRisk['en'], 'body_fa' => $mainRisk['fa']],
-            ['heading_en' => 'No contact', 'heading_fa' => 'No Contact', 'body_en' => $noContact['en'], 'body_fa' => $noContact['fa']],
+            ['heading_en' => 'Ghost Mode', 'heading_fa' => 'حالت شبح', 'body_en' => $noContact['en'], 'body_fa' => $noContact['fa']],
         ];
 
         if ($patterns !== []) {
@@ -212,14 +212,14 @@ class RebootProtocolReportBuilder
 
         if ($contact > 1 || array_intersect($risks, [1, 2, 3, 4]) !== [] || $dimensions['urgency'] > 0.55) {
             return [
-                'en' => "Your first priority is not closure. It's distance. No contact is space for your nervous system to stabilize — not a trick to get her back.",
-                'fa' => 'اولویت اول تو گرفتن جواب نهایی نیست. اولویت اول فاصله است. No Contact فضایی است برای آرام شدن سیستم عصبی‌ات — نه ترفند برگرداندن او.',
+                'en' => "Your first priority is not closure. It's distance. Ghost Mode is space for your nervous system to stabilize — not a trick to get her back.",
+                'fa' => 'اولویت اول تو گرفتن جواب نهایی نیست. اولویت اول فاصله است. حالت شبح فضایی است برای آرام شدن سیستم عصبی‌ات — نه ترفند برگرداندن او.',
             ];
         }
 
         return [
-            'en' => 'You seem ready to use no contact as structure, not punishment.',
-            'fa' => 'به نظر می‌رسد آماده‌ای از No Contact به عنوان ساختار استفاده کنی، نه تنبیه.',
+            'en' => 'You seem ready to use Ghost Mode as structure, not punishment.',
+            'fa' => 'به نظر می‌رسد آماده‌ای از حالت شبح به عنوان ساختار استفاده کنی، نه تنبیه.',
         ];
     }
 
@@ -380,22 +380,22 @@ class RebootProtocolReportBuilder
             : match ($phaseKey) {
                 'obsession_loop' => ['en' => 'Next 24h: no profile checks + write one truth journal line.', 'fa' => '۲۴ ساعت بعدی: بدون چک پروفایل + یک خط حقیقت در ژورنال.'],
                 'identity_loss' => ['en' => 'Next 24h: one walk alone + name one value that is yours.', 'fa' => '۲۴ ساعت بعدی: یک پیاده‌روی تنها + یک ارزش که مال خودت است.'],
-                'rebuild_ready' => ['en' => 'Next 24h: No Contact Day 0 + one body task + schedule tomorrow.', 'fa' => '۲۴ ساعت بعدی: No Contact روز صفر + یک کار بدن + برنامه فردا.'],
-                default => ['en' => 'Next 24h: No Contact Day 0 + one body task + one truth journal.', 'fa' => '۲۴ ساعت بعدی: No Contact روز صفر + یک کار بدن + یک ژورنال حقیقت.'],
+                'rebuild_ready' => ['en' => 'Next 24h: Ghost Mode Day 0 + one body task + schedule tomorrow.', 'fa' => '۲۴ ساعت بعدی: حالت شبح روز صفر + یک کار بدن + برنامه فردا.'],
+                default => ['en' => 'Next 24h: Ghost Mode Day 0 + one body task + one truth journal.', 'fa' => '۲۴ ساعت بعدی: حالت شبح روز صفر + یک کار بدن + یک ژورنال حقیقت.'],
             };
 
         $step3 = match (true) {
             $dimensions['dysregulation'] > 0.6 => [
-                'en' => 'Next 7 days: sleep anchor + daily walk + no contact check-in each night.',
-                'fa' => '۷ روز بعدی: لنگر خواب + پیاده‌روی روزانه + چک‌این No Contact هر شب.',
+                'en' => 'Next 7 days: sleep anchor + daily walk + Ghost Mode check-in each night.',
+                'fa' => '۷ روز بعدی: لنگر خواب + پیاده‌روی روزانه + چک‌این حالت شبح هر شب.',
             ],
             $dimensions['obsession'] > 0.6 => [
                 'en' => 'Next 7 days: fantasy detox list + one physical task + one truth journal daily.',
                 'fa' => '۷ روز بعدی: لیست Fantasy Detox + یک کار بدنی + یک ژورنال حقیقت روزانه.',
             ],
             default => [
-                'en' => 'Next 7 days: each day — one physical task, one no-contact reminder, one truth journal.',
-                'fa' => '۷ روز بعدی: هر روز — یک کار فیزیکی، یک یادآور No Contact، یک خط حقیقت.',
+                'en' => 'Next 7 days: each day — one physical task, one Ghost Mode reminder, one truth journal.',
+                'fa' => '۷ روز بعدی: هر روز — یک کار فیزیکی، یک یادآور حالت شبح، یک خط حقیقت.',
             ],
         };
 

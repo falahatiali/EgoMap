@@ -58,7 +58,7 @@ class RecoveryTriageTest extends TestCase
             ->assertSet('step', 5)
             ->call('finishDiagnosis')
             ->assertSee('Your priority', false)
-            ->assertSee('Activate no-contact timer', false)
+            ->assertSee('Activate Ghost Mode', false)
             ->assertSee(route('no-contact'), false);
 
         $this->assertSame(RecoveryPhase::Detox, app(RecoveryJourneyService::class)->currentPhase());
@@ -90,7 +90,7 @@ class RecoveryTriageTest extends TestCase
 
         Livewire::actingAs($user)
             ->test(Show::class)
-            ->assertSee('No-contact command center', false)
+            ->assertSee('Ghost Mode command center', false)
             ->assertDontSee('eg-profile-tests-section', false);
     }
 

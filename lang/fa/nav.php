@@ -2,7 +2,7 @@
 
 return [
     'tests' => 'تست‌ها',
-    'no_contact' => 'نو-کانتکت',
+    'no_contact' => 'حالت شبح',
     'how_it_works' => 'مسیر ریکاوری',
     'report_preview' => 'امکانات',
     'start_test' => 'شروع تست رایگان',

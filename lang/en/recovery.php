@@ -39,8 +39,8 @@ return [
 
     'plan_status_red' => 'Red alert — nervous system hijacked',
     'plan_priority_label' => 'Your priority',
-    'plan_priority_title' => 'No-contact protocol',
-    'plan_activate_cta' => 'Activate no-contact timer',
+    'plan_priority_title' => 'Ghost Mode',
+    'plan_activate_cta' => 'Activate Ghost Mode',
     'plan_footer' => 'Current phase: :phase. Advanced tools unlock after 24 hours on protocol.',
 
     'plan_diagnosis_stalking_title' => 'You are in a feedback loop',
@@ -49,7 +49,7 @@ return [
 
     'plan_diagnosis_get_back_title' => 'Chasing is shrinking you',
     'plan_diagnosis_get_back_body' => 'Trying to win them back hands them the remote. You are not negotiating — you are begging for signal.',
-    'plan_why_get_back' => 'Why? No-contact is the firewall. Silence is the first rebuild, not another paragraph at 2 a.m.',
+    'plan_why_get_back' => 'Why? Ghost Mode is the firewall. Silence is the first rebuild, not another paragraph at 2 a.m.',
 
     'plan_diagnosis_anger_title' => 'Rage needs a channel, not a text',
     'plan_diagnosis_anger_body' => 'Anger is valid — but sending it to them feeds the loop. You need detox before justice.',
@@ -57,13 +57,13 @@ return [
 
     'plan_diagnosis_worthless_title' => 'Your worth is not their verdict',
     'plan_diagnosis_worthless_body' => 'Hopelessness means the wound is talking. Data comes later — first we stop the bleed.',
-    'plan_why_worthless' => 'Why? Even when you feel small, stalking and texting keep the wound open. No-contact first — then we debug patterns.',
+    'plan_why_worthless' => 'Why? Even when you feel small, stalking and texting keep the wound open. Ghost Mode first — then we debug patterns.',
 
-    'rec_no_contact_title' => 'Start the no-contact protocol',
+    'rec_no_contact_title' => 'Start Ghost Mode',
     'rec_no_contact_body' => 'Cut the signal before it cuts you. A server-backed timer resets if you slip — no willpower theater.',
-    'rec_get_back_body' => 'Chasing makes you smaller. Lock no-contact first; rebuild later.',
+    'rec_get_back_body' => 'Chasing makes you smaller. Lock Ghost Mode first; rebuild later.',
     'rec_vent_title' => 'Vent safely, then cut contact',
-    'rec_anger_body' => 'Anger needs an outlet — but not a text at 2 a.m. Start with the no-contact timer.',
+    'rec_anger_body' => 'Anger needs an outlet — but not a text at 2 a.m. Start with the Ghost Mode timer.',
     'rec_worthless_body' => 'Stop the bleed first. The MBTI debug unlocks after 24 hours on protocol.',
 
     'phase_diagnose' => 'Diagnose',
@@ -77,11 +77,11 @@ return [
     'needs_triage_body' => 'Four questions so we show only what you need today.',
     'needs_triage_cta' => 'Start intake',
     'advanced_locked_title' => 'Locked until detox holds',
-    'advanced_locked_body' => 'Tests and empire tools unlock after 24 hours on your no-contact protocol.',
+    'advanced_locked_body' => 'Tests and empire tools unlock after 24 hours on Ghost Mode.',
 
     'tool_diagnose_title' => 'Relationship debug',
     'tool_diagnose_body' => 'Map your patterns with the MBTI assessment — free PDF when you finish.',
-    'tool_detox_title' => 'No-contact command center',
+    'tool_detox_title' => 'Ghost Mode command center',
     'tool_detox_body' => 'Your streak is stored on our servers. Slip = full reset.',
     'tool_detox_activate_body' => 'Your prescription is ready. Activate the timer — this is step one.',
     'tool_deliver_title' => 'Empire tracker',
@@ -93,6 +93,6 @@ return [
     'lock_diagnose_focus_detox' => 'Focus on Detox first — unlock Diagnose after 24h on protocol',
     'lock_detox_after_diagnose' => 'Unlock after you complete one diagnostic test',
     'lock_deliver_after_diagnose' => 'Unlock after Detox phase',
-    'lock_deliver_after_detox' => 'Unlock after 24 hours on no-contact or completing the protocol',
+    'lock_deliver_after_detox' => 'Unlock after 24 hours on Ghost Mode or completing the protocol',
     'lock_phase_default' => 'Complete your current phase first',
 ];

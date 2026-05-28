@@ -377,8 +377,8 @@ class RebootProtocolAnalysisEngine
 
         if ($dimensions['readiness'] > 0.6) {
             return [
-                'en' => 'Start 90-Day No Contact — Day zero. Use structure, not punishment.',
-                'fa' => 'No Contact ۹۰ روزه — روز صفر. ساختار بساز، نه تنبیه.',
+                'en' => 'Start 90-Day Ghost Mode — Day zero. Use structure, not punishment.',
+                'fa' => 'حالت شبح ۹۰ روزه — روز صفر. ساختار بساز، نه تنبیه.',
                 'emergency' => false,
             ];
         }
@@ -393,15 +393,15 @@ class RebootProtocolAnalysisEngine
 
         if ($features['contact_frequency'] > 0.5) {
             return [
-                'en' => 'Restart No Contact from Day Zero tonight — your nervous system needs distance.',
-                'fa' => 'امشب No Contact را از روز صفر دوباره شروع کن — سیستم عصبی‌ات به فاصله نیاز دارد.',
+                'en' => 'Restart Ghost Mode from Day Zero tonight — your nervous system needs distance.',
+                'fa' => 'امشب حالت شبح را از روز صفر دوباره شروع کن — سیستم عصبی‌ات به فاصله نیاز دارد.',
                 'emergency' => false,
             ];
         }
 
         return [
-            'en' => 'Begin the No Contact protocol and check in tomorrow for your first daily mission.',
-            'fa' => 'پروتکل No Contact را شروع کن و فردا برای اولین ماموریت روزانه برگرد.',
+            'en' => 'Begin Ghost Mode and check in tomorrow for your first daily mission.',
+            'fa' => 'حالت شبح را شروع کن و فردا برای اولین ماموریت روزانه برگرد.',
             'emergency' => false,
         ];
     }
@@ -441,7 +441,7 @@ class RebootProtocolAnalysisEngine
         return match ($phaseKey) {
             'shock' => ['en' => 'Shock Phase', 'fa' => 'مرحله شوک'],
             'withdrawal' => ['en' => 'Emotional Withdrawal', 'fa' => 'مرحله ترک عاطفی'],
-            'instability' => ['en' => 'No-Contact Instability', 'fa' => 'بی‌ثباتی در No Contact'],
+            'instability' => ['en' => 'Ghost Mode instability', 'fa' => 'بی‌ثباتی در حالت شبح'],
             'obsession_loop' => ['en' => 'Obsession Loop', 'fa' => 'حلقه وسواس فکری'],
             'identity_loss' => ['en' => 'Identity Loss', 'fa' => 'گم‌کردن هویت'],
             'rebuild_ready' => ['en' => 'Rebuild Ready', 'fa' => 'آماده بازسازی'],
@@ -464,8 +464,8 @@ class RebootProtocolAnalysisEngine
                 'fa' => 'مغزت دلبستگی آشنا را می‌خواهد. این ترک است، نه اینکه حتماً باید پیام بدهی.',
             ],
             'instability' => [
-                'en' => 'You are fighting the urge to reach out. No Contact is stabilization, not a tactic to win her back.',
-                'fa' => 'با میل تماس مبارزه می‌کنی. No Contact تثبیت است، نه ترفند برگرداندن او.',
+                'en' => 'You are fighting the urge to reach out. Ghost Mode is stabilization, not a tactic to win her back.',
+                'fa' => 'با میل تماس مبارزه می‌کنی. حالت شبح تثبیت است، نه ترفند برگرداندن او.',
             ],
             'obsession_loop' => [
                 'en' => 'Your mind is replaying the relationship on a loop. Action beats more analysis.',
