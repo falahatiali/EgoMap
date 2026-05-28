@@ -326,6 +326,19 @@
     color: inherit;
 }
 
+.eg-profile-test-card-link {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    text-decoration: none;
+    color: inherit;
+}
+
+.eg-profile-test-card-link:hover {
+    color: inherit;
+}
+
 .eg-profile-test-card-top {
     display: flex;
     align-items: center;
@@ -741,4 +754,23 @@
     .eg-profile-test-detail .eg-profile-result-stack .row.g-4 {
         --bs-gutter-y: 1.5rem;
     }
+}
+
+.eg-profile-security-card {
+    padding: var(--eg-space-lg);
+    border-radius: var(--eg-radius-lg);
+    max-width: 36rem;
+}
+
+.eg-profile-security-form .form-control {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--eg-border);
+    color: var(--eg-text);
+}
+
+.eg-profile-security-form .form-control:focus {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--eg-accent);
+    box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--eg-accent) 20%, transparent);
+    color: var(--eg-text);
 }

@@ -36,4 +36,11 @@ return [
     'open_full_result' => 'Open full report page',
     'delete_test' => 'Delete test',
     'delete_test_confirm' => 'Are you sure you want to delete this test session?',
+    'security_title' => 'Account security',
+    'security_subtitle' => 'Manage where you are signed in.',
+    'revoke_sessions_body' => 'Sign out everywhere else. Other browsers and devices will need to sign in again. Your current session stays active.',
+    'revoke_sessions_button' => 'Sign out other devices',
+    'revoke_sessions_loading' => 'Signing out other devices…',
+    'revoke_sessions_success' => '{0} No other active sessions were found.|{1} Signed out :count other device.|[2,*] Signed out :count other devices.',
+    'revoke_sessions_password_invalid' => 'That password is incorrect.',
 ];

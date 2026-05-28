@@ -37,9 +37,10 @@ class TestShow extends Component
             403,
         );
 
-        // Deleted sessions (soft deleted as Abandoned) should not be accessible.
         if ($this->session->status === SessionStatus::Abandoned) {
-            abort(404);
+            $this->redirectRoute('profile', navigate: true);
+
+            return;
         }
 
         if ($this->session->status === SessionStatus::InProgress) {

@@ -153,8 +153,7 @@ class ProfilePageTest extends TestCase
         Livewire::actingAs($user)
             ->test(Show::class)
             ->call('deleteSession', $session->uuid)
-            ->assertViewHas('totalTests', 0)
-            ->assertSee(__('profile.no_tests_title'), false);
+            ->assertRedirect(route('profile', ['locale' => 'en']).'#my-tests');
 
         $this->assertSame(
             SessionStatus::Abandoned,

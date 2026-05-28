@@ -56,6 +56,52 @@
         @include('livewire.profile.partials.quiz-history')
     @endif
 
+    <section class="container eg-profile-section">
+        <div class="eg-profile-section-head mb-3">
+            <div>
+                <h2 class="eg-display h4 mb-1">{{ __('profile.security_title') }}</h2>
+                <p class="eg-text-muted mb-0">{{ __('profile.security_subtitle') }}</p>
+            </div>
+        </div>
+
+        <div class="eg-profile-security-card eg-glass">
+            @if (session('profile_notice'))
+                <div class="alert alert-success mb-3" role="alert">
+                    {{ session('profile_notice') }}
+                </div>
+            @endif
+
+            <form wire:submit="revokeOtherSessions" class="eg-profile-security-form">
+                <p class="eg-text-muted small mb-3">{{ __('profile.revoke_sessions_body') }}</p>
+
+                <div class="mb-3">
+                    <label for="revoke-password" class="form-label">{{ __('auth.password') }}</label>
+                    <input
+                        id="revoke-password"
+                        type="password"
+                        wire:model="revokePassword"
+                        class="form-control @error('revokePassword') is-invalid @enderror"
+                        placeholder="{{ __('auth.password_placeholder') }}"
+                        autocomplete="current-password"
+                    >
+                    @error('revokePassword')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <button type="submit" class="btn btn-outline-danger" wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="revokeOtherSessions">
+                        <i class="fa-solid fa-right-from-bracket me-1"></i>
+                        {{ __('profile.revoke_sessions_button') }}
+                    </span>
+                    <span wire:loading wire:target="revokeOtherSessions">
+                        {{ __('profile.revoke_sessions_loading') }}
+                    </span>
+                </button>
+            </form>
+        </div>
+    </section>
+
     {{-- Recovery journey --}}
     <section class="container eg-profile-section pb-5">
         @if ($journey['needs_triage'])

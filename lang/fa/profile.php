@@ -36,4 +36,11 @@ return [
     'open_full_result' => 'صفحه گزارش کامل',
     'delete_test' => 'حذف تست',
     'delete_test_confirm' => 'مطمئنی می‌خوای این جلسه تست رو حذف کنی؟',
+    'security_title' => 'امنیت حساب',
+    'security_subtitle' => 'مدیریت دستگاه‌هایی که وارد شده‌ای.',
+    'revoke_sessions_body' => 'از همه دستگاه‌ها و مرورگرهای دیگر خارج شو. برای ورود دوباره باید لاگین کنند. این جلسه فعلی باز می‌ماند.',
+    'revoke_sessions_button' => 'خروج از دستگاه‌های دیگر',
+    'revoke_sessions_loading' => 'در حال خروج از دستگاه‌های دیگر…',
+    'revoke_sessions_success' => '{0} جلسه فعال دیگری پیدا نشد.|{1} از :count دستگاه دیگر خارج شدی.|[2,*] از :count دستگاه دیگر خارج شدی.',
+    'revoke_sessions_password_invalid' => 'رمز عبور اشتباه است.',
 ];

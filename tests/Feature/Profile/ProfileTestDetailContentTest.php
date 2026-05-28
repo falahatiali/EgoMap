@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Profile;
 
+use App\Enums\SessionStatus;
 use App\Livewire\Profile\TestShow;
 use App\Models\Quiz;
 use App\Models\QuizSession;
@@ -55,6 +56,17 @@ class ProfileTestDetailContentTest extends TestCase
             ->assertSee(__('profile.retake'), false)
             ->assertSee(__('profile.open_full_result'), false)
             ->assertSee('eg-profile-result-stack', false);
+    }
+
+    public function test_profile_test_detail_redirects_when_session_was_deleted(): void
+    {
+        $user = User::factory()->create();
+        $session = $this->completeSessionFor($user);
+        $session->update(['status' => SessionStatus::Abandoned]);
+
+        $this->actingAs($user)
+            ->get(route('profile.test.show', ['uuid' => $session->uuid]))
+            ->assertRedirect(route('profile', ['locale' => 'en']));
     }
 
     public function test_profile_test_detail_forbids_other_users(): void

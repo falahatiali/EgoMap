@@ -5,10 +5,13 @@ namespace App\Livewire\Profile;
 use App\Enums\SessionStatus;
 use App\Models\User;
 use App\Models\QuizSession;
+use App\Services\Auth\UserSessionService;
 use App\Services\Profile\UserQuizHistoryService;
 use App\Services\Recovery\RecoveryJourneyService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -20,6 +23,8 @@ class Show extends Component
 
     #[Url(as: 'tab', history: true)]
     public string $filter = 'all';
+
+    public string $revokePassword = '';
 
     public function mount(UserQuizHistoryService $historyService): void
     {
@@ -51,6 +56,33 @@ class Show extends Component
 
         // Soft delete behavior: mark the session as abandoned so it disappears from history.
         $session->update(['status' => SessionStatus::Abandoned]);
+
+        $this->redirect(route('profile').'#my-tests', navigate: true);
+    }
+
+    public function revokeOtherSessions(UserSessionService $sessionService): void
+    {
+        $user = Auth::user();
+        abort_unless($user !== null, 401);
+
+        $this->validate([
+            'revokePassword' => ['required', 'string'],
+        ]);
+
+        if (! Hash::check($this->revokePassword, $user->password)) {
+            throw ValidationException::withMessages([
+                'revokePassword' => [__('profile.revoke_sessions_password_invalid')],
+            ]);
+        }
+
+        $deleted = $sessionService->revokeOtherSessions($user);
+
+        $this->reset('revokePassword');
+
+        session()->flash(
+            'profile_notice',
+            __('profile.revoke_sessions_success', ['count' => $deleted]),
+        );
     }
 
     public function render(UserQuizHistoryService $historyService, RecoveryJourneyService $journeyService): View
