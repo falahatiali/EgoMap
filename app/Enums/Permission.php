@@ -13,6 +13,7 @@ enum Permission: string
     // Admin
     case AdminAccess = 'admin.access';
     case AdminQuizzesManage = 'admin.quizzes.manage';
+    case AdminMissionsManage = 'admin.missions.manage';
     case AdminUsersManage = 'admin.users.manage';
     case AdminRolesManage = 'admin.roles.manage';
 
@@ -92,6 +93,7 @@ enum Permission: string
         return [
             self::AdminAccess,
             self::AdminQuizzesManage,
+            self::AdminMissionsManage,
             self::AdminUsersManage,
         ];
     }

@@ -51,6 +51,15 @@ final class AdminNavigation
                 'permission' => Permission::AdminQuizzesManage->value,
             ],
             [
+                'key' => 'mission-engine',
+                'label' => __('admin.nav.mission_engine'),
+                'icon' => 'fa-route',
+                'route' => 'admin.mission-engine.templates.index',
+                'enabled' => true,
+                'badge' => null,
+                'permission' => Permission::AdminMissionsManage->value,
+            ],
+            [
                 'key' => 'sessions',
                 'label' => __('admin.nav.sessions'),
                 'icon' => 'fa-clipboard-list',

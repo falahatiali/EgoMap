@@ -2,6 +2,9 @@
 
 use App\Enums\Permission;
 use App\Livewire\Admin\Dashboard;
+use App\Livewire\Admin\MissionEngine\Templates\Create as MissionTemplatesCreate;
+use App\Livewire\Admin\MissionEngine\Templates\Edit as MissionTemplatesEdit;
+use App\Livewire\Admin\MissionEngine\Templates\Index as MissionTemplatesIndex;
 use App\Livewire\Admin\Permissions\Index as PermissionsIndex;
 use App\Livewire\Admin\Quizzes\Edit as QuizzesEdit;
 use App\Livewire\Admin\Quizzes\Index as QuizzesIndex;
@@ -24,6 +27,15 @@ Route::middleware('permission:'.Permission::AdminQuizzesManage->value)->group(fu
     Route::livewire('/quizzes', QuizzesIndex::class)->name('quizzes.index');
     Route::livewire('/quizzes/{quiz}', QuizzesEdit::class)->name('quizzes.edit');
 });
+
+Route::middleware('permission:'.Permission::AdminMissionsManage->value)
+    ->prefix('mission-engine')
+    ->name('mission-engine.')
+    ->group(function (): void {
+        Route::livewire('/templates', MissionTemplatesIndex::class)->name('templates.index');
+        Route::livewire('/templates/create', MissionTemplatesCreate::class)->name('templates.create');
+        Route::livewire('/templates/{template}', MissionTemplatesEdit::class)->name('templates.edit');
+    });
 
 Route::livewire('/sessions', SessionsIndex::class)->name('sessions.index');
 Route::livewire('/sessions/{session}', SessionsShow::class)->name('sessions.show');

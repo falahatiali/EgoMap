@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Ai\Concerns\HasConversations;
+use Modules\MissionEngine\Models\MissionEnrollment;
 use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable([
@@ -63,5 +64,13 @@ class User extends Authenticatable
     public function noContactProtocols(): HasMany
     {
         return $this->hasMany(NoContactProtocol::class)->latest('updated_at');
+    }
+
+    /**
+     * @return HasMany<MissionEnrollment, $this>
+     */
+    public function missionEnrollments(): HasMany
+    {
+        return $this->hasMany(MissionEnrollment::class)->latest('last_activity_at');
     }
 }
