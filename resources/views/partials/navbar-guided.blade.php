@@ -16,6 +16,11 @@
                 @include('partials.language-switcher')
 
                 @auth
+                    @include('partials.nav-missions-link', ['variant' => 'button'])
+                    <a href="{{ route('no-contact') }}" class="eg-nav-ghost-link eg-transition d-none d-sm-inline-flex" wire:navigate>
+                        <i class="fa-solid fa-ghost" aria-hidden="true"></i>
+                        <span>{{ __('nav.no_contact') }}</span>
+                    </a>
                     <a href="{{ route('profile') }}" class="eg-nav-auth-link eg-transition d-none d-sm-inline" wire:navigate>
                         {{ __('profile.page_title') }}
                     </a>

@@ -3,6 +3,11 @@
         @include('partials.page-nav-actions', [
             'links' => [
                 [
+                    'href' => $missionNav['href'],
+                    'label' => __('nav.my_missions'),
+                    'icon' => 'fa-bullseye',
+                ],
+                [
                     'href' => route('home'),
                     'label' => __('quiz.back_home'),
                     'icon' => 'fa-house',
@@ -15,7 +20,7 @@
                 [
                     'href' => route('no-contact'),
                     'label' => __('nav.no_contact'),
-                    'icon' => 'fa-hourglass-half',
+                    'icon' => 'fa-ghost',
                 ],
             ],
         ])
@@ -47,9 +52,70 @@
                             </span>
                         @endif
                     </div>
+                    <div class="eg-profile-hero-actions">
+                        <a href="{{ $missionNav['href'] }}" class="btn eg-btn-primary eg-profile-missions-hero-btn" wire:navigate>
+                            <i class="fa-solid fa-bullseye me-2" aria-hidden="true"></i>
+                            {{ __('missions.open_missions') }}
+                        </a>
+                        <a href="{{ $missionNav['catalog_href'] }}" class="btn btn-outline-light" wire:navigate>
+                            {{ __('missions.browse_missions') }}
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
+    </section>
+
+    <section id="missions" class="container eg-profile-section eg-profile-missions-section">
+        <div class="eg-profile-section-head">
+            <div>
+                <h2 class="eg-display h4 mb-2">{{ __('missions.profile_missions') }}</h2>
+                <p class="eg-text-muted mb-0">{{ __('missions.profile_missions_sub') }}</p>
+            </div>
+            <a href="{{ $missionNav['catalog_href'] }}" class="btn btn-outline-light" wire:navigate>
+                {{ __('missions.browse_missions') }}
+            </a>
+        </div>
+
+        @if ($missionEnrollments->isNotEmpty())
+            <div class="eg-profile-missions-grid">
+                @foreach ($missionEnrollments as $enrollment)
+                    @php
+                        $snap = $enrollment->template_snapshot;
+                        $missionTitle = $enrollment->title
+                            ?: ($snap['title'][$locale] ?? $snap['title']['en'] ?? __('missions.untitled'));
+                        $missionIcon = $enrollment->template?->icon ?? 'fa-dumbbell';
+                    @endphp
+                    <a
+                        href="{{ route('missions.workspace', ['locale' => $locale, 'enrollment' => $enrollment->uuid]) }}"
+                        class="eg-profile-mission-card eg-glass text-decoration-none text-reset"
+                        wire:navigate
+                    >
+                        <div class="eg-profile-mission-card-top">
+                            <span class="eg-profile-mission-card-icon" aria-hidden="true">
+                                <i class="fa-solid {{ $missionIcon }}"></i>
+                            </span>
+                            <h3 class="eg-profile-mission-card-title">{{ $missionTitle }}</h3>
+                        </div>
+                        <span class="eg-profile-mission-card-cta">
+                            {{ __('missions.continue_mission') }}
+                            <i class="fa-solid fa-arrow-{{ app()->getLocale() === 'fa' ? 'left' : 'right' }}" data-icon-directional></i>
+                        </span>
+                    </a>
+                @endforeach
+            </div>
+        @else
+            <div class="eg-profile-missions-empty eg-glass">
+                <span class="eg-profile-missions-empty-icon" aria-hidden="true">
+                    <i class="fa-solid fa-bullseye"></i>
+                </span>
+                <h3 class="h5 mb-2">{{ __('missions.profile_missions_empty_title') }}</h3>
+                <p class="eg-text-muted mb-4">{{ __('missions.profile_missions_empty_body') }}</p>
+                <a href="{{ $missionNav['catalog_href'] }}" class="btn eg-btn-primary" wire:navigate>
+                    {{ __('missions.browse_missions') }}
+                </a>
+            </div>
+        @endif
     </section>
 
     @if ($showQuizHistory)
