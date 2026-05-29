@@ -3,6 +3,7 @@
 return [
     'tests' => 'Tests',
     'no_contact' => 'Ghost Mode',
+    'my_missions' => 'My missions',
     'how_it_works' => 'Recovery path',
     'report_preview' => 'Features',
     'start_test' => 'Start free test',
