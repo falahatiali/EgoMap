@@ -1,0 +1,30 @@
+{
+    "name": "egomap/missionengine",
+    "description": "",
+    "authors": [
+        {
+            "name": "EgoMap",
+            "email": "hello@egomap.test"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\MissionEngine\\": "app/",
+            "Modules\\MissionEngine\\Database\\Factories\\": "database/factories/",
+            "Modules\\MissionEngine\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\MissionEngine\\Tests\\": "tests/"
+        }
+    }
+}

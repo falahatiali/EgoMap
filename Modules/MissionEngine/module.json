@@ -1,0 +1,11 @@
+{
+    "name": "MissionEngine",
+    "alias": "missionengine",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\MissionEngine\\Providers\\MissionEngineServiceProvider"
+    ],
+    "files": []
+}
