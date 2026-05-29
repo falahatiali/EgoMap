@@ -8,9 +8,13 @@
     padding: var(--eg-space-xl) 0 var(--eg-space-2xl);
 }
 
-.eg-auth-container {
+.eg-auth-main > .eg-auth-container {
     position: relative;
+    width: 100%;
     max-width: 28rem;
+    margin-inline: auto;
+    padding-inline: calc(var(--bs-gutter-x, 0.75rem) * 0.5);
+    flex: 0 1 28rem;
 }
 
 .eg-auth-page-nav {
@@ -21,10 +25,6 @@
     padding: var(--eg-space-xl) var(--eg-space-lg);
     border-radius: var(--eg-radius-lg);
     text-align: center;
-}
-
-.eg-auth-card--verify {
-    max-width: 100%;
 }
 
 .eg-auth-icon {
@@ -141,8 +141,13 @@
 .eg-otp-inputs {
     display: flex;
     flex-direction: row;
+    flex-wrap: nowrap;
     gap: 0.75rem;
     justify-content: center;
+    align-items: center;
+    width: fit-content;
+    max-width: 100%;
+    margin-inline: auto;
     margin-bottom: var(--eg-space-lg);
     direction: ltr;
     unicode-bidi: isolate;
@@ -152,8 +157,11 @@
     border-color: var(--eg-danger);
 }
 
-.eg-otp-digit {
+.eg-otp-inputs .eg-otp-digit {
+    flex: 0 0 3.25rem;
     width: 3.25rem;
+    max-width: 3.25rem;
+    min-width: 3.25rem;
     height: 3.75rem;
     direction: ltr;
     text-align: center;
@@ -166,13 +174,19 @@
     border-radius: var(--eg-radius-sm);
     color: var(--eg-text);
     padding: 0;
+    appearance: textfield;
+    -moz-appearance: textfield;
 }
 
-.eg-otp-digit:focus {
+.eg-otp-inputs .eg-otp-digit:focus {
     border-color: var(--eg-accent-bright);
     box-shadow: 0 0 0 0.2rem var(--eg-accent-soft);
     background: rgba(255, 255, 255, 0.07);
     color: var(--eg-text);
+}
+
+.eg-auth-card--verify .eg-auth-form {
+    text-align: center;
 }
 
 .eg-auth-timer {
