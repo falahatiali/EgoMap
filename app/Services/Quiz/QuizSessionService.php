@@ -34,7 +34,7 @@ class QuizSessionService
             'quiz_id' => $quiz->id,
             'user_id' => auth()->id(),
             'guest_token' => $guestToken,
-            'locale' => LocaleConfig::resolve(session('locale')),
+            'locale' => LocaleConfig::active(),
             'status' => SessionStatus::InProgress,
             'current_sort_order' => 1,
             'started_at' => now(),

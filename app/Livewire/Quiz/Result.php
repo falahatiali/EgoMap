@@ -46,6 +46,24 @@ class Result extends Component
 
         $this->email = $this->session->email ?? '';
         $this->emailSent = $this->session->email_report_sent_at !== null;
+
+        $this->ensureUrlMatchesSessionLocale();
+    }
+
+    private function ensureUrlMatchesSessionLocale(): void
+    {
+        $sessionLocale = LocaleConfig::resolve($this->session->locale);
+        $routeLocale = request()->route('locale');
+
+        if (is_string($routeLocale) && $routeLocale === $sessionLocale) {
+            return;
+        }
+
+        $this->redirectRoute(
+            'quiz.result',
+            LocaleConfig::routeParameters(['uuid' => $this->uuid], $sessionLocale),
+            navigate: true,
+        );
     }
 
     public function sendFullReport(QuizSessionService $quizSessionService, PdfDeliveryService $pdfDelivery): void
@@ -95,7 +113,10 @@ class Result extends Component
      */
     public function getResultDataProperty(): array
     {
-        return QuizResultViewData::fromSession($this->session, LocaleConfig::fromRoute());
+        return QuizResultViewData::fromSession(
+            $this->session,
+            LocaleConfig::resolve($this->session->locale),
+        );
     }
 
     public function render(): View

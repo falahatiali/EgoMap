@@ -7,6 +7,7 @@ use App\Models\Question;
 use App\Models\QuizResponse;
 use App\Services\Quiz\QuizSessionService;
 use App\Services\Quiz\RebootProtocol\RebootProtocolFlow;
+use App\Support\LocaleConfig;
 
 trait AnswersQuizQuestions
 {
@@ -197,7 +198,14 @@ trait AnswersQuizQuestions
 
         if ($this->session->current_sort_order > $lastSort) {
             $quizSessionService->complete($this->session);
-            $this->redirectRoute('quiz.result', ['uuid' => $this->session->uuid], navigate: true);
+            $this->redirectRoute(
+                'quiz.result',
+                LocaleConfig::routeParameters(
+                    ['uuid' => $this->session->uuid],
+                    LocaleConfig::resolve($this->session->locale),
+                ),
+                navigate: true,
+            );
         }
     }
 

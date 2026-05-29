@@ -69,9 +69,9 @@ final class LocaleConfig
     }
 
     /**
-     * Locale for rendering UI copy: URL segment first, then the active app locale.
+     * Locale for the current request: URL segment, then session, then app default.
      */
-    public static function fromRoute(): string
+    public static function active(): string
     {
         $routeLocale = request()->route('locale');
 
@@ -79,6 +79,34 @@ final class LocaleConfig
             return $routeLocale;
         }
 
+        $sessionLocale = session('locale');
+
+        if (is_string($sessionLocale) && self::isSupported($sessionLocale)) {
+            return $sessionLocale;
+        }
+
         return self::resolve(app()->getLocale());
+    }
+
+    /**
+     * Locale for rendering UI copy: URL segment first, then session, then app locale.
+     */
+    public static function fromRoute(): string
+    {
+        return self::active();
+    }
+
+    /**
+     * Route parameters with a guaranteed locale prefix for localized named routes.
+     *
+     * @param  array<string, mixed>  $parameters
+     * @return array<string, mixed>
+     */
+    public static function routeParameters(array $parameters = [], ?string $locale = null): array
+    {
+        return array_merge(
+            ['locale' => self::resolve($locale ?? self::active())],
+            $parameters,
+        );
     }
 }
