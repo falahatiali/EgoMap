@@ -1,0 +1,304 @@
+.eg-missions-page {
+    padding-bottom: 4rem;
+}
+
+.eg-missions-hero {
+    padding: 2rem 0 1.5rem;
+}
+
+.eg-missions-hero-card {
+    padding: 1.75rem 1.5rem;
+    border-radius: var(--eg-radius-lg, 1rem);
+}
+
+.eg-missions-grid {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.eg-mission-card {
+    padding: 1.35rem 1.25rem;
+    border-radius: var(--eg-radius-lg, 1rem);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    height: 100%;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.eg-mission-card:hover {
+    transform: translateY(-2px);
+}
+
+.eg-mission-card-icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    font-size: 1.1rem;
+}
+
+.eg-mission-card-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.eg-mission-workspace {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: minmax(200px, 240px) 1fr;
+}
+
+@media (max-width: 991px) {
+    .eg-mission-workspace {
+        grid-template-columns: 1fr;
+    }
+}
+
+.eg-mission-tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.eg-mission-tab {
+    text-align: start;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    color: inherit;
+    padding: 0.65rem 0.85rem;
+    border-radius: 0.65rem;
+    font-size: 0.95rem;
+}
+
+.eg-mission-tab.is-active {
+    border-color: rgba(52, 211, 153, 0.45);
+    background: rgba(16, 185, 129, 0.12);
+}
+
+.eg-mission-panel {
+    padding: 1.35rem 1.25rem;
+    border-radius: var(--eg-radius-lg, 1rem);
+}
+
+.eg-mission-pro-banner {
+    border: 1px dashed rgba(251, 191, 36, 0.45);
+    background: rgba(251, 191, 36, 0.08);
+    border-radius: 0.75rem;
+    padding: 0.85rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.eg-mission-day-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.eg-mission-day-chip {
+    position: relative;
+}
+
+.eg-mission-day-chip input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.eg-mission-day-chip span {
+    display: inline-block;
+    padding: 0.45rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    font-size: 0.88rem;
+    cursor: pointer;
+}
+
+.eg-mission-day-chip input:checked + span {
+    border-color: rgba(52, 211, 153, 0.55);
+    background: rgba(16, 185, 129, 0.18);
+}
+
+.eg-mission-log-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.eg-mission-log-item {
+    padding: 0.75rem 0.85rem;
+    border-radius: 0.65rem;
+    background: rgba(255, 255, 255, 0.04);
+    font-size: 0.9rem;
+}
+
+.eg-mission-checklist label {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.55rem 0;
+    cursor: pointer;
+}
+
+.eg-mission-workspace-header {
+    padding: var(--eg-space-lg, 1.5rem);
+    border-radius: var(--eg-radius-lg, 1rem);
+}
+
+.eg-mission-log-date {
+    max-width: 16rem;
+}
+
+.eg-mission-block {
+    padding-bottom: var(--eg-space-lg, 1.5rem);
+    margin-bottom: var(--eg-space-lg, 1.5rem);
+    border-bottom: 1px solid var(--eg-border, rgba(255, 255, 255, 0.08));
+}
+
+.eg-mission-block:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.eg-mission-block-title {
+    font-family: var(--eg-font-display);
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+}
+
+.eg-mission-exercise-card,
+.eg-mission-meal-card {
+    padding: var(--eg-space-md, 1rem);
+    margin-bottom: var(--eg-space-md, 1rem);
+    border-radius: var(--eg-radius, 1rem);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--eg-border, rgba(255, 255, 255, 0.08));
+}
+
+.eg-mission-sets-table th {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--eg-text-muted);
+    font-weight: 600;
+}
+
+.eg-mission-set-summary {
+    list-style: none;
+    padding: 0;
+    margin: 0.25rem 0 0;
+    font-size: 0.88rem;
+    color: var(--eg-text-muted);
+}
+
+.eg-mission-set-summary li {
+    padding: 0.15rem 0;
+}
+
+.eg-mission-history-card {
+    padding: var(--eg-space-md, 1rem);
+    border-radius: var(--eg-radius, 1rem);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--eg-border, rgba(255, 255, 255, 0.08));
+}
+
+.eg-mission-calorie-hint {
+    padding: 0.75rem 1rem;
+    border-radius: 0.65rem;
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px dashed rgba(99, 102, 241, 0.35);
+    font-size: 0.88rem;
+    color: var(--eg-text-muted);
+}
+
+.eg-mission-product-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.eg-mission-product-item {
+    padding: 0.65rem 0.75rem;
+    border-radius: 0.65rem;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.eg-mission-preset-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.eg-mission-equipment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.eg-mission-equipment-card {
+    padding: 0.85rem 1rem;
+    border-radius: var(--eg-radius-sm, 0.65rem);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--eg-border);
+}
+
+.eg-mission-equipment-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--eg-space-md, 1rem);
+}
+
+.eg-mission-equipment-name {
+    font-family: var(--eg-font-display);
+    font-size: 1.05rem;
+}
+
+.eg-mission-equipment-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+}
+
+.eg-mission-equipment-badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: rgba(99, 102, 241, 0.15);
+    color: var(--eg-accent-bright);
+}
+
+.eg-mission-equipment-badge--status {
+    background: rgba(16, 185, 129, 0.14);
+    color: var(--eg-success);
+}
+
+.eg-mission-equipment-empty {
+    padding: 1rem;
+    border-radius: var(--eg-radius-sm, 0.65rem);
+    border: 1px dashed var(--eg-border);
+    text-align: center;
+}
+
+.eg-mission-panel {
+    padding: var(--eg-space-xl, 2rem) var(--eg-space-lg, 1.5rem);
+}
+
+.eg-mission-tabs {
+    gap: 0.5rem;
+}
+
+.eg-mission-tab {
+    padding: 0.75rem 1rem;
+}
