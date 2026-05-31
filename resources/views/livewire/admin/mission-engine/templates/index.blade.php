@@ -31,6 +31,8 @@
                         <th>{{ __('admin.mission_engine.name') }}</th>
                         <th>{{ __('admin.mission_engine.category') }}</th>
                         <th>{{ __('admin.mission_engine.difficulty') }}</th>
+                        <th>{{ __('admin.mission_engine.fields') }}</th>
+                        <th>{{ __('admin.mission_engine.phases') }}</th>
                         <th>{{ __('admin.mission_engine.enrollments') }}</th>
                         <th>{{ __('admin.table.status') }}</th>
                         <th></th>
@@ -43,6 +45,8 @@
                             <td>{{ $template->getTranslation('title', 'en', true) }}</td>
                             <td>{{ $template->category?->getTranslation('name', 'en', true) ?? '—' }}</td>
                             <td><span class="eg-admin-tag">{{ $template->difficulty->value }}</span></td>
+                            <td>{{ number_format($template->fields_count) }}</td>
+                            <td>{{ number_format($template->phases_count) }}</td>
                             <td>{{ number_format($template->enrollments_count) }}</td>
                             <td>
                                 <span class="eg-admin-status eg-admin-status--{{ $template->status === \Modules\MissionEngine\Enums\MissionTemplateStatus::Published ? 'completed' : 'muted' }}">
@@ -57,7 +61,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="eg-admin-table-empty">{{ __('admin.table.empty') }}</td>
+                            <td colspan="9" class="eg-admin-table-empty">{{ __('admin.table.empty') }}</td>
                         </tr>
                     @endforelse
                 </tbody>

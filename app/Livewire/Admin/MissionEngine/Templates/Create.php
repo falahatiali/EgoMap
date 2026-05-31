@@ -52,7 +52,7 @@ class Create extends Component
             'estimatedDays' => ['nullable', 'integer', 'min:1', 'max:3650'],
         ]);
 
-        $template = MissionTemplate::query()->create([
+        $template = MissionTemplate::query()->make([
             'slug' => $validated['slug'],
             'category_id' => $validated['categoryId'],
             'difficulty' => $validated['difficulty'],

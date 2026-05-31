@@ -40,7 +40,7 @@ class Index extends Component
     {
         $templates = MissionTemplate::query()
             ->with('category')
-            ->withCount(['enrollments', 'capabilities'])
+            ->withCount(['enrollments', 'fields', 'phases'])
             ->when($this->search !== '', function ($query): void {
                 $term = '%'.$this->search.'%';
                 $query->where(function ($inner) use ($term): void {

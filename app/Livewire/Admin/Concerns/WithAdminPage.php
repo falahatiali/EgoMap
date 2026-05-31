@@ -20,5 +20,13 @@ trait WithAdminPage
     {
         session()->flash('admin_notice', $message);
         session()->flash('admin_notice_type', $type);
+
+        if (property_exists($this, 'pageNotice')) {
+            $this->pageNotice = $message;
+        }
+
+        if (property_exists($this, 'pageNoticeType')) {
+            $this->pageNoticeType = $type;
+        }
     }
 }
