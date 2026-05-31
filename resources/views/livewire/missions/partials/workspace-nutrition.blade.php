@@ -56,24 +56,39 @@
                     </div>
                 </div>
 
-                <p class="small fw-semibold mb-2">{{ __('missions.meal_items') }}</p>
+                <div class="mb-2">
+                    <p class="small fw-semibold mb-1">{{ __('missions.meal_items') }}</p>
+                    <p class="small eg-text-muted mb-0">{{ __('missions.nutrition_items_examples') }}</p>
+                </div>
                 @foreach ($meal['items'] as $itemIndex => $item)
                     <div class="row g-2 mb-2 align-items-end">
-                        <div class="col-md-4">
-                            <input type="text" class="form-control" wire:model="nutritionMeals.{{ $mealIndex }}.items.{{ $itemIndex }}.name" placeholder="{{ __('missions.food_name') }}">
+                        <div class="col-md-5">
+                            @if ($itemIndex === 0)
+                                <label class="form-label mb-1">{{ __('missions.food_name') }}</label>
+                            @endif
+                            <input type="text" class="form-control" wire:model="nutritionMeals.{{ $mealIndex }}.items.{{ $itemIndex }}.name" placeholder="{{ __('missions.food_name_placeholder') }}">
                         </div>
-                        <div class="col-md-2">
-                            <input type="number" step="0.1" class="form-control" wire:model="nutritionMeals.{{ $mealIndex }}.items.{{ $itemIndex }}.quantity" placeholder="{{ __('missions.qty') }}">
+                        <div class="col-md-3">
+                            @if ($itemIndex === 0)
+                                @include('livewire.missions.partials.form-label-tooltip', [
+                                    'label' => __('missions.qty'),
+                                    'help' => __('missions.nutrition_qty_help'),
+                                ])
+                            @endif
+                            <input type="number" step="0.1" min="0" class="form-control" wire:model="nutritionMeals.{{ $mealIndex }}.items.{{ $itemIndex }}.quantity" placeholder="{{ __('missions.nutrition_qty_placeholder') }}">
                         </div>
-                        <div class="col-md-2">
-                            <input type="text" class="form-control" wire:model="nutritionMeals.{{ $mealIndex }}.items.{{ $itemIndex }}.unit" placeholder="{{ __('missions.unit') }}">
-                        </div>
-                        <div class="col-md-2">
-                            <input type="number" class="form-control" wire:model="nutritionMeals.{{ $mealIndex }}.items.{{ $itemIndex }}.calories" placeholder="{{ __('missions.calories') }}">
+                        <div class="col-md-3">
+                            @if ($itemIndex === 0)
+                                @include('livewire.missions.partials.form-label-tooltip', [
+                                    'label' => __('missions.unit'),
+                                    'help' => __('missions.nutrition_unit_help'),
+                                ])
+                            @endif
+                            <input type="text" class="form-control" wire:model="nutritionMeals.{{ $mealIndex }}.items.{{ $itemIndex }}.unit" placeholder="{{ __('missions.nutrition_unit_placeholder') }}">
                         </div>
                         <div class="col-md-1">
                             @if (count($meal['items']) > 1)
-                                <button type="button" class="btn btn-sm btn-outline-danger" wire:click="removeMealItem({{ $mealIndex }}, {{ $itemIndex }})">×</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" wire:click="removeMealItem({{ $mealIndex }}, {{ $itemIndex }})" aria-label="{{ __('missions.workout_remove') }}">×</button>
                             @endif
                         </div>
                     </div>

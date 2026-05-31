@@ -4,8 +4,10 @@ import { initLocale, syncLocaleFromDocument } from "./locale.js";
 import { initNoContactTimers } from "./no-contact-timer.js";
 import { initHeroTypedLine } from "./hero-typed-line.js";
 import { initProtocolHero } from "./protocol-hero.js";
+import { initBootstrapTooltips } from "./tooltips.js";
 
 initLocale();
+initBootstrapTooltips();
 initFormClickSounds();
 initNoContactTimers();
 initProtocolHero();
@@ -16,4 +18,11 @@ document.addEventListener("livewire:navigated", () => {
     initNoContactTimers();
     initProtocolHero();
     initHeroTypedLine();
+    initBootstrapTooltips();
+});
+
+document.addEventListener("livewire:init", () => {
+    Livewire.hook("morph.updated", ({ el }) => {
+        initBootstrapTooltips(el);
+    });
 });

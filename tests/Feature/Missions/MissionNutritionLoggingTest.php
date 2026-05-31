@@ -110,7 +110,7 @@ class MissionNutritionLoggingTest extends TestCase
                     'meal_time' => '08:00',
                     'notes' => '',
                     'items' => [
-                        ['name' => 'Eggs', 'quantity' => '2', 'unit' => 'pcs', 'calories' => '140', 'protein_g' => ''],
+                        ['name' => 'Eggs', 'quantity' => '2', 'unit' => 'count', 'calories' => '', 'protein_g' => ''],
                     ],
                 ],
             ])
