@@ -115,14 +115,15 @@ class MissionWorkoutLoggingTest extends TestCase
         Livewire::actingAs($user)
             ->test(Workspace::class, ['enrollment' => $enrollment])
             ->set('workoutPlan', [
-                ['day' => 'sat', 'focus' => 'legs', 'notes' => 'heavy'],
+                ['day' => 'sat', 'focus' => 'Legs', 'notes' => 'heavy'],
             ])
             ->call('saveWorkoutPlan')
             ->assertHasNoErrors();
 
         $enrollment->refresh();
 
-        $this->assertSame('legs', $enrollment->field_values['workout_plan'][0]['focus']);
+        $this->assertSame('Legs', $enrollment->field_values['workout_plan'][0]['focus']['en']);
+        $this->assertSame('heavy', $enrollment->field_values['workout_plan'][0]['notes']['en']);
     }
 
     public function test_workspace_forbidden_for_other_user(): void

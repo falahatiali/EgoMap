@@ -22,6 +22,7 @@ use Modules\MissionEngine\Services\MissionNutritionLogService;
 use Modules\MissionEngine\Services\MissionSupplementLogService;
 use Modules\MissionEngine\Services\MissionWorkoutLogService;
 use Modules\MissionEngine\Support\MissionEnrollmentPresenter;
+use Modules\MissionEngine\Support\MissionLocalizedText;
 use Modules\MissionEngine\Support\MissionProGate;
 
 #[Layout('layouts.app')]
@@ -170,7 +171,7 @@ class Workspace extends Component
     public function saveWorkoutPlan(MissionEnrollmentFieldService $fields): void
     {
         $fields->merge($this->enrollment, [
-            'workout_plan' => array_values($this->workoutPlan),
+            'workout_plan' => $this->persistWorkoutPlanRows(),
         ], Auth::user());
 
         $this->flashSaved();
@@ -520,9 +521,17 @@ class Workspace extends Component
         $taskConfig = collect($capabilities)->firstWhere('key', 'task')['config'] ?? [];
         $nutritionConfig = collect($capabilities)->firstWhere('key', 'nutrition')['config'] ?? [];
 
+        $snapshot = is_array($this->enrollment->template_snapshot)
+            ? $this->enrollment->template_snapshot
+            : [];
+        $missionIcon = is_string($snapshot['icon'] ?? null) && $snapshot['icon'] !== ''
+            ? $snapshot['icon']
+            : 'fa-compass';
+
         return view('livewire.missions.workspace', [
             'locale' => $locale,
             'presenter' => $presenter,
+            'missionIcon' => $missionIcon,
             'capabilities' => $capabilities,
             'workoutHistory' => $workouts->paginateSessions($this->enrollment, 5),
             'nutritionHistory' => $nutrition->paginateDays($this->enrollment, 5),
@@ -594,7 +603,7 @@ class Workspace extends Component
     private function loadWorkoutIntoForm(MissionWorkoutSession $session): void
     {
         $this->workoutDayKey = (string) ($session->day_key ?? 'sat');
-        $this->workoutFocus = (string) ($session->focus ?? '');
+        $this->workoutFocus = MissionLocalizedText::forLocale($session->focus ?? '', app()->getLocale());
         $this->workoutDuration = $session->duration_minutes;
         $this->workoutSessionNotes = (string) ($session->notes ?? '');
         $this->workoutExercises = $session->exercises->map(fn ($exercise): array => [
@@ -746,8 +755,12 @@ class Workspace extends Component
 
         $this->gymDays = is_array($values['gym_days'] ?? null) ? $values['gym_days'] : [];
         $this->preferredGymTime = (string) ($values['preferred_gym_time'] ?? '18:00');
-        $this->workoutPlan = is_array($values['workout_plan'] ?? null) ? $values['workout_plan'] : [];
-        $this->equipmentNotes = (string) ($values['equipment_notes'] ?? '');
+        $locale = app()->getLocale();
+        $this->workoutPlan = $this->hydrateWorkoutPlanForLocale(
+            is_array($values['workout_plan'] ?? null) ? $values['workout_plan'] : [],
+            $locale,
+        );
+        $this->equipmentNotes = MissionLocalizedText::forLocale($values['equipment_notes'] ?? '', $locale);
         $this->equipmentItems = $this->normalizeEquipmentItems($values['equipment_items'] ?? null);
         $this->registrationProgress = is_array($values['registration_progress'] ?? null)
             ? $values['registration_progress']
@@ -770,9 +783,15 @@ class Workspace extends Component
 
     private function persistEquipment(MissionEnrollmentFieldService $fields): void
     {
+        $locale = app()->getLocale();
+
         $fields->merge($this->enrollment, [
             'equipment_items' => $this->equipmentItems,
-            'equipment_notes' => $this->equipmentNotes,
+            'equipment_notes' => MissionLocalizedText::merge(
+                $this->enrollment->field_values['equipment_notes'] ?? '',
+                $this->equipmentNotes,
+                $locale,
+            ),
         ], Auth::user());
 
         $this->flashSaved();
@@ -856,6 +875,51 @@ class Workspace extends Component
     /**
      * @return list<array{value: string, label: string}>
      */
+    /**
+     * @param  list<array<string, mixed>>  $stored
+     * @return list<array{day: string, focus: string, notes: string}>
+     */
+    private function hydrateWorkoutPlanForLocale(array $stored, string $locale): array
+    {
+        return array_values(array_map(
+            static fn (array $row): array => [
+                'day' => (string) ($row['day'] ?? 'sat'),
+                'focus' => MissionLocalizedText::forLocale($row['focus'] ?? '', $locale),
+                'notes' => MissionLocalizedText::forLocale($row['notes'] ?? '', $locale),
+            ],
+            $stored,
+        ));
+    }
+
+    /**
+     * @return list<array{day: string, focus: array{en: string, fa: string}, notes: array{en: string, fa: string}}>
+     */
+    private function persistWorkoutPlanRows(): array
+    {
+        $locale = app()->getLocale();
+        $existing = $this->enrollment->field_values['workout_plan'] ?? [];
+        $persisted = [];
+
+        foreach ($this->workoutPlan as $index => $row) {
+            $previous = is_array($existing[$index] ?? null) ? $existing[$index] : [];
+
+            foreach ($existing as $existingRow) {
+                if (is_array($existingRow) && ($existingRow['day'] ?? null) === ($row['day'] ?? null)) {
+                    $previous = $existingRow;
+                    break;
+                }
+            }
+
+            $persisted[] = [
+                'day' => (string) ($row['day'] ?? 'sat'),
+                'focus' => MissionLocalizedText::merge($previous['focus'] ?? '', (string) ($row['focus'] ?? ''), $locale),
+                'notes' => MissionLocalizedText::merge($previous['notes'] ?? '', (string) ($row['notes'] ?? ''), $locale),
+            ];
+        }
+
+        return $persisted;
+    }
+
     private function dayOptions(string $locale): array
     {
         $map = [

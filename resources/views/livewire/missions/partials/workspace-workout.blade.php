@@ -121,12 +121,14 @@
         @foreach ($workoutHistory as $session)
             <article class="eg-mission-history-card mb-3">
                 <header class="d-flex flex-wrap justify-content-between gap-2 mb-2">
-                    <strong>{{ $session->session_date->translatedFormat('l، j F Y') }}</strong>
-                    @if ($session->focus)<span class="eg-badge">{{ $session->focus }}</span>@endif
+                    <strong>{{ $session->session_date->locale($locale)->translatedFormat($locale === 'fa' ? 'l، j F Y' : 'l, F j, Y') }}</strong>
+                    @if ($session->focus)
+                        <span class="eg-badge">{{ \Modules\MissionEngine\Support\MissionLocalizedText::forLocale($session->focus, $locale) }}</span>
+                    @endif
                 </header>
                 @foreach ($session->exercises as $exercise)
                     <div class="mb-2">
-                        <span class="fw-semibold">{{ $exercise->name }}</span>
+                        <span class="fw-semibold">{{ \Modules\MissionEngine\Support\MissionLocalizedText::forLocale($exercise->name, $locale) }}</span>
                         <ul class="eg-mission-set-summary mb-0">
                             @foreach ($exercise->sets as $set)
                                 <li>{{ __('missions.set_line', ['n' => $set->set_number, 'reps' => $set->reps ?? '—', 'weight' => $set->weight ?? '—']) }}</li>

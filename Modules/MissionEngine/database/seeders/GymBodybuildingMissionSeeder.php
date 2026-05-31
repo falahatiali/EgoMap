@@ -210,9 +210,21 @@ class GymBodybuildingMissionSeeder extends Seeder
                 'label' => ['en' => 'Training split', 'fa' => 'برنامه تمرینی'],
                 'help_text' => ['en' => 'Example: Saturday legs, Monday chest.', 'fa' => 'مثال: شنبه پا، دوشنبه سینه.'],
                 'default_value' => [
-                    ['day' => 'sat', 'focus' => 'legs', 'notes' => ''],
-                    ['day' => 'mon', 'focus' => 'chest', 'notes' => ''],
-                    ['day' => 'wed', 'focus' => 'back', 'notes' => ''],
+                    [
+                        'day' => 'sat',
+                        'focus' => ['en' => 'Legs', 'fa' => 'پا'],
+                        'notes' => ['en' => '', 'fa' => ''],
+                    ],
+                    [
+                        'day' => 'mon',
+                        'focus' => ['en' => 'Chest', 'fa' => 'سینه'],
+                        'notes' => ['en' => '', 'fa' => ''],
+                    ],
+                    [
+                        'day' => 'wed',
+                        'focus' => ['en' => 'Back', 'fa' => 'پشت'],
+                        'notes' => ['en' => '', 'fa' => ''],
+                    ],
                 ],
             ],
             [
