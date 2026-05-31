@@ -34,9 +34,14 @@ class NoContactTimerPageTest extends TestCase
             ->test(Show::class)
             ->set('selectedDays', 30)
             ->call('startProtocol')
-            ->assertDontSee('Activate Ghost Mode', false)
+            ->assertRedirect(route('no-contact', ['locale' => 'en']));
+
+        $this->get(route('no-contact', ['locale' => 'en']))
+            ->assertOk()
+            ->assertSee('id="eg-ghost-mode-timer"', false)
             ->assertSee('Time remaining', false)
-            ->assertSee('30 days', false);
+            ->assertSee('Day 1 of 30', false)
+            ->assertSee('data-ghost-part="seconds"', false);
 
         $this->assertDatabaseHas('no_contact_protocols', [
             'user_id' => $user->id,
@@ -57,6 +62,10 @@ class NoContactTimerPageTest extends TestCase
             ->test(Show::class)
             ->set('selectedDays', 90)
             ->call('startProtocol')
+            ->assertRedirect(route('no-contact', ['locale' => 'fa']));
+
+        $this->get(route('no-contact', ['locale' => 'fa']))
+            ->assertOk()
             ->assertSee('زمان باقی‌مانده', false)
             ->assertSee('ساعت', false)
             ->assertSee('دقیقه', false)

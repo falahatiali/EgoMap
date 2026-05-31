@@ -4,6 +4,7 @@ namespace App\Livewire\NoContact;
 
 use App\Services\NoContact\NoContactTimerService;
 use App\Services\Recovery\RecoveryJourneyService;
+use App\Support\LocaleConfig;
 use Illuminate\Contracts\View\View;
 use InvalidArgumentException;
 use Livewire\Attributes\Layout;
@@ -30,6 +31,12 @@ class Show extends Component
             $timerService->start($this->selectedDays);
             $this->confirmSlip = false;
             $this->showSetup = false;
+
+            // Full reload so the client timer script picks up active-mode DOM (see ghost timer init).
+            $this->redirect(
+                route('no-contact', LocaleConfig::routeParameters()),
+                navigate: false,
+            );
         } catch (InvalidArgumentException) {
             $this->addError('duration', __('no_contact.invalid_duration'));
         }

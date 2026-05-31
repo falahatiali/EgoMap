@@ -459,22 +459,28 @@
         }
     };
 
-    initGhostTimer();
-    initEmergency();
-
-    document.addEventListener('livewire:navigated', () => {
+    const bootGhostMode = () => {
         initGhostTimer();
         initEmergency();
-    });
+    };
 
-    if (window.Livewire) {
+    bootGhostMode();
+
+    document.addEventListener('livewire:navigated', bootGhostMode);
+
+    document.addEventListener('livewire:init', () => {
+        bootGhostMode();
+
+        Livewire.hook('message.processed', () => {
+            queueMicrotask(bootGhostMode);
+        });
+
         Livewire.hook('morph.updated', ({ el }) => {
-            if (el.id === 'eg-ghost-mode-timer' || el.querySelector?.('#eg-ghost-mode-timer')) {
-                initGhostTimer();
-                initEmergency();
+            if (el?.id === 'eg-ghost-mode-timer' || el?.querySelector?.('#eg-ghost-mode-timer')) {
+                queueMicrotask(bootGhostMode);
             }
         });
-    }
+    });
 })();
 </script>
 @endpush
