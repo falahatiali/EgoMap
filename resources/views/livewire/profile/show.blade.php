@@ -57,7 +57,8 @@
                             <i class="fa-solid fa-bullseye me-2" aria-hidden="true"></i>
                             {{ __('missions.open_missions') }}
                         </a>
-                        <a href="{{ $missionNav['catalog_href'] }}" class="btn btn-outline-light" wire:navigate>
+                        <a href="{{ $missionNav['catalog_href'] }}" class="btn eg-btn-mission-browse eg-transition" wire:navigate>
+                            <i class="fa-solid fa-compass" aria-hidden="true"></i>
                             {{ __('missions.browse_missions') }}
                         </a>
                     </div>
@@ -72,7 +73,8 @@
                 <h2 class="eg-display h4 mb-2">{{ __('missions.profile_missions') }}</h2>
                 <p class="eg-text-muted mb-0">{{ __('missions.profile_missions_sub') }}</p>
             </div>
-            <a href="{{ $missionNav['catalog_href'] }}" class="btn btn-outline-light" wire:navigate>
+            <a href="{{ $missionNav['catalog_href'] }}" class="btn eg-btn-mission-browse eg-btn-mission-browse--compact eg-transition" wire:navigate>
+                <i class="fa-solid fa-compass" aria-hidden="true"></i>
                 {{ __('missions.browse_missions') }}
             </a>
         </div>
@@ -111,7 +113,8 @@
                 </span>
                 <h3 class="h5 mb-2">{{ __('missions.profile_missions_empty_title') }}</h3>
                 <p class="eg-text-muted mb-4">{{ __('missions.profile_missions_empty_body') }}</p>
-                <a href="{{ $missionNav['catalog_href'] }}" class="btn eg-btn-primary" wire:navigate>
+                <a href="{{ $missionNav['catalog_href'] }}" class="btn eg-btn-mission-browse eg-transition" wire:navigate>
+                    <i class="fa-solid fa-compass" aria-hidden="true"></i>
                     {{ __('missions.browse_missions') }}
                 </a>
             </div>
