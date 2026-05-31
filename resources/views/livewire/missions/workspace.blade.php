@@ -10,14 +10,20 @@
 
     <section class="container pb-5">
         <div class="eg-mission-workspace-header eg-glass mb-4">
-            <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
-                <div>
-                    <h1 class="eg-display h4 mb-1">{{ $presenter->title($locale) }}</h1>
-                    <p class="eg-text-muted small mb-0">{{ __('missions.workspace_title') }}</p>
+            <div class="eg-mission-workspace-header__main">
+                <div class="eg-mission-workspace-header__icon" aria-hidden="true">
+                    <i class="fa-solid {{ $missionIcon }}"></i>
                 </div>
-                <div x-show="saved" x-cloak class="alert alert-success py-2 px-3 mb-0 small">{{ __('missions.saved') }}</div>
+                <div class="eg-mission-workspace-header__copy">
+                    <h1 class="eg-display h4 mb-1">{{ $presenter->title($locale) }}</h1>
+                    <p class="eg-text-muted small mb-0">{{ __('missions.workspace_subtitle') }}</p>
+                </div>
             </div>
-            <div class="eg-mission-log-date mt-3">
+            <div x-show="saved" x-cloak class="eg-mission-save-toast" role="status">
+                <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                {{ __('missions.saved') }}
+            </div>
+            <div class="eg-mission-log-date">
                 <label class="form-label mb-1" for="mission-log-date">{{ __('missions.log_date') }}</label>
                 <input type="date" id="mission-log-date" class="form-control" wire:model.live="logDate">
                 <p class="eg-text-muted small mb-0 mt-1">{{ __('missions.log_date_help') }}</p>
@@ -25,17 +31,24 @@
         </div>
 
         <div class="eg-mission-workspace">
-            <nav class="eg-mission-tabs" aria-label="{{ __('missions.workspace_title') }}">
+            <nav class="eg-mission-tabs eg-glass" aria-label="{{ __('missions.workspace_title') }}">
                 @foreach ([
-                    'workout' => __('missions.tab_workout'),
-                    'nutrition' => __('missions.tab_nutrition'),
-                    'supplements' => __('missions.tab_supplements'),
-                    'daily' => __('missions.tab_daily'),
-                    'schedule' => __('missions.tab_schedule'),
-                    'equipment' => __('missions.tab_equipment'),
-                    'registration' => __('missions.tab_registration'),
-                ] as $tab => $label)
-                    <button type="button" class="eg-mission-tab {{ $activeTab === $tab ? 'is-active' : '' }}" wire:click="setTab('{{ $tab }}')">{{ $label }}</button>
+                    'workout' => ['icon' => 'fa-dumbbell', 'label' => __('missions.tab_workout')],
+                    'nutrition' => ['icon' => 'fa-utensils', 'label' => __('missions.tab_nutrition')],
+                    'supplements' => ['icon' => 'fa-capsules', 'label' => __('missions.tab_supplements')],
+                    'daily' => ['icon' => 'fa-calendar-day', 'label' => __('missions.tab_daily')],
+                    'schedule' => ['icon' => 'fa-calendar-week', 'label' => __('missions.tab_schedule')],
+                    'equipment' => ['icon' => 'fa-bag-shopping', 'label' => __('missions.tab_equipment')],
+                    'registration' => ['icon' => 'fa-clipboard-check', 'label' => __('missions.tab_registration')],
+                ] as $tab => $tabMeta)
+                    <button
+                        type="button"
+                        class="eg-mission-tab {{ $activeTab === $tab ? 'is-active' : '' }}"
+                        wire:click="setTab('{{ $tab }}')"
+                    >
+                        <i class="fa-solid {{ $tabMeta['icon'] }}" aria-hidden="true"></i>
+                        <span>{{ $tabMeta['label'] }}</span>
+                    </button>
                 @endforeach
             </nav>
 

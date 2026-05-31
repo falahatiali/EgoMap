@@ -22,6 +22,7 @@ use Modules\MissionEngine\Models\MissionTemplate;
  *     capabilities: list<array<string, mixed>>,
  *     fields: list<array<string, mixed>>,
  *     phases: list<array<string, mixed>>,
+ *     icon: string|null,
  * }
  */
 final class MissionTemplateSnapshotBuilder
@@ -47,6 +48,7 @@ final class MissionTemplateSnapshotBuilder
             'title' => $template->getTranslations('title'),
             'summary' => $template->getTranslations('summary'),
             'description' => $template->getTranslations('description'),
+            'icon' => $template->icon,
             'difficulty' => $template->difficulty?->value ?? 'beginner',
             'estimated_days' => $template->estimated_days,
             'category' => $template->category === null ? null : [

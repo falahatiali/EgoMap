@@ -54,8 +54,8 @@ class MissionWorkspaceIntegrationTest extends TestCase
                     'meal_time' => '08:00',
                     'notes' => '',
                     'items' => [
-                        ['name' => 'Eggs', 'quantity' => '2', 'unit' => 'pcs', 'calories' => '140', 'protein_g' => ''],
-                        ['name' => 'Avocado', 'quantity' => '1', 'unit' => 'pcs', 'calories' => '120', 'protein_g' => ''],
+                        ['name' => 'Eggs', 'quantity' => '2', 'unit' => 'count', 'calories' => '', 'protein_g' => ''],
+                        ['name' => 'Avocado', 'quantity' => '1', 'unit' => 'count', 'calories' => '', 'protein_g' => ''],
                     ],
                 ],
             ])
