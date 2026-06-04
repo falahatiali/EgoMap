@@ -17,6 +17,8 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Modules\GamificationEngine\Models\GamificationWallet;
+use Modules\GamificationEngine\Services\GamificationEngine;
 use Modules\MissionEngine\Enums\MissionEnrollmentStatus;
 use Modules\MissionEngine\Models\MissionEnrollment;
 
@@ -114,8 +116,15 @@ class Show extends Component
             ->latest('last_activity_at')
             ->get();
 
+        $rewardsPreview = null;
+
+        if ($this->user !== null && GamificationWallet::query()->where('user_id', $this->user->id)->exists()) {
+            $rewardsPreview = app(GamificationEngine::class)->walletFor($this->user, null);
+        }
+
         return view('livewire.profile.show', [
             'locale' => $locale,
+            'rewardsPreview' => $rewardsPreview,
             'missionNav' => $missionNavigationService->forUser($this->user, $locale),
             'missionEnrollments' => $missionEnrollments,
             'records' => $records,

@@ -57,6 +57,10 @@
                             <i class="fa-solid fa-bullseye me-2" aria-hidden="true"></i>
                             {{ __('missions.open_missions') }}
                         </a>
+                        <a href="{{ route('profile.rewards') }}" class="btn eg-btn-rewards-dossier eg-transition" wire:navigate>
+                            <i class="fa-solid fa-crown" aria-hidden="true"></i>
+                            {{ __('profile.rewards_card_cta') }}
+                        </a>
                         <a href="{{ $missionNav['catalog_href'] }}" class="btn eg-btn-mission-browse eg-transition" wire:navigate>
                             <i class="fa-solid fa-compass" aria-hidden="true"></i>
                             {{ __('missions.browse_missions') }}
@@ -65,6 +69,32 @@
                 </div>
             </div>
         </div>
+    </section>
+
+    <section class="container eg-profile-section">
+        <a href="{{ route('profile.rewards') }}" class="eg-profile-rewards-teaser eg-glass text-decoration-none text-reset" wire:navigate>
+            <div class="eg-profile-rewards-teaser__glow" aria-hidden="true"></div>
+            <div class="eg-profile-rewards-teaser__icon" aria-hidden="true">
+                <i class="fa-solid fa-crown"></i>
+            </div>
+            <div class="eg-profile-rewards-teaser__body">
+                <h2 class="h5 mb-1">{{ __('profile.rewards_card_title') }}</h2>
+                <p class="eg-text-muted small mb-0">{{ __('profile.rewards_card_sub') }}</p>
+                @if ($rewardsPreview)
+                    <p class="eg-profile-rewards-teaser__stats small mb-0 mt-2">
+                        <i class="fa-solid fa-star"></i> {{ eg_num($rewardsPreview['points'] ?? 0) }}
+                        <span class="mx-2" aria-hidden="true">·</span>
+                        <i class="fa-solid fa-coins"></i> {{ eg_num($rewardsPreview['coins'] ?? 0) }}
+                        <span class="mx-2" aria-hidden="true">·</span>
+                        <i class="fa-solid fa-fire"></i> {{ eg_num($rewardsPreview['streak_days'] ?? 0) }}
+                    </p>
+                @endif
+            </div>
+            <span class="eg-profile-rewards-teaser__cta">
+                {{ __('profile.rewards_card_cta') }}
+                <i class="fa-solid fa-arrow-{{ app()->getLocale() === 'fa' ? 'left' : 'right' }}" data-icon-directional></i>
+            </span>
+        </a>
     </section>
 
     <section id="missions" class="container eg-profile-section eg-profile-missions-section">
