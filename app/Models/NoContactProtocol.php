@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'user_id',
@@ -21,6 +22,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'slip_count',
     'last_slip_at',
     'completed_at',
+    'gamification_rewarded_at',
 ])]
 #[ObservedBy([AssignsUuidObserver::class])]
 class NoContactProtocol extends Model
@@ -41,6 +43,7 @@ class NoContactProtocol extends Model
             'target_ends_at' => 'datetime',
             'last_slip_at' => 'datetime',
             'completed_at' => 'datetime',
+            'gamification_rewarded_at' => 'datetime',
         ];
     }
 
@@ -50,6 +53,14 @@ class NoContactProtocol extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return HasMany<GhostModeEvent, $this>
+     */
+    public function events(): HasMany
+    {
+        return $this->hasMany(GhostModeEvent::class);
     }
 
     public function isActive(): bool

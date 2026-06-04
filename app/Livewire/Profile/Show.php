@@ -6,6 +6,7 @@ use App\Enums\SessionStatus;
 use App\Models\QuizSession;
 use App\Models\User;
 use App\Services\Auth\UserSessionService;
+use App\Services\Missions\MissionNavigationService;
 use App\Services\Profile\UserQuizHistoryService;
 use App\Services\Recovery\RecoveryJourneyService;
 use App\Support\LocaleConfig;
@@ -16,6 +17,10 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Modules\GamificationEngine\Models\GamificationWallet;
+use Modules\GamificationEngine\Services\GamificationEngine;
+use Modules\MissionEngine\Enums\MissionEnrollmentStatus;
+use Modules\MissionEngine\Models\MissionEnrollment;
 
 #[Layout('layouts.app')]
 class Show extends Component
@@ -86,8 +91,11 @@ class Show extends Component
         );
     }
 
-    public function render(UserQuizHistoryService $historyService, RecoveryJourneyService $journeyService): View
-    {
+    public function render(
+        UserQuizHistoryService $historyService,
+        RecoveryJourneyService $journeyService,
+        MissionNavigationService $missionNavigationService,
+    ): View {
         $records = $historyService->recordsForUser($this->user, LocaleConfig::fromRoute());
 
         $inProgress = $records->where('is_in_progress', true)->values();
@@ -99,7 +107,26 @@ class Show extends Component
             default => $records,
         };
 
+        $locale = LocaleConfig::fromRoute();
+
+        $missionEnrollments = MissionEnrollment::query()
+            ->with('template')
+            ->where('user_id', $this->user->id)
+            ->where('status', MissionEnrollmentStatus::Active)
+            ->latest('last_activity_at')
+            ->get();
+
+        $rewardsPreview = null;
+
+        if ($this->user !== null && GamificationWallet::query()->where('user_id', $this->user->id)->exists()) {
+            $rewardsPreview = app(GamificationEngine::class)->walletFor($this->user, null);
+        }
+
         return view('livewire.profile.show', [
+            'locale' => $locale,
+            'rewardsPreview' => $rewardsPreview,
+            'missionNav' => $missionNavigationService->forUser($this->user, $locale),
+            'missionEnrollments' => $missionEnrollments,
             'records' => $records,
             'filteredRecords' => $filtered,
             'inProgressRecords' => $inProgress,

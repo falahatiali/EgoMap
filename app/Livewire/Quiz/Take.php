@@ -51,7 +51,7 @@ class Take extends Component
             if ($session === null) {
                 session()->flash('quiz_notice', __('quiz.session_not_found'));
 
-                $this->redirectRoute('home', navigate: true);
+                $this->redirectRoute('home', LocaleConfig::routeParameters(), navigate: true);
 
                 return;
             }
@@ -70,7 +70,11 @@ class Take extends Component
             }
 
             if ($this->session->status === SessionStatus::Completed) {
-                $this->redirectRoute('quiz.result', ['uuid' => $uuid], navigate: true);
+                $this->redirectRoute(
+                    'quiz.result',
+                    LocaleConfig::routeParameters(['uuid' => $uuid], $session->locale),
+                    navigate: true,
+                );
 
                 return;
             }
@@ -84,7 +88,7 @@ class Take extends Component
             if ($quizSessionService->findActiveQuizBySlugOrNull($slug) === null) {
                 session()->flash('quiz_notice', __('quiz.quiz_unavailable'));
 
-                $this->redirectRoute('home', navigate: true);
+                $this->redirectRoute('home', LocaleConfig::routeParameters(), navigate: true);
 
                 return;
             }
@@ -130,7 +134,11 @@ class Take extends Component
 
         $session = $quizSessionService->start($quiz);
 
-        $this->redirectRoute('quiz.session', ['uuid' => $session->uuid], navigate: true);
+        $this->redirectRoute(
+            'quiz.session',
+            LocaleConfig::routeParameters(['uuid' => $session->uuid], $session->locale),
+            navigate: true,
+        );
     }
 
     private function beginOrResumeForAuthenticatedUser(
@@ -153,7 +161,11 @@ class Take extends Component
         $entry = $quizSessionService->resolveAuthenticatedEntry($quiz, Auth::user());
 
         if ($entry['action'] === 'resume' && $entry['session'] !== null) {
-            $this->redirectRoute('quiz.session', ['uuid' => $entry['session']->uuid], navigate: true);
+            $this->redirectRoute(
+                'quiz.session',
+                LocaleConfig::routeParameters(['uuid' => $entry['session']->uuid], $entry['session']->locale),
+                navigate: true,
+            );
 
             return;
         }
@@ -166,7 +178,11 @@ class Take extends Component
         }
 
         $session = $quizSessionService->start($quiz);
-        $this->redirectRoute('quiz.session', ['uuid' => $session->uuid], navigate: true);
+        $this->redirectRoute(
+            'quiz.session',
+            LocaleConfig::routeParameters(['uuid' => $session->uuid], $session->locale),
+            navigate: true,
+        );
     }
 
     private function beginOrResumeForGuest(
@@ -179,7 +195,11 @@ class Take extends Component
 
             if ($existing !== null && $existing->quiz_id === $quiz->id) {
                 if ($existing->status === SessionStatus::InProgress) {
-                    $this->redirectRoute('quiz.session', ['uuid' => $existing->uuid], navigate: true);
+                    $this->redirectRoute(
+                        'quiz.session',
+                        LocaleConfig::routeParameters(['uuid' => $existing->uuid], $existing->locale),
+                        navigate: true,
+                    );
 
                     return;
                 }
@@ -198,7 +218,11 @@ class Take extends Component
             request()->cookie('egomap_guest'),
         );
 
-        $this->redirectRoute('quiz.session', ['uuid' => $session->uuid], navigate: true);
+        $this->redirectRoute(
+            'quiz.session',
+            LocaleConfig::routeParameters(['uuid' => $session->uuid], $session->locale),
+            navigate: true,
+        );
     }
 
     public function submitSafetyAnswer(string $value, RebootProtocolFlow $flow, QuizSessionService $quizSessionService): void
@@ -252,7 +276,11 @@ class Take extends Component
         $quiz = $quizSessionService->findActiveQuizBySlug($this->slug);
         $session = $quizSessionService->start($quiz);
 
-        $this->redirectRoute('quiz.session', ['uuid' => $session->uuid], navigate: true);
+        $this->redirectRoute(
+            'quiz.session',
+            LocaleConfig::routeParameters(['uuid' => $session->uuid], $session->locale),
+            navigate: true,
+        );
     }
 
     public function toggleSound(): void
@@ -299,7 +327,7 @@ class Take extends Component
     public function render(): View
     {
         if ($this->returningSession !== null) {
-            $locale = LocaleConfig::fromRoute();
+            $locale = LocaleConfig::resolve($this->returningSession->locale);
             $resultData = QuizResultViewData::fromSession($this->returningSession, $locale);
             $report = $resultData['report'];
 

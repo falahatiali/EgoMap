@@ -88,6 +88,68 @@ body.eg-body {
     text-decoration: none;
 }
 
+.eg-nav-missions-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--eg-accent-bright) !important;
+    font-weight: 600;
+}
+
+.eg-nav-missions-link:hover {
+    color: var(--eg-success) !important;
+}
+
+.eg-nav-missions-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: var(--eg-radius-pill);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.22), rgba(52, 211, 153, 0.12));
+    border: 1px solid rgba(52, 211, 153, 0.35);
+    color: var(--eg-success);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.eg-nav-missions-btn:hover {
+    color: #6ee7b7;
+    border-color: rgba(110, 231, 183, 0.55);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+}
+
+.eg-nav-missions-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    padding: 0 0.35rem;
+    border-radius: var(--eg-radius-pill);
+    background: var(--eg-accent);
+    color: var(--eg-text);
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.eg-nav-ghost-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--eg-text-muted) !important;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.eg-nav-ghost-link:hover {
+    color: var(--eg-text) !important;
+}
+
 .eg-lang-switch {
     display: inline-flex;
     padding: 0.2rem;

@@ -1,5 +1,5 @@
 <section
-    class="container eg-auth-container"
+    class="eg-auth-container"
     wire:key="verify-{{ $this->expiresAtTimestamp ?? 'none' }}"
     x-data="egVerifyPage(@js($this->expiresAtTimestamp))"
 >
@@ -50,7 +50,7 @@
                         maxlength="1"
                         pattern="[0-9]"
                         dir="ltr"
-                        class="eg-otp-digit form-control"
+                        class="eg-otp-digit"
                         aria-label="{{ __('auth.digit', ['n' => $index + 1]) }}"
                         x-ref="digit{{ $index }}"
                         x-on:input="handleInput($event, {{ $index }})"

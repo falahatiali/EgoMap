@@ -68,6 +68,9 @@
                 'content' => $content,
                 'quizLocale' => $quizLocale,
             ])
+            @include('partials.quiz-result-reboot-ai', [
+                'content' => $content,
+            ])
             @include('partials.quiz-result-reboot-dimensions', [
                 'report' => $report,
                 'theme' => 'light',

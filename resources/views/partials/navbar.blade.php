@@ -1,6 +1,6 @@
 @php
     $nav = app(\App\Services\Recovery\RecoveryJourneyService::class)->navigationState();
-    $hasMenu = $nav['show_explore_links'] || $nav['show_no_contact_link'];
+    $hasMenu = $nav['show_explore_links'] || $nav['show_no_contact_link'] || auth()->check();
 @endphp
 
 <header class="eg-nav sticky-top">
@@ -30,9 +30,15 @@
             <div @class(['collapse navbar-collapse', 'show' => ! $hasMenu]) id="egNav">
                 @if ($hasMenu)
                     <ul class="navbar-nav mx-lg-auto gap-lg-4 mt-3 mt-lg-0">
+                        @auth
+                            @include('partials.nav-missions-link')
+                        @endauth
                         @if ($nav['show_no_contact_link'])
                             <li class="nav-item">
-                                <a class="eg-nav-link nav-link px-0 eg-transition" href="{{ route('no-contact') }}" wire:navigate data-i18n="nav.no_contact">{{ __('nav.no_contact') }}</a>
+                                <a class="eg-nav-link nav-link px-0 eg-transition" href="{{ route('no-contact') }}" wire:navigate data-i18n="nav.no_contact">
+                                    <i class="fa-solid fa-ghost me-1" aria-hidden="true"></i>
+                                    {{ __('nav.no_contact') }}
+                                </a>
                             </li>
                         @endif
                         @if ($nav['show_explore_links'])
@@ -53,6 +59,9 @@
                     @include('partials.language-switcher')
 
                     @auth
+                        <div class="d-lg-none">
+                            @include('partials.nav-missions-link', ['variant' => 'button'])
+                        </div>
                         <a href="{{ route('profile') }}" class="eg-nav-profile-link eg-transition" wire:navigate>
                             <span class="eg-nav-profile-avatar">{{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}</span>
                             <span class="d-none d-xl-inline">{{ __('profile.page_title') }}</span>

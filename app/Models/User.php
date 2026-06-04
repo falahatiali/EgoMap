@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Ai\Concerns\HasConversations;
+use Modules\MissionEngine\Models\MissionEnrollment;
 use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable([
@@ -26,6 +27,8 @@ use Spatie\Permission\Traits\HasRoles;
     'breakup_initiator',
     'primary_struggle',
     'recovery_triage_completed_at',
+    'premium_upsell_deferred_at',
+    'premium_upsell_dismiss_count',
 ])]
 #[Hidden(['password', 'remember_token'])]
 #[ObservedBy([AssignsUuidObserver::class])]
@@ -45,6 +48,8 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'email_verification_expires_at' => 'datetime',
             'recovery_triage_completed_at' => 'datetime',
+            'premium_upsell_deferred_at' => 'datetime',
+            'premium_upsell_dismiss_count' => 'integer',
             'password' => 'hashed',
         ];
     }
@@ -63,5 +68,13 @@ class User extends Authenticatable
     public function noContactProtocols(): HasMany
     {
         return $this->hasMany(NoContactProtocol::class)->latest('updated_at');
+    }
+
+    /**
+     * @return HasMany<MissionEnrollment, $this>
+     */
+    public function missionEnrollments(): HasMany
+    {
+        return $this->hasMany(MissionEnrollment::class)->latest('last_activity_at');
     }
 }

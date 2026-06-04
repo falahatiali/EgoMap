@@ -1,10 +1,15 @@
 <?php
 
+use App\Http\Controllers\AliController;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Auth\VerifyEmail;
 use App\Livewire\Home\Protocol;
+use App\Livewire\Missions\Catalog as MissionsCatalog;
+use App\Livewire\Missions\Show as MissionShow;
+use App\Livewire\Missions\Workspace as MissionWorkspace;
 use App\Livewire\NoContact\Show as NoContactShow;
+use App\Livewire\Profile\Rewards as ProfileRewards;
 use App\Livewire\Profile\Show;
 use App\Livewire\Profile\TestShow;
 use App\Livewire\Quiz\Result;
@@ -63,12 +68,18 @@ Route::prefix('{locale}')
         Route::livewire('/no-contact', NoContactShow::class)->name('no-contact');
 
         Route::livewire('/profile', Show::class)->middleware('auth')->name('profile');
+        Route::livewire('/profile/rewards', ProfileRewards::class)->middleware('auth')->name('profile.rewards');
         Route::livewire('/profile/tests/{uuid}', TestShow::class)->middleware('auth')->name('profile.test.show');
+
+        Route::middleware('auth')->prefix('missions')->name('missions.')->group(function (): void {
+            Route::livewire('/', MissionsCatalog::class)->name('catalog');
+            Route::livewire('/templates/{template}', MissionShow::class)->name('show');
+            Route::livewire('/active/{enrollment}', MissionWorkspace::class)->name('workspace');
+        });
 
         Route::livewire('/quiz/session/{uuid}/result', Result::class)->name('quiz.result');
         Route::livewire('/quiz/session/{uuid}', Take::class)->name('quiz.session');
         Route::livewire('/quiz/{slug}', Take::class)->name('quiz.start');
     });
 
-
-Route::get('/ali/test', [\App\Http\Controllers\AliController::class, 'ali'])->name('ali.test');
+Route::get('/ali/test', [AliController::class, 'ali'])->name('ali.test');

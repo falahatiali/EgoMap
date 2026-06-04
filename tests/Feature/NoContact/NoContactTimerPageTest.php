@@ -8,6 +8,7 @@ use App\Services\NoContact\NoContactTimerService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Livewire\Livewire;
+use Modules\GamificationEngine\Database\Seeders\GamificationEngineDatabaseSeeder;
 use Tests\TestCase;
 
 class NoContactTimerPageTest extends TestCase
@@ -34,9 +35,14 @@ class NoContactTimerPageTest extends TestCase
             ->test(Show::class)
             ->set('selectedDays', 30)
             ->call('startProtocol')
-            ->assertDontSee('Activate Ghost Mode', false)
+            ->assertRedirect(route('no-contact', ['locale' => 'en']));
+
+        $this->get(route('no-contact', ['locale' => 'en']))
+            ->assertOk()
+            ->assertSee('id="eg-ghost-mode-timer"', false)
             ->assertSee('Time remaining', false)
-            ->assertSee('30 days', false);
+            ->assertSee('Day 1 of 30', false)
+            ->assertSee('data-ghost-part="seconds"', false);
 
         $this->assertDatabaseHas('no_contact_protocols', [
             'user_id' => $user->id,
@@ -57,6 +63,10 @@ class NoContactTimerPageTest extends TestCase
             ->test(Show::class)
             ->set('selectedDays', 90)
             ->call('startProtocol')
+            ->assertRedirect(route('no-contact', ['locale' => 'fa']));
+
+        $this->get(route('no-contact', ['locale' => 'fa']))
+            ->assertOk()
             ->assertSee('زمان باقی‌مانده', false)
             ->assertSee('ساعت', false)
             ->assertSee('دقیقه', false)
@@ -67,9 +77,11 @@ class NoContactTimerPageTest extends TestCase
             ->assertSee('۰', false);
     }
 
-    public function test_slip_requires_confirmation_then_resets(): void
+    public function test_slip_triage_records_trigger_and_applies_penalty(): void
     {
         Carbon::setTestNow('2026-05-25 12:00:00');
+
+        $this->seed(GamificationEngineDatabaseSeeder::class);
 
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -79,15 +91,40 @@ class NoContactTimerPageTest extends TestCase
         Carbon::setTestNow('2026-06-10 12:00:00');
 
         Livewire::test(Show::class)
+            ->call('beginSlipTriage')
+            ->assertSet('showSlipForm', true)
+            ->set('slipTrigger', 'felt_weak')
             ->call('recordSlip')
-            ->assertSet('confirmSlip', true)
-            ->call('recordSlip')
-            ->assertSet('confirmSlip', false);
+            ->assertSet('showSlipForm', false)
+            ->assertSet('rewardToasts', fn (array $toasts): bool => count($toasts) > 0);
 
         $protocol = app(NoContactTimerService::class)->findActiveProtocol();
 
         $this->assertNotNull($protocol);
         $this->assertSame(1, $protocol->slip_count);
-        $this->assertTrue($protocol->streak_started_at->equalTo(Carbon::parse('2026-06-10 12:00:00')));
+        $this->assertTrue($protocol->streak_started_at->equalTo(Carbon::parse('2026-05-30 12:00:00')));
+
+        $this->assertDatabaseHas('ghost_mode_events', [
+            'no_contact_protocol_id' => $protocol->id,
+            'type' => 'slip',
+            'trigger' => 'felt_weak',
+        ]);
+    }
+
+    public function test_active_page_shows_ghost_mode_ai_sections(): void
+    {
+        Carbon::setTestNow('2026-05-25 12:00:00');
+
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        app(NoContactTimerService::class)->start(30);
+
+        $this->get(route('no-contact', ['locale' => 'en']))
+            ->assertOk()
+            ->assertSee('Panic Button', false)
+            ->assertSee('Data Blackhole', false)
+            ->assertSee('Truth Flashlight', false)
+            ->assertSee('Integrity Shield', false);
     }
 }

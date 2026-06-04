@@ -11,6 +11,7 @@ use App\Models\QuizResult;
 use App\Models\QuizSession;
 use App\Models\User;
 use App\Services\Quiz\Scoring\ScoringEngineFactory;
+use App\Services\Recovery\QuizAiReportService;
 use App\Support\LocaleConfig;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -20,6 +21,7 @@ class QuizSessionService
     public function __construct(
         private readonly ScoringEngineFactory $scoringEngineFactory,
         private readonly QuizSessionClaimService $claimService,
+        private readonly QuizAiReportService $quizAiReport,
     ) {}
 
     public function start(Quiz $quiz, ?string $guestToken = null): QuizSession
@@ -34,7 +36,7 @@ class QuizSessionService
             'quiz_id' => $quiz->id,
             'user_id' => auth()->id(),
             'guest_token' => $guestToken,
-            'locale' => LocaleConfig::resolve(session('locale')),
+            'locale' => LocaleConfig::active(),
             'status' => SessionStatus::InProgress,
             'current_sort_order' => 1,
             'started_at' => now(),
@@ -251,7 +253,7 @@ class QuizSessionService
                 'completed_at' => now(),
             ]);
 
-            return QuizResult::query()->updateOrCreate(
+            $result = QuizResult::query()->updateOrCreate(
                 ['quiz_session_id' => $session->id],
                 [
                     'outcome_profile_id' => $scored['outcome_profile_id'],
@@ -261,6 +263,8 @@ class QuizSessionService
                     'generated_at' => now(),
                 ],
             );
+
+            return $this->quizAiReport->generateForResult($result, $session->fresh());
         });
     }
 

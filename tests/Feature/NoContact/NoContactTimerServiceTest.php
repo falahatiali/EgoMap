@@ -48,7 +48,7 @@ class NoContactTimerServiceTest extends TestCase
         $this->assertGreaterThan(0, $state['remaining_seconds']);
     }
 
-    public function test_slip_resets_streak_from_scratch(): void
+    public function test_slip_applies_penalty_days_instead_of_full_reset(): void
     {
         Carbon::setTestNow('2026-05-25 12:00:00');
 
@@ -60,14 +60,14 @@ class NoContactTimerServiceTest extends TestCase
 
         Carbon::setTestNow('2026-06-20 12:00:00');
 
-        $reset = $service->recordSlip();
+        $reset = $service->recordSlip('felt_weak');
 
         $this->assertSame(1, $reset->slip_count);
-        $this->assertTrue($reset->streak_started_at->equalTo(Carbon::parse('2026-06-20 12:00:00')));
-        $this->assertTrue($reset->target_ends_at->equalTo(Carbon::parse('2026-08-19 12:00:00')));
+        $this->assertTrue($reset->streak_started_at->equalTo(Carbon::parse('2026-05-30 12:00:00')));
+        $this->assertTrue($reset->target_ends_at->equalTo(Carbon::parse('2026-07-29 12:00:00')));
 
         $state = $service->displayState();
-        $this->assertGreaterThan(59, $state['countdown']['days']);
+        $this->assertLessThan(40, $state['progress_percent']);
     }
 
     public function test_guest_protocol_persists_via_guest_token_cookie(): void
@@ -86,7 +86,7 @@ class NoContactTimerServiceTest extends TestCase
             ->get(route('no-contact', ['locale' => 'en']));
 
         $response->assertOk();
-        $response->assertSee('Time left in protocol', false);
+        $response->assertSee('Time remaining', false);
         $response->assertSee('30 days', false);
     }
 

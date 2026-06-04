@@ -1,0 +1,165 @@
+<?php
+
+return [
+    'stats' => [
+        'coins' => 'Phoenix Coins',
+        'points' => 'Honor points',
+        'streak' => 'Clean streak',
+        'level' => 'Level',
+        'xp' => 'XP',
+    ],
+
+    'events' => [
+        'ghost_mode_activated' => 'Ghost Mode activated',
+        'ghost_mode_daily_login' => 'Daily login',
+        'ghost_mode_emergency_completed' => 'Emergency mode completed',
+        'ghost_mode_blackhole_write' => 'Blackhole message destroyed',
+        'ghost_mode_slip_reported' => 'Slip reported',
+        'ghost_mode_daily_checkin' => 'Daily check-in',
+        'ghost_mode_mission_completed' => 'Daily mission completed',
+        'ghost_mode_panic_used' => 'Panic button',
+        'ghost_mode_block_confirmed' => 'Block confirmed',
+        'punishment_completed' => 'Recovery task completed',
+        'panic_challenge_completed' => 'Panic challenge',
+        'ghost_mode_protocol_completed' => 'Protocol completed',
+        'mission_completed' => 'Mission completed',
+        'shop_purchase' => 'Shop purchase',
+        'perk_consumed' => 'Perk used',
+        'admin_adjustment' => 'Admin adjustment',
+    ],
+
+    'protocol' => [
+        'title' => 'Phoenix rises!',
+        'body' => 'You completed your no-contact protocol. Massive rewards unlocked.',
+        'continue' => 'Continue journey',
+    ],
+
+    'combo_active' => '7-day combo — rewards doubled',
+    'emergency_weakened' => 'Emergency mode weakened for 24h after 3 slips this week',
+
+    'activity' => [
+        'activate_ghost_mode' => 'Ghost Mode activated',
+        'daily_login' => 'Daily login',
+        'clean_day' => 'Clean day',
+        'emergency_complete' => 'Emergency mode completed',
+        'blackhole_write' => 'Blackhole message destroyed',
+        'report_slip' => 'Slip reported',
+        'compensation_mission' => 'Compensation mission completed',
+        'sacrifice_mission' => 'Sacrifice mission completed',
+        'shop_purchase' => 'Shop purchase',
+        'surprise_box' => 'Surprise box opened',
+        'comeback_bonus' => 'Comeback bonus',
+        'level_up' => 'Level up',
+    ],
+
+    'toast' => [
+        'headline_reward' => 'Reward unlocked',
+        'headline_penalty' => 'Penalty applied',
+        'headline_neutral' => 'Progress logged',
+        'badge_unlocked' => 'Badge: :badge',
+        'level_fallback' => 'Level :level — you are rebuilding, one day at a time.',
+        'action' => ':action — Shield :shield · Coins :coins · XP :xp',
+        'slip' => 'Shield −:shield (honesty +:honest). Streak reset.',
+        'comeback' => 'Comeback bonus — +:shield shield restored',
+        'level_up' => 'Level :level unlocked!',
+        'level_up_body' => 'Keep going — new rewards await.',
+        'surprise_box' => 'Surprise box — +:coins coins',
+        'shop_streak_freeze' => 'Streak freeze added to inventory',
+        'shop_shield_repair' => 'Shield repair kit applied',
+        'shop_emergency_boost' => 'Emergency boost active',
+    ],
+
+    'level_narratives' => [
+        1 => 'You have taken the first step. The fog is still thick, but you are moving.',
+        2 => 'The hurt is still there, but you are no longer drowning.',
+        3 => 'You are starting to remember who you were before her.',
+        5 => 'Your shield is forming. Small urges no longer control you.',
+        10 => 'You have become a guardian of your own peace. Panic is rare now.',
+        20 => 'You are a silent fortress — others do not see the battle you won.',
+        50 => 'Legend status. You stay to help the next man rise.',
+        90 => 'Phoenix tier. You are not the man who started this journey.',
+    ],
+
+    'alchemy' => [
+        'offer_title' => 'Positive Alchemy — turn this urge into action',
+        'accept_destroy' => 'Accept commitment & destroy',
+        'pending_title' => 'Today\'s commitment',
+        'complete' => 'I did it — claim reward',
+        'none_pending' => 'No pending commitment found.',
+    ],
+
+    'slip_preview' => [
+        'title' => 'Penalty preview',
+        'net' => 'Net total',
+        'discount_note' => '50% Slip Shield perk will soften this penalty once.',
+        'freeze_note' => 'Streak freeze will protect your gamification streak if available.',
+        'shield' => '−:value shield',
+        'coins' => '−:value coins',
+        'streak' => 'Streak resets',
+        'honest' => '+:value shield for honesty',
+        'compensation' => 'Compensation mission required',
+    ],
+
+    'compensation' => [
+        'title' => 'Compensation mission',
+        'body' => 'Complete this to restore momentum after a serious slip.',
+        'task' => '10 pushups or 5 minutes of deep breathing',
+        'complete' => 'Mission complete',
+        'sacrifice' => 'Sacrifice mission instead (once per week)',
+    ],
+
+    'sections' => [
+        'activity' => 'Recent activity',
+        'badges' => 'Hall of Fame',
+        'shop' => 'Phoenix Shop',
+        'perks' => 'Unlocked perks',
+    ],
+
+    'badges' => [
+        'first_day' => 'Journey Start',
+        'week_warrior' => 'Week Warrior',
+        'phoenix_rising' => 'Phoenix Rising',
+        'blackhole_master' => 'Blackhole Master',
+        'emergency_junkie' => 'Emergency Pro',
+        'level_10' => 'Level 10',
+        'level_25' => 'Level 25',
+        'no_contact_hero' => 'No Contact Hero',
+        'honest_slip' => 'Honest Warrior',
+        'comeback_king' => 'Comeback King',
+        'daily_devotee_7' => '7-Day Devotee',
+        'daily_devotee_30' => '30-Day Devotee',
+    ],
+
+    'shop' => [
+        'buy' => 'Buy',
+        'insufficient_coins' => 'Not enough Phoenix Coins.',
+        'item_not_found' => 'Shop item not found.',
+        'purchase_failed' => 'Purchase failed.',
+        'streak_freeze_active' => ':count streak freeze charge(s) ready',
+        'surprise_box' => 'Open surprise box',
+        'surprise_box_cooldown' => 'Surprise box available once per week.',
+        'items' => [
+            'streak_freeze' => 'Streak Freeze',
+            'shield_repair' => 'Shield Repair Kit',
+            'emergency_boost' => 'Emergency Boost',
+        ],
+        'descriptions' => [
+            'streak_freeze' => 'Protect your streak after one slip.',
+            'shield_repair' => 'Restore +10 shield integrity.',
+            'emergency_boost' => 'Full-strength Emergency Mode for 12 hours.',
+        ],
+    ],
+
+    'perks' => [
+        'use_now' => 'Use now',
+        'confirm_title' => 'Use this perk?',
+        'confirm_body' => 'This perk will be consumed and cannot be undone.',
+        'not_owned' => 'You do not own this perk.',
+        'consume_failed' => 'Could not use perk.',
+        'voice_panic_message' => 'Voice message for Panic Button',
+        'custom_shield_color' => 'Custom shield color',
+        'double_coins_3_days' => 'Double coins for 3 days',
+        'monthly_streak_freeze' => 'Monthly streak freeze',
+        'exclusive_badge_frame' => 'Exclusive badge frame',
+    ],
+];

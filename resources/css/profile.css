@@ -67,6 +67,81 @@
     color: var(--eg-success);
 }
 
+.eg-profile-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--eg-space-sm);
+    margin-top: var(--eg-space-lg);
+    justify-content: center;
+}
+
+@media (min-width: 768px) {
+    .eg-profile-hero-actions {
+        justify-content: flex-start;
+    }
+}
+
+.eg-profile-missions-hero-btn {
+    font-weight: 600;
+}
+
+.eg-btn-mission-browse {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.85rem 1.65rem;
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 1.2;
+    color: #d1fae5 !important;
+    text-decoration: none;
+    border-radius: var(--eg-radius-pill);
+    border: 1px solid rgba(52, 211, 153, 0.45);
+    background: linear-gradient(
+        135deg,
+        rgba(16, 185, 129, 0.14) 0%,
+        rgba(6, 78, 59, 0.35) 100%
+    );
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 4px 18px rgba(16, 185, 129, 0.12);
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.eg-btn-mission-browse i {
+    font-size: 0.95em;
+    opacity: 0.95;
+}
+
+.eg-btn-mission-browse.eg-transition:hover {
+    color: #ecfdf5 !important;
+    border-color: rgba(110, 231, 183, 0.75);
+    background: linear-gradient(
+        135deg,
+        rgba(16, 185, 129, 0.22) 0%,
+        rgba(6, 95, 70, 0.45) 100%
+    );
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        0 10px 28px rgba(16, 185, 129, 0.22);
+    transform: translateY(-2px);
+}
+
+.eg-btn-mission-browse--compact {
+    padding: 0.65rem 1.25rem;
+    font-size: 0.9rem;
+}
+
+.eg-profile-hero-actions .eg-btn-mission-browse,
+.eg-profile-hero-actions .eg-profile-missions-hero-btn {
+    min-height: 2.75rem;
+}
+
 .eg-profile-section {
     padding-top: var(--eg-space-xl);
 }
@@ -216,7 +291,8 @@
 
 /* Stats */
 .eg-profile-stats-row {
-    margin-top: calc(var(--eg-space-lg) * -1);
+    margin-top: var(--eg-space-xl);
+    margin-bottom: var(--eg-space-lg);
     position: relative;
     z-index: 1;
 }
@@ -245,7 +321,7 @@
 
 /* My tests section */
 .eg-profile-tests-section {
-    padding-top: var(--eg-space-xl);
+    padding-top: var(--eg-space-2xl);
 }
 
 .eg-profile-section-head {
@@ -255,6 +331,100 @@
     flex-wrap: wrap;
     gap: var(--eg-space-md);
     margin-bottom: var(--eg-space-lg);
+}
+
+/* Mission Engine on profile */
+.eg-profile-missions-section {
+    padding-top: var(--eg-space-xl);
+    padding-bottom: var(--eg-space-2xl);
+}
+
+.eg-profile-missions-section .eg-profile-section-head {
+    margin-bottom: var(--eg-space-xl);
+}
+
+.eg-profile-missions-grid {
+    display: grid;
+    gap: var(--eg-space-lg);
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.eg-profile-mission-card {
+    padding: var(--eg-space-lg) var(--eg-space-xl);
+    border-radius: var(--eg-radius-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--eg-space-md);
+    min-height: 8.5rem;
+    border: 1px solid var(--eg-border);
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.eg-profile-mission-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(52, 211, 153, 0.35);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+}
+
+.eg-profile-mission-card-top {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--eg-space-md);
+}
+
+.eg-profile-mission-card-icon {
+    flex-shrink: 0;
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--eg-radius);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(16, 185, 129, 0.14);
+    color: var(--eg-success);
+    font-size: 1.2rem;
+}
+
+.eg-profile-mission-card-title {
+    font-family: var(--eg-font-display);
+    font-size: 1.2rem;
+    font-weight: 600;
+    line-height: var(--eg-line-height-tight);
+    margin: 0;
+}
+
+.eg-profile-mission-card-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--eg-success);
+    margin-top: auto;
+}
+
+.eg-profile-mission-card:hover .eg-profile-mission-card-cta {
+    color: #6ee7b7;
+}
+
+.eg-profile-missions-empty {
+    text-align: center;
+    padding: var(--eg-space-xl) var(--eg-space-lg);
+    border-radius: var(--eg-radius-lg);
+    border: 1px dashed rgba(52, 211, 153, 0.25);
+}
+
+.eg-profile-missions-empty-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    margin-bottom: var(--eg-space-md);
+    border-radius: var(--eg-radius);
+    background: rgba(16, 185, 129, 0.14);
+    color: var(--eg-success);
+    font-size: 1.35rem;
 }
 
 .eg-profile-filters {

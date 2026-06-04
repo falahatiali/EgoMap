@@ -57,7 +57,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         View::composer(['layouts.app', 'layouts.guided', 'layouts.protocol'], function ($view): void {
-            $view->with('i18nBundle', TranslationBundle::forGroups(['common', 'nav', 'home', 'landing', 'no_contact', 'recovery', 'profile']));
+            $view->with('i18nBundle', TranslationBundle::forGroups(['common', 'nav', 'home', 'landing', 'no_contact', 'recovery', 'profile', 'missions']));
         });
 
         Event::listen(Login::class, ClaimGuestQuizSessions::class);

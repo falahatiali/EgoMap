@@ -1,4 +1,4 @@
-<section class="container eg-auth-container">
+<section class="eg-auth-container">
     <div class="eg-auth-page-nav">
         @include('partials.page-nav-actions', [
             'links' => [
