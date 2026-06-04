@@ -11,6 +11,7 @@ use App\Enums\RelationshipDuration;
 use App\Enums\SessionStatus;
 use App\Models\NoContactProtocol;
 use App\Models\User;
+use App\Services\Gamification\GamificationProfileRewards;
 use Carbon\CarbonImmutable;
 
 class RecoveryJourneyService
@@ -119,6 +120,13 @@ class RecoveryJourneyService
                 'recovery_phase' => $phase->value,
                 'recovery_triage_completed_at' => now(),
             ]);
+
+            $user->refresh();
+            app(GamificationProfileRewards::class)->dispatchForUser(
+                $user,
+                app(GamificationProfileRewards::class)->completenessForUser($user),
+                'recovery_triage',
+            );
         }
 
         return $phase;

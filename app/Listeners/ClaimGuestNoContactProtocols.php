@@ -5,11 +5,13 @@ namespace App\Listeners;
 use App\Models\User;
 use App\Services\NoContact\NoContactTimerService;
 use Illuminate\Auth\Events\Login;
+use Modules\GamificationEngine\Services\GamificationEngine;
 
-class ClaimGuestNoContactProtocols
+readonly class ClaimGuestNoContactProtocols
 {
     public function __construct(
-        private readonly NoContactTimerService $timerService,
+        private NoContactTimerService $timerService,
+        private GamificationEngine $gamification,
     ) {}
 
     public function handle(Login $event): void
@@ -18,5 +20,6 @@ class ClaimGuestNoContactProtocols
         $user = $event->user;
 
         $this->timerService->claimForUser($user);
+        $this->gamification->claimForUser($user);
     }
 }
