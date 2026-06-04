@@ -129,7 +129,7 @@ class NoContactTimerService
         });
     }
 
-    public function recordSlip(): NoContactProtocol
+    public function recordSlip(?string $trigger = null): NoContactProtocol
     {
         $protocol = $this->findActiveProtocol();
 
@@ -138,12 +138,41 @@ class NoContactTimerService
         }
 
         $now = CarbonImmutable::now();
+        $penaltyDays = max((int) config('recovery_ai.slip_penalty_days', 5), 1);
+        $startedAt = CarbonImmutable::parse($protocol->streak_started_at);
+        $newStartedAt = $startedAt->addDays($penaltyDays);
+
+        if ($newStartedAt->greaterThan($now)) {
+            $newStartedAt = $now;
+        }
 
         $protocol->update([
-            'streak_started_at' => $now,
-            'target_ends_at' => $now->addDays($protocol->duration_days),
+            'streak_started_at' => $newStartedAt,
+            'target_ends_at' => $newStartedAt->addDays($protocol->duration_days),
             'slip_count' => $protocol->slip_count + 1,
             'last_slip_at' => $now,
+        ]);
+
+        return $protocol->refresh();
+    }
+
+    public function repairShield(int $percentBonus = 10): NoContactProtocol
+    {
+        $protocol = $this->findActiveProtocol();
+
+        if ($protocol === null || $protocol->status !== NoContactStatus::Active) {
+            throw new InvalidArgumentException('No active no-contact protocol to repair.');
+        }
+
+        $percentBonus = max(1, min(50, $percentBonus));
+        $startedAt = CarbonImmutable::parse($protocol->streak_started_at);
+        $endsAt = CarbonImmutable::parse($protocol->target_ends_at);
+        $totalSeconds = max($endsAt->getTimestamp() - $startedAt->getTimestamp(), 1);
+        $bonusSeconds = (int) round($totalSeconds * ($percentBonus / 100));
+        $newStartedAt = $startedAt->subSeconds($bonusSeconds);
+
+        $protocol->update([
+            'streak_started_at' => $newStartedAt,
         ]);
 
         return $protocol->refresh();
