@@ -609,6 +609,58 @@
     grid-template-columns: 1fr auto auto;
 }
 
+.eg-admin-subnav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.eg-admin-subnav__link {
+    padding: 0.45rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    color: var(--eg-text-muted);
+    text-decoration: none;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.eg-admin-subnav__link.is-active,
+.eg-admin-subnav__link:hover {
+    color: #fff;
+    border-color: rgba(251, 191, 36, 0.45);
+    background: rgba(251, 191, 36, 0.1);
+}
+
+.eg-admin-chart-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 160px;
+    overflow-x: auto;
+}
+
+.eg-admin-chart-bar {
+    display: flex;
+    align-items: flex-end;
+    gap: 1px;
+    width: 8px;
+    height: 100%;
+}
+
+.eg-admin-chart-bar span {
+    display: block;
+    width: 3px;
+    border-radius: 2px 2px 0 0;
+}
+
+.eg-admin-chart-bar__points {
+    background: #fbbf24;
+}
+
+.eg-admin-chart-bar__coins {
+    background: #34d399;
+}
+
 .eg-admin-input,
 .eg-admin-select,
 .eg-admin-textarea {

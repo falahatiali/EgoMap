@@ -14,6 +14,7 @@ enum Permission: string
     case AdminAccess = 'admin.access';
     case AdminQuizzesManage = 'admin.quizzes.manage';
     case AdminMissionsManage = 'admin.missions.manage';
+    case AdminGamificationManage = 'admin.gamification.manage';
     case AdminUsersManage = 'admin.users.manage';
     case AdminRolesManage = 'admin.roles.manage';
 
@@ -94,6 +95,7 @@ enum Permission: string
             self::AdminAccess,
             self::AdminQuizzesManage,
             self::AdminMissionsManage,
+            self::AdminGamificationManage,
             self::AdminUsersManage,
         ];
     }

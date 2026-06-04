@@ -60,6 +60,15 @@ final class AdminNavigation
                 'permission' => Permission::AdminMissionsManage->value,
             ],
             [
+                'key' => 'gamification',
+                'label' => __('admin.nav.gamification'),
+                'icon' => 'fa-trophy',
+                'route' => 'admin.gamification.catalog',
+                'enabled' => true,
+                'badge' => null,
+                'permission' => Permission::AdminGamificationManage->value,
+            ],
+            [
                 'key' => 'sessions',
                 'label' => __('admin.nav.sessions'),
                 'icon' => 'fa-clipboard-list',
