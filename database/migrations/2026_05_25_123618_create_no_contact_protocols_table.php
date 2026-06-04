@@ -20,6 +20,7 @@ return new class extends Migration
             $table->unsignedInteger('slip_count')->default(0);
             $table->timestamp('last_slip_at')->nullable();
             $table->timestamp('completed_at')->nullable();
+            $table->timestamp('gamification_rewarded_at')->nullable();
             $table->timestamps();
 
             $table->index(['user_id', 'status']);

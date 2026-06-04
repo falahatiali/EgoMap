@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('email_verification_code')->nullable();
             $table->timestamp('email_verification_expires_at')->nullable();
             $table->string('password');
+            $table->timestamp('premium_upsell_deferred_at')->nullable();
+            $table->unsignedTinyInteger('premium_upsell_dismiss_count')->default(0);
             $table->rememberToken();
             $table->timestamps();
         });

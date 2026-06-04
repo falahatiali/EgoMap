@@ -27,6 +27,8 @@ use Spatie\Permission\Traits\HasRoles;
     'breakup_initiator',
     'primary_struggle',
     'recovery_triage_completed_at',
+    'premium_upsell_deferred_at',
+    'premium_upsell_dismiss_count',
 ])]
 #[Hidden(['password', 'remember_token'])]
 #[ObservedBy([AssignsUuidObserver::class])]
@@ -46,6 +48,8 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'email_verification_expires_at' => 'datetime',
             'recovery_triage_completed_at' => 'datetime',
+            'premium_upsell_deferred_at' => 'datetime',
+            'premium_upsell_dismiss_count' => 'integer',
             'password' => 'hashed',
         ];
     }
