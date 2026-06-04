@@ -1,0 +1,11 @@
+{
+    "name": "GamificationEngine",
+    "alias": "gamificationengine",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\GamificationEngine\\Providers\\GamificationEngineServiceProvider"
+    ],
+    "files": []
+}

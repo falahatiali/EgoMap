@@ -1,0 +1,30 @@
+{
+    "name": "egomap/gamificationengine",
+    "description": "",
+    "authors": [
+        {
+            "name": "EgoMap",
+            "email": "hello@egomap.test"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\GamificationEngine\\": "",
+            "Modules\\GamificationEngine\\Database\\Factories\\": "database/factories/",
+            "Modules\\GamificationEngine\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\GamificationEngine\\Tests\\": "tests/"
+        }
+    }
+}

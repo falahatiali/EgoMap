@@ -1,3 +1,4 @@
 {
-    "MissionEngine": true
+    "MissionEngine": true,
+    "GamificationEngine": true
 }

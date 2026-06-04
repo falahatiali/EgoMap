@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Modules\GamificationEngine\Database\Seeders\GamificationEngineDatabaseSeeder;
 use Modules\MissionEngine\Database\Seeders\MissionEngineDatabaseSeeder;
 
 class DatabaseSeeder extends Seeder
@@ -17,6 +18,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call(RolePermissionSeeder::class);
         $this->call(MissionEngineDatabaseSeeder::class);
+        $this->call(GamificationEngineDatabaseSeeder::class);
 
         $admin = User::factory()->create([
             'name' => 'Admin User',

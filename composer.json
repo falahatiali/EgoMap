@@ -37,7 +37,13 @@
         "psr-4": {
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
-            "Database\\Seeders\\": "database/seeders/"
+            "Database\\Seeders\\": "database/seeders/",
+            "Modules\\MissionEngine\\": "Modules/MissionEngine/",
+            "Modules\\MissionEngine\\Database\\Factories\\": "Modules/MissionEngine/database/factories/",
+            "Modules\\MissionEngine\\Database\\Seeders\\": "Modules/MissionEngine/database/seeders/",
+            "Modules\\GamificationEngine\\": "Modules/GamificationEngine/",
+            "Modules\\GamificationEngine\\Database\\Factories\\": "Modules/GamificationEngine/database/factories/",
+            "Modules\\GamificationEngine\\Database\\Seeders\\": "Modules/GamificationEngine/database/seeders/"
         },
         "files": [
             "app/helpers.php"
@@ -45,7 +51,9 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests/"
+            "Tests\\": "tests/",
+            "Modules\\MissionEngine\\Tests\\": "Modules/MissionEngine/tests/",
+            "Modules\\GamificationEngine\\Tests\\": "Modules/GamificationEngine/tests/"
         }
     },
     "scripts": {
