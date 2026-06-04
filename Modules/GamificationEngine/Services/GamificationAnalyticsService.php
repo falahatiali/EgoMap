@@ -6,7 +6,6 @@ use Carbon\CarbonImmutable;
 use Modules\GamificationEngine\Enums\GamificationRuleType;
 use Modules\GamificationEngine\Models\GamificationBadge;
 use Modules\GamificationEngine\Models\GamificationRule;
-use Modules\GamificationEngine\Models\GamificationRule;
 use Modules\GamificationEngine\Models\GamificationTransaction;
 use Modules\GamificationEngine\Models\GamificationWallet;
 
