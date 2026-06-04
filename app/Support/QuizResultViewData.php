@@ -17,9 +17,11 @@ class QuizResultViewData
 
         $report = $session->result?->free_report ?? [];
         $report = is_array($report) ? $report : [];
+        $premium = $session->result?->premium_report;
+        $premium = is_array($premium) ? $premium : null;
 
         if (($report['template'] ?? '') === 'reboot_protocol') {
-            return self::fromRebootProtocolReport($report, $locale);
+            return self::fromRebootProtocolReport($report, $locale, $premium);
         }
 
         $typeCode = strtolower((string) ($report['type_code'] ?? ''));
@@ -48,15 +50,12 @@ class QuizResultViewData
 
     /**
      * @param  array<string, mixed>  $report
-     * @return array<string, mixed>
-     */
-    /**
-     * @param  array<string, mixed>  $report
+     * @param  array<string, mixed>|null  $premium
      * @return array{report: array<string, mixed>, content: array<string, mixed>, palette: array{accent: string, soft: string, glow: string, group: string}}
      */
-    private static function fromRebootProtocolReport(array $report, string $locale): array
+    private static function fromRebootProtocolReport(array $report, string $locale, ?array $premium = null): array
     {
-        return [
+        $localized = [
             'report' => RebootProtocolLocalizedCopy::localizeReport($report, $locale),
             'content' => RebootProtocolLocalizedCopy::localizeContent($report, $locale),
             'palette' => [
@@ -66,6 +65,27 @@ class QuizResultViewData
                 'group' => 'reboot',
             ],
         ];
+
+        if ($premium !== null && isset($premium['assessment']) && is_array($premium['assessment'])) {
+            $assessment = $premium['assessment'];
+            $localized['content']['ai_insights'] = [
+                'badge' => __('quiz.reboot.ai_insights_badge', locale: $locale),
+                'title' => __('quiz.reboot.ai_insights_title', locale: $locale),
+                'summary' => (string) ($assessment['summary'] ?? ''),
+                'recovery_phase' => (string) ($assessment['recovery_phase'] ?? ''),
+                'main_risk' => (string) ($assessment['main_risk'] ?? ''),
+                'attachment_pattern' => (string) ($assessment['attachment_pattern'] ?? ''),
+                'recommendations' => is_array($assessment['recommendations'] ?? null)
+                    ? $assessment['recommendations']
+                    : [],
+                'truth_flashes' => is_array($premium['truth_flashes'] ?? null)
+                    ? $premium['truth_flashes']
+                    : [],
+                'source' => (string) ($premium['source'] ?? 'fallback'),
+            ];
+        }
+
+        return $localized;
     }
 
     /**

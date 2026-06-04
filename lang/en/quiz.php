@@ -77,5 +77,10 @@ return [
         'continue_without_save' => 'Continue without saving',
         'dimension_breakdown' => 'Recovery dimension breakdown',
         'dimension_breakdown_intro' => 'Each bar shows how high that signal scored in your analysis (0% low, 100% high).',
+        'ai_insights_title' => 'AI personalized read',
+        'ai_insights_badge' => 'AI analysis',
+        'ai_attachment' => 'Likely attachment pattern',
+        'ai_recommendations' => 'Three first steps',
+        'ai_truth_title' => 'Truth flashes',
     ],
 ];

@@ -98,6 +98,9 @@ class RebootProtocolAssessmentTest extends TestCase
 
         $this->assertSame('reboot_protocol', $result->free_report['template']);
         $this->assertArrayHasKey('stability_score', $result->free_report);
+        $this->assertIsArray($result->premium_report);
+        $this->assertArrayHasKey('assessment', $result->premium_report);
+        $this->assertArrayHasKey('truth_flashes', $result->premium_report);
     }
 
     public function test_reboot_pdf_definition_skips_mbti_dimension_sections(): void

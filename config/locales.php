@@ -40,6 +40,21 @@ return [
         'fa' => 'فارسی',
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | AI prompt language names
+    |--------------------------------------------------------------------------
+    |
+    | Human-readable language names sent to LLM instructions. Add one entry
+    | per supported locale when you expand languages.
+    |
+    */
+
+    'ai_language_names' => [
+        'en' => 'English',
+        'fa' => 'Persian (Farsi)',
+    ],
+
     'short_labels' => [
         'en' => 'EN',
         'fa' => 'FA',
