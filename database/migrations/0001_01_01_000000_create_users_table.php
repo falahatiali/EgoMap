@@ -22,6 +22,10 @@ return new class extends Migration
             $table->string('password');
             $table->timestamp('premium_upsell_deferred_at')->nullable();
             $table->unsignedTinyInteger('premium_upsell_dismiss_count')->default(0);
+            $table->string('stripe_id')->nullable()->index();
+            $table->string('pm_type')->nullable();
+            $table->string('pm_last_four', 4)->nullable();
+            $table->timestamp('trial_ends_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
