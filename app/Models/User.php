@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Ai\Concerns\HasConversations;
+use Laravel\Cashier\Billable;
 use Modules\MissionEngine\Models\MissionEnrollment;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -35,7 +36,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasConversations, HasFactory, HasRoles, InteractsWithEgoMapPermissions, Notifiable;
+    use Billable, HasConversations, HasFactory, HasRoles, InteractsWithEgoMapPermissions, Notifiable;
 
     /**
      * Get the attributes that should be cast.
@@ -50,6 +51,7 @@ class User extends Authenticatable
             'recovery_triage_completed_at' => 'datetime',
             'premium_upsell_deferred_at' => 'datetime',
             'premium_upsell_dismiss_count' => 'integer',
+            'trial_ends_at' => 'datetime',
             'password' => 'hashed',
         ];
     }

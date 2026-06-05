@@ -2,7 +2,6 @@
 
 namespace Modules\MissionEngine\Support;
 
-use App\Enums\RoleName;
 use App\Models\User;
 
 final class MissionProGate
@@ -13,9 +12,7 @@ final class MissionProGate
             return false;
         }
 
-        return $user->hasRole(RoleName::Pro->value)
-            || $user->hasRole(RoleName::SuperAdmin->value)
-            || $user->hasRole(RoleName::Admin->value);
+        return $user->isAdmin() || $user->isPro();
     }
 
     /**

@@ -23,6 +23,12 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $cashierPath = trim((string) env('CASHIER_PATH', 'stripe'), '/');
+
+        $middleware->validateCsrfTokens(except: [
+            $cashierPath.'/*',
+        ]);
+
         $middleware->web(prepend: [
             SetLocale::class,
         ]);

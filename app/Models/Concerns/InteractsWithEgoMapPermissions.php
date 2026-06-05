@@ -22,10 +22,18 @@ trait InteractsWithEgoMapPermissions
 
     public function isPro(): bool
     {
-        return $this->hasAnyRole([
+        if ($this->hasAnyRole([
             RoleName::SuperAdmin->value,
             RoleName::Pro->value,
-        ]) || $this->can(Permission::ReportsViewPremium->value);
+        ])) {
+            return true;
+        }
+
+        if ($this->subscribed((string) config('billing.subscription_name', 'default'))) {
+            return true;
+        }
+
+        return $this->can(Permission::ReportsViewPremium->value);
     }
 
     public function isMember(): bool

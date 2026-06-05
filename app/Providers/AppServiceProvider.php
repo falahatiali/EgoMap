@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Listeners\ClaimGuestNoContactProtocols;
 use App\Listeners\ClaimGuestQuizSessions;
+use App\Listeners\SyncProRoleFromStripeWebhook;
 use App\Listeners\SyncRecoveryJourneyOnLogin;
 use App\Services\Pdf\Drivers\RtlAwareDomPdfDriver;
 use App\Support\LocaleConfig;
@@ -13,6 +14,7 @@ use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Cashier\Events\WebhookHandled;
 use Spatie\Translatable\Facades\Translatable;
 
 class AppServiceProvider extends ServiceProvider
@@ -63,5 +65,6 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(Login::class, ClaimGuestQuizSessions::class);
         Event::listen(Login::class, ClaimGuestNoContactProtocols::class);
         Event::listen(Login::class, SyncRecoveryJourneyOnLogin::class);
+        Event::listen(WebhookHandled::class, SyncProRoleFromStripeWebhook::class);
     }
 }
