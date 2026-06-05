@@ -20,6 +20,11 @@ trait InteractsWithEgoMapPermissions
         ]);
     }
 
+    public function hasActiveSubscription(?string $type = null): bool
+    {
+        return $this->subscribed($type ?? (string) config('billing.subscription_name', 'default'));
+    }
+
     public function isPro(): bool
     {
         if ($this->hasAnyRole([
@@ -29,7 +34,7 @@ trait InteractsWithEgoMapPermissions
             return true;
         }
 
-        if ($this->subscribed((string) config('billing.subscription_name', 'default'))) {
+        if ($this->hasActiveSubscription()) {
             return true;
         }
 
