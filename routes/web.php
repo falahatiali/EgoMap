@@ -9,6 +9,7 @@ use App\Livewire\Missions\Catalog as MissionsCatalog;
 use App\Livewire\Missions\Show as MissionShow;
 use App\Livewire\Missions\Workspace as MissionWorkspace;
 use App\Livewire\NoContact\Show as NoContactShow;
+use App\Livewire\Pricing\Show as PricingShow;
 use App\Livewire\Profile\Rewards as ProfileRewards;
 use App\Livewire\Profile\Show;
 use App\Livewire\Profile\TestShow;
@@ -66,6 +67,7 @@ Route::prefix('{locale}')
 
         Route::livewire('/start', Protocol::class)->name('onboarding');
         Route::livewire('/no-contact', NoContactShow::class)->name('no-contact');
+        Route::livewire('/pricing', PricingShow::class)->name('pricing');
 
         Route::livewire('/profile', Show::class)->middleware('auth')->name('profile');
         Route::livewire('/profile/rewards', ProfileRewards::class)->middleware('auth')->name('profile.rewards');

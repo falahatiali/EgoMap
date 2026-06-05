@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'pricing' => 'قیمت‌ها',
     'tests' => 'تست‌ها',
     'no_contact' => 'حالت شبح',
     'my_missions' => 'مأموریت‌های من',

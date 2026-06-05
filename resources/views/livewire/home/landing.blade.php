@@ -230,7 +230,7 @@
                 </ul>
             </div>
         </div>
-        <a href="{{ route('register') }}" class="rh-btn rh-btn--secondary" wire:navigate>
+        <a href="{{ route('pricing', ['locale' => app()->getLocale()]) }}" class="rh-btn rh-btn--secondary" wire:navigate>
             <span data-i18n="landing.premium_cta">{{ __('landing.premium_cta') }}</span>
         </a>
     </section>

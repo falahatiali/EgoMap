@@ -14,7 +14,7 @@
             <a href="#how" class="rh-nav__link" data-i18n="landing.nav_how">{{ __('landing.nav_how') }}</a>
             <a href="#protocol-90" class="rh-nav__link" data-i18n="landing.nav_protocol">{{ __('landing.nav_protocol') }}</a>
             <a href="#emergency" class="rh-nav__link rh-nav__link--alert" data-i18n="landing.nav_emergency">{{ __('landing.nav_emergency') }}</a>
-            <a href="#premium" class="rh-nav__link" data-i18n="landing.nav_pricing">{{ __('landing.nav_pricing') }}</a>
+            <a href="{{ route('pricing', ['locale' => $locale]) }}" class="rh-nav__link" wire:navigate data-i18n="landing.nav_pricing">{{ __('landing.nav_pricing') }}</a>
         </nav>
 
         <div class="rh-nav__actions">

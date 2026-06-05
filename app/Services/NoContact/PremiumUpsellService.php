@@ -176,11 +176,9 @@ readonly class PremiumUpsellService
 
     private function checkoutUrl(string $coupon): string
     {
-        $anchor = (string) config('gamification.premium_upsell.pricing_anchor', '#pricing');
-
-        return URL::to(route('home', LocaleConfig::routeParameters())).'?'.http_build_query([
+        return URL::to(route('pricing', LocaleConfig::routeParameters())).'?'.http_build_query([
             'coupon' => $coupon,
             'upgrade' => 'pro',
-        ]).$anchor;
+        ]);
     }
 }

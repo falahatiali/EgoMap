@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'pricing' => 'Pricing',
     'tests' => 'Tests',
     'no_contact' => 'Ghost Mode',
     'my_missions' => 'My missions',

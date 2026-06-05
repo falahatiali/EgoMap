@@ -43,6 +43,9 @@
                         @endif
                         @if ($nav['show_explore_links'])
                             <li class="nav-item">
+                                <a class="eg-nav-link nav-link px-0 eg-transition" href="{{ route('pricing') }}" wire:navigate data-i18n="nav.pricing">{{ __('nav.pricing') }}</a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="eg-nav-link nav-link px-0 eg-transition" href="{{ route('home') }}#tests" data-i18n="nav.tests">{{ __('nav.tests') }}</a>
                             </li>
                             <li class="nav-item">
