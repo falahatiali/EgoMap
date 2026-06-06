@@ -166,6 +166,30 @@ class StripePlan extends Model
         return $this->billingPeriod() === 'yearly';
     }
 
+    public function displayOrder(): int
+    {
+        return match ($this->billingPeriod()) {
+            'monthly' => 0,
+            'quarterly' => 1,
+            'yearly' => 2,
+            default => 3,
+        };
+    }
+
+    public function compareTierTo(self $other): int
+    {
+        return $this->displayOrder() <=> $other->displayOrder();
+    }
+
+    public function resolvedSubscriptionType(): string
+    {
+        if (is_string($this->subscription_type) && $this->subscription_type !== '') {
+            return $this->subscription_type;
+        }
+
+        return (string) config('billing.subscription_name', 'default');
+    }
+
     private function currencySubunit(): int
     {
         return in_array(strtolower($this->currency), self::ZERO_DECIMAL_CURRENCIES, true) ? 1 : 100;

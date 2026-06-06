@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\StripePlan;
+use App\Services\Billing\BillingSchemaEnsurer;
 use App\Services\Billing\StripeService;
 use Illuminate\Console\Command;
 use Stripe\Exception\ApiErrorException;
@@ -15,8 +16,10 @@ class SyncStripePlansCommand extends Command
 {
     protected $signature = 'billing:sync-stripe-plans {--limit=100}';
 
-    public function handle(StripeService $stripe): int
+    public function handle(StripeService $stripe, BillingSchemaEnsurer $schema): int
     {
+        $schema->ensure();
+
         try {
             $prices = $stripe->all((int) $this->option('limit'));
         } catch (ApiErrorException $exception) {
@@ -62,6 +65,7 @@ class SyncStripePlansCommand extends Command
             'active' => $price->active,
             'is_recurring' => $price->type === 'recurring',
             'lookup_key' => $price->lookup_key,
+            'subscription_type' => (string) config('billing.subscription_name', 'default'),
             'synced_at' => now(),
         ];
     }
