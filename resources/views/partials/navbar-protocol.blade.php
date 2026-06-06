@@ -18,17 +18,8 @@
         </nav>
 
         <div class="rh-nav__actions">
-            @include('partials.language-switcher', ['variant' => 'nav'])
-
             @auth
-                <a
-                    href="{{ route('profile', ['locale' => $locale]) }}"
-                    class="rh-nav__btn rh-nav__btn--ghost"
-                    data-i18n="profile.page_title"
-                >
-                    <i class="fa-solid fa-user" aria-hidden="true"></i>
-                    <span>{{ __('profile.page_title') }}</span>
-                </a>
+                @include('partials.nav-profile-link', ['variant' => 'protocol'])
                 <form method="POST" action="{{ route('logout', ['locale' => $locale]) }}" class="d-inline">
                     @csrf
                     <button type="submit" class="rh-nav__btn rh-nav__btn--ghost">

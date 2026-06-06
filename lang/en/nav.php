@@ -12,4 +12,6 @@ return [
     'register' => 'Create account',
     'home' => 'Home',
     'page_navigation' => 'Page navigation',
+    'member' => 'Member',
+    'pro_badge' => 'Pro',
 ];

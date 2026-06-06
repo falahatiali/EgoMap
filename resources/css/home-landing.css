@@ -261,6 +261,33 @@
         0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
+.rh-nav__profile {
+    max-width: min(100%, 16rem);
+}
+
+.rh-nav__profile-avatar {
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.68rem;
+    font-weight: 800;
+    color: #5eead4;
+    background: rgba(45, 212, 191, 0.14);
+    border: 1px solid rgba(45, 212, 191, 0.28);
+    flex-shrink: 0;
+}
+
+.rh-nav__profile-name {
+    max-width: 7rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--rh-ink);
+}
+
 .rh-nav__btn--cta {
     position: relative;
     overflow: hidden;

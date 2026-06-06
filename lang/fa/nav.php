@@ -12,4 +12,6 @@ return [
     'register' => 'ساخت حساب',
     'home' => 'خانه',
     'page_navigation' => 'ناوبری صفحه',
+    'member' => 'عضو',
+    'pro_badge' => 'پرو',
 ];

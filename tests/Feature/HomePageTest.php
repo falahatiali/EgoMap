@@ -71,13 +71,14 @@ class HomePageTest extends TestCase
 
     public function test_home_nav_shows_profile_link_for_authenticated_user(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['name' => 'Mina Karimi']);
 
         $response = $this->actingAs($user)->get(route('home', ['locale' => 'fa']));
 
         $response->assertOk();
         $response->assertSee(route('profile', ['locale' => 'fa']), false);
-        $response->assertSee(__('profile.page_title'), false);
+        $response->assertSee('rh-nav__profile-name', false);
+        $response->assertSee('Mina Karimi', false);
         $response->assertDontSee(__('landing.nav_login'), false);
     }
 
