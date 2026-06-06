@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Missions;
 
+use App\Services\Missions\MissionAetherProgramService;
+use App\Services\Profile\UserAetherProgramHistoryService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -11,6 +13,17 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\AetherEngine\Enums\CoachingTone;
+use Modules\AetherEngine\Enums\CookingAbility;
+use Modules\AetherEngine\Enums\DietaryPattern;
+use Modules\AetherEngine\Enums\EquipmentAccess;
+use Modules\AetherEngine\Enums\Gender;
+use Modules\AetherEngine\Enums\MotivationStyle;
+use Modules\AetherEngine\Enums\PrimaryGoal;
+use Modules\AetherEngine\Enums\SessionDuration;
+use Modules\AetherEngine\Enums\TrainingExperience;
+use Modules\AetherEngine\Enums\WorkoutTimePreference;
+use Modules\AetherEngine\Services\AetherProfileService;
 use Modules\MissionEngine\Enums\EquipmentCategory;
 use Modules\MissionEngine\Enums\EquipmentStatus;
 use Modules\MissionEngine\Enums\MealType;
@@ -47,6 +60,8 @@ class Workspace extends Component
 
     /** @var list<array{day: string, focus: string, notes: string}> */
     public array $workoutPlan = [];
+
+    public string $mealPlanNotes = '';
 
     /** Workout session log */
     public string $workoutDayKey = 'sat';
@@ -128,6 +143,52 @@ class Workspace extends Component
     public string $newEquipmentNotes = '';
 
     public string $equipmentNotes = '';
+
+    public bool $showAiQuestionnaire = false;
+
+    public string $aiQuestionnaireTarget = 'workout';
+
+    public int $aiWizardStep = 1;
+
+    public int $aiAge = 28;
+
+    public string $aiGender = 'male';
+
+    public int $aiHeightCm = 175;
+
+    public float $aiWeightKg = 75;
+
+    public ?float $aiBodyFatPercent = null;
+
+    public string $aiTrainingExperience = 'intermediate';
+
+    public string $aiPrimaryGoal = 'muscle_gain';
+
+    public int $aiTrainingDaysPerWeek = 4;
+
+    public string $aiSessionDuration = '45_60';
+
+    public string $aiPreferredWorkoutTime = 'evening';
+
+    public string $aiEquipment = 'full_gym';
+
+    public string $aiInjuriesLimitations = '';
+
+    public string $aiDietaryPattern = 'omnivore';
+
+    public string $aiCookingAbility = 'simple';
+
+    public string $aiAllergiesText = '';
+
+    public string $aiCoachingTone = 'technical';
+
+    public string $aiMotivationStyle = 'feeling_strong';
+
+    public string $aiFavoriteExercisesText = '';
+
+    public string $aiDislikedExercisesText = '';
+
+    public bool $aiIsGenerating = false;
 
     /** @var array<string, bool> */
     public array $registrationProgress = [];
@@ -507,11 +568,117 @@ class Workspace extends Component
         $this->persistEquipment($fields);
     }
 
+    public function openAiWorkoutGenerator(AetherProfileService $profiles, MissionAetherProgramService $aether): void
+    {
+        if (! $this->userCanAccessAiWorkout()) {
+            return;
+        }
+
+        $this->openAiQuestionnaire('workout', $profiles, $aether);
+    }
+
+    public function openAiMealGenerator(AetherProfileService $profiles, MissionAetherProgramService $aether): void
+    {
+        if (! $this->userCanAccessAiMeal()) {
+            return;
+        }
+
+        $this->openAiQuestionnaire('meal', $profiles, $aether);
+    }
+
+    public function closeAiQuestionnaire(): void
+    {
+        $this->showAiQuestionnaire = false;
+        $this->aiWizardStep = 1;
+        $this->aiIsGenerating = false;
+        $this->resetErrorBag();
+    }
+
+    public function aiWizardNext(): void
+    {
+        $this->normalizeAiWizardInputs();
+        $this->validate($this->aiWizardRulesForStep($this->aiWizardStep));
+
+        if ($this->aiWizardStep < 3) {
+            $this->aiWizardStep++;
+        }
+    }
+
+    public function aiWizardBack(): void
+    {
+        if ($this->aiWizardStep > 1) {
+            $this->aiWizardStep--;
+        }
+    }
+
+    public function submitAiQuestionnaire(
+        MissionAetherProgramService $aether,
+        MissionEnrollmentFieldService $fields,
+    ): void {
+        if ($this->aiIsGenerating) {
+            return;
+        }
+
+        $this->normalizeAiWizardInputs();
+        $this->validate(array_merge(
+            $this->aiWizardRulesForStep(1),
+            $this->aiWizardRulesForStep(2),
+            $this->aiWizardRulesForStep(3),
+        ));
+
+        $this->aiIsGenerating = true;
+
+        try {
+            $user = Auth::user();
+            $locale = app()->getLocale();
+            $program = $aether->generate($user, $this->aiWizardPayload());
+            $program->update([
+                'applied_target' => $this->aiQuestionnaireTarget,
+                'mission_enrollment_id' => $this->enrollment->id,
+            ]);
+
+            if (in_array($this->aiQuestionnaireTarget, ['workout', 'meal'], true)) {
+                $merge = [];
+
+                if ($this->aiQuestionnaireTarget === 'workout') {
+                    $rows = $aether->workoutPlanRowsForLocale($program, $locale);
+                    $this->workoutPlan = $rows;
+                    $merge['workout_plan'] = $aether->persistWorkoutPlanRows($this->enrollment, $rows, $locale);
+                }
+
+                if ($this->aiQuestionnaireTarget === 'meal') {
+                    $mealNotes = $aether->mealPlanNotesForLocale($program, $locale);
+                    $merge['meal_plan_notes'] = MissionLocalizedText::merge(
+                        $this->enrollment->field_values['meal_plan_notes'] ?? '',
+                        $mealNotes,
+                        $locale,
+                    );
+                }
+
+                if ($merge !== []) {
+                    $fields->merge($this->enrollment, $merge, $user);
+                    $this->enrollment->refresh();
+                    $this->hydrateFromFieldValues();
+                }
+            }
+
+            $this->closeAiQuestionnaire();
+            $this->flashSaved();
+            session()->flash('mission_ai_status', __('missions.ai_program_applied'));
+        } catch (\Throwable $exception) {
+            $this->addError('aiWizard', __('missions.ai_generation_failed'));
+            report($exception);
+        } finally {
+            $this->aiIsGenerating = false;
+        }
+    }
+
     public function render(
         MissionWorkoutLogService $workouts,
         MissionNutritionLogService $nutrition,
         MissionSupplementLogService $supplements,
         MissionDailyReportService $reports,
+        UserAetherProgramHistoryService $programHistory,
     ): View {
         $locale = app()->getLocale();
         $presenter = new MissionEnrollmentPresenter($this->enrollment);
@@ -547,6 +714,19 @@ class Workspace extends Component
             'equipmentCategories' => EquipmentCategory::cases(),
             'equipmentStatuses' => EquipmentStatus::cases(),
             'equipmentPresets' => $this->equipmentPresetDefinitions(),
+            'aiWizardSteps' => 3,
+            'aiFormOptions' => $this->aiFormOptions(),
+            'hasUserWorkoutProgram' => $programHistory->hasAppliedTarget($user, 'workout'),
+            'hasUserMealProgram' => $programHistory->hasAppliedTarget($user, 'meal'),
+            'activeWorkoutProgram' => $activeWorkoutProgram = $programHistory->latestForTarget($user, 'workout'),
+            'activeMealProgram' => $activeMealProgram = $programHistory->latestForTarget($user, 'meal'),
+            'activeWorkoutProgramSummary' => $activeWorkoutProgram
+                ? $programHistory->summaryForProgram($activeWorkoutProgram, $locale)
+                : null,
+            'activeMealProgramSummary' => $activeMealProgram
+                ? $programHistory->summaryForProgram($activeMealProgram, $locale)
+                : null,
+            'programHistoryUrl' => route('profile').'#my-programs',
         ]);
     }
 
@@ -760,6 +940,7 @@ class Workspace extends Component
             is_array($values['workout_plan'] ?? null) ? $values['workout_plan'] : [],
             $locale,
         );
+        $this->mealPlanNotes = MissionLocalizedText::forLocale($values['meal_plan_notes'] ?? '', $locale);
         $this->equipmentNotes = MissionLocalizedText::forLocale($values['equipment_notes'] ?? '', $locale);
         $this->equipmentItems = $this->normalizeEquipmentItems($values['equipment_items'] ?? null);
         $this->registrationProgress = is_array($values['registration_progress'] ?? null)
@@ -779,6 +960,196 @@ class Workspace extends Component
     private function flashSaved(): void
     {
         $this->dispatch('mission-saved');
+    }
+
+    private function userCanAccessAiWorkout(): bool
+    {
+        $presenter = new MissionEnrollmentPresenter($this->enrollment);
+        $taskConfig = collect($presenter->enabledCapabilities(app()->getLocale()))
+            ->firstWhere('key', 'task')['config'] ?? [];
+
+        return MissionProGate::canUseFeature(Auth::user(), $taskConfig, 'ai_workout_plan');
+    }
+
+    private function userCanAccessAiMeal(): bool
+    {
+        $presenter = new MissionEnrollmentPresenter($this->enrollment);
+        $nutritionConfig = collect($presenter->enabledCapabilities(app()->getLocale()))
+            ->firstWhere('key', 'nutrition')['config'] ?? [];
+
+        return MissionProGate::canUseFeature(Auth::user(), $nutritionConfig, 'ai_meal_plan');
+    }
+
+    private function openAiQuestionnaire(
+        string $target,
+        AetherProfileService $profiles,
+        MissionAetherProgramService $aether,
+    ): void {
+        $defaults = $aether->loadWizardDefaults($profiles->forUser(Auth::user()), $this->enrollment);
+
+        $this->aiQuestionnaireTarget = $target;
+        $this->aiWizardStep = 1;
+        $this->aiAge = (int) $defaults['age'];
+        $this->aiGender = (string) $defaults['gender'];
+        $this->aiHeightCm = (int) $defaults['height_cm'];
+        $this->aiWeightKg = (float) $defaults['weight_kg'];
+        $this->aiBodyFatPercent = $defaults['body_fat_percent'];
+        $this->aiTrainingExperience = (string) $defaults['training_experience'];
+        $this->aiPrimaryGoal = (string) $defaults['primary_goal'];
+        $this->aiTrainingDaysPerWeek = (int) $defaults['training_days_per_week'];
+        $this->aiSessionDuration = (string) $defaults['session_duration'];
+        $this->aiPreferredWorkoutTime = (string) $defaults['preferred_workout_time'];
+        $this->aiEquipment = (string) $defaults['equipment'];
+        $this->aiInjuriesLimitations = (string) $defaults['injuries_limitations'];
+        $this->aiDietaryPattern = (string) $defaults['dietary_pattern'];
+        $this->aiCookingAbility = (string) $defaults['cooking_ability'];
+        $this->aiAllergiesText = (string) $defaults['allergies_text'];
+        $this->aiCoachingTone = (string) $defaults['coaching_tone'];
+        $this->aiMotivationStyle = (string) $defaults['motivation_style'];
+        $this->aiFavoriteExercisesText = (string) $defaults['favorite_exercises_text'];
+        $this->aiDislikedExercisesText = (string) $defaults['disliked_exercises_text'];
+        $this->showAiQuestionnaire = true;
+        $this->resetErrorBag();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function aiWizardPayload(): array
+    {
+        return [
+            'age' => $this->aiAge,
+            'gender' => $this->aiGender,
+            'height_cm' => $this->aiHeightCm,
+            'weight_kg' => $this->aiWeightKg,
+            'body_fat_percent' => $this->aiBodyFatPercent,
+            'training_experience' => $this->aiTrainingExperience,
+            'primary_goal' => $this->aiPrimaryGoal,
+            'training_days_per_week' => $this->aiTrainingDaysPerWeek,
+            'session_duration' => $this->aiSessionDuration,
+            'preferred_workout_time' => $this->aiPreferredWorkoutTime,
+            'equipment' => $this->aiEquipment,
+            'injuries_limitations' => $this->aiInjuriesLimitations,
+            'dietary_pattern' => $this->aiDietaryPattern,
+            'cooking_ability' => $this->aiCookingAbility,
+            'allergies_text' => $this->aiAllergiesText,
+            'coaching_tone' => $this->aiCoachingTone,
+            'motivation_style' => $this->aiMotivationStyle,
+            'favorite_exercises_text' => $this->aiFavoriteExercisesText,
+            'disliked_exercises_text' => $this->aiDislikedExercisesText,
+        ];
+    }
+
+    /**
+     * @return array<string, array<int, mixed>>
+     */
+    private function aiWizardRulesForStep(int $step): array
+    {
+        return match ($step) {
+            1 => [
+                'aiAge' => ['required', 'integer', 'min:16', 'max:80'],
+                'aiGender' => $this->enumValueRule(Gender::class),
+                'aiHeightCm' => ['required', 'integer', 'min:130', 'max:230'],
+                'aiWeightKg' => ['required', 'numeric', 'min:35', 'max:250'],
+                'aiBodyFatPercent' => ['nullable', 'numeric', 'min:3', 'max:60'],
+            ],
+            2 => [
+                'aiTrainingExperience' => $this->enumValueRule(TrainingExperience::class),
+                'aiPrimaryGoal' => $this->enumValueRule(PrimaryGoal::class),
+                'aiTrainingDaysPerWeek' => ['required', 'integer', 'min:1', 'max:7'],
+                'aiSessionDuration' => $this->enumValueRule(SessionDuration::class),
+                'aiPreferredWorkoutTime' => $this->enumValueRule(WorkoutTimePreference::class),
+                'aiEquipment' => $this->enumValueRule(EquipmentAccess::class),
+                'aiInjuriesLimitations' => ['nullable', 'string', 'max:1000'],
+            ],
+            default => [
+                'aiDietaryPattern' => $this->enumValueRule(DietaryPattern::class),
+                'aiCookingAbility' => $this->enumValueRule(CookingAbility::class),
+                'aiAllergiesText' => ['nullable', 'string', 'max:500'],
+                'aiCoachingTone' => $this->enumValueRule(CoachingTone::class),
+                'aiMotivationStyle' => $this->enumValueRule(MotivationStyle::class),
+                'aiFavoriteExercisesText' => ['nullable', 'string', 'max:500'],
+                'aiDislikedExercisesText' => ['nullable', 'string', 'max:500'],
+            ],
+        };
+    }
+
+    private function normalizeAiWizardInputs(): void
+    {
+        $this->aiGender = $this->normalizeBackedEnum($this->aiGender, Gender::class);
+        $this->aiTrainingExperience = $this->normalizeBackedEnum($this->aiTrainingExperience, TrainingExperience::class);
+        $this->aiPrimaryGoal = $this->normalizeBackedEnum($this->aiPrimaryGoal, PrimaryGoal::class);
+        $this->aiSessionDuration = $this->normalizeBackedEnum($this->aiSessionDuration, SessionDuration::class);
+        $this->aiPreferredWorkoutTime = $this->normalizeBackedEnum($this->aiPreferredWorkoutTime, WorkoutTimePreference::class);
+        $this->aiEquipment = $this->normalizeBackedEnum($this->aiEquipment, EquipmentAccess::class);
+        $this->aiDietaryPattern = $this->normalizeBackedEnum($this->aiDietaryPattern, DietaryPattern::class);
+        $this->aiCookingAbility = $this->normalizeBackedEnum($this->aiCookingAbility, CookingAbility::class);
+        $this->aiCoachingTone = $this->normalizeBackedEnum($this->aiCoachingTone, CoachingTone::class);
+        $this->aiMotivationStyle = $this->normalizeBackedEnum($this->aiMotivationStyle, MotivationStyle::class);
+    }
+
+    /**
+     * @param  class-string<\BackedEnum>  $enumClass
+     */
+    private function normalizeBackedEnum(string $value, string $enumClass): string
+    {
+        $normalized = strtolower(trim($value));
+
+        foreach ($enumClass::cases() as $case) {
+            if ($case->value === $normalized || strtolower($case->name) === $normalized) {
+                return $case->value;
+            }
+        }
+
+        return $normalized;
+    }
+
+    /**
+     * @param  class-string<\BackedEnum>  $enumClass
+     * @return array<int, mixed>
+     */
+    private function enumValueRule(string $enumClass): array
+    {
+        return [
+            'required',
+            'string',
+            Rule::in(array_map(static fn (\BackedEnum $case): string => $case->value, $enumClass::cases())),
+        ];
+    }
+
+    /**
+     * @return array<string, list<array{value: string, label: string}>>
+     */
+    private function aiFormOptions(): array
+    {
+        $locale = app()->getLocale();
+
+        return [
+            'genders' => $this->enumOptions(Gender::cases(), 'missions.ai_gender_', $locale),
+            'goals' => $this->enumOptions(PrimaryGoal::cases(), 'missions.ai_goal_', $locale),
+            'experience' => $this->enumOptions(TrainingExperience::cases(), 'missions.ai_experience_', $locale),
+            'session_durations' => $this->enumOptions(SessionDuration::cases(), 'missions.ai_session_', $locale),
+            'workout_times' => $this->enumOptions(WorkoutTimePreference::cases(), 'missions.ai_time_', $locale),
+            'equipment' => $this->enumOptions(EquipmentAccess::cases(), 'missions.ai_equipment_', $locale),
+            'dietary' => $this->enumOptions(DietaryPattern::cases(), 'missions.ai_diet_', $locale),
+            'cooking' => $this->enumOptions(CookingAbility::cases(), 'missions.ai_cooking_', $locale),
+            'tones' => $this->enumOptions(CoachingTone::cases(), 'missions.ai_tone_', $locale),
+            'motivation' => $this->enumOptions(MotivationStyle::cases(), 'missions.ai_motivation_', $locale),
+        ];
+    }
+
+    /**
+     * @param  array<int, \BackedEnum>  $cases
+     * @return list<array{value: string, label: string}>
+     */
+    private function enumOptions(array $cases, string $labelPrefix, string $locale): array
+    {
+        return collect($cases)
+            ->map(fn (\BackedEnum $case): array => [
+                'value' => $case->value,
+                'label' => __($labelPrefix.$case->value, locale: $locale),
+            ])
+            ->all();
     }
 
     private function persistEquipment(MissionEnrollmentFieldService $fields): void

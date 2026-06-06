@@ -1,11 +1,32 @@
 @if ($requiresProWorkout)
-    <div class="eg-mission-pro-banner d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-        <div>
-            <strong>{{ __('missions.ai_workout') }}</strong>
-            <p class="small mb-0 eg-text-muted">{{ __('missions.pro_hint') }}</p>
+    @if ($hasUserWorkoutProgram)
+        @include('livewire.missions.partials.workspace-ai-program-card', [
+            'target' => 'workout',
+            'program' => $activeWorkoutProgram,
+            'profileUrl' => $programHistoryUrl,
+            'locale' => $locale,
+            'summary' => $activeWorkoutProgramSummary,
+        ])
+    @else
+        <div class="eg-mission-pro-banner d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+            <div>
+                <strong>{{ __('missions.ai_workout') }}</strong>
+                <p class="small mb-0 eg-text-muted">
+                    {{ $canAiWorkout ? __('missions.ai_workout_pro_hint') : __('missions.pro_hint') }}
+                </p>
+            </div>
+            @if ($canAiWorkout)
+                <button type="button" class="btn btn-sm btn-primary" wire:click="openAiWorkoutGenerator" wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="openAiWorkoutGenerator">{{ __('missions.ai_generate_workout_cta') }}</span>
+                    <span wire:loading wire:target="openAiWorkoutGenerator">{{ __('missions.ai_generating') }}</span>
+                </button>
+            @else
+                <a href="{{ route('pricing', ['locale' => app()->getLocale()]) }}" class="btn btn-sm btn-warning" wire:navigate>
+                    {{ __('missions.pro_upgrade_cta') }}
+                </a>
+            @endif
         </div>
-        <button type="button" class="btn btn-sm btn-warning" disabled>{{ __('missions.pro_cta') }}</button>
-    </div>
+    @endif
 @endif
 
 <div class="eg-mission-block mb-4">

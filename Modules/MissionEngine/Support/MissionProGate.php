@@ -12,7 +12,7 @@ final class MissionProGate
             return false;
         }
 
-        return $user->isAdmin() || $user->isPro();
+        return $user->isAdmin() || $user->hasActiveSubscription() || $user->isPro();
     }
 
     /**

@@ -23,6 +23,12 @@
                 <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
                 {{ __('missions.saved') }}
             </div>
+            @if (session('mission_ai_status'))
+                <div class="alert alert-success mb-0 mt-2 py-2 px-3 small" role="status">
+                    <i class="fa-solid fa-circle-check me-1" aria-hidden="true"></i>
+                    {{ session('mission_ai_status') }}
+                </div>
+            @endif
             <div class="eg-mission-log-date">
                 <label class="form-label mb-1" for="mission-log-date">{{ __('missions.log_date') }}</label>
                 <input type="date" id="mission-log-date" class="form-control" wire:model.live="logDate">
@@ -71,4 +77,6 @@
             </div>
         </div>
     </section>
+
+    @include('livewire.missions.partials.workspace-ai-questionnaire')
 </div>

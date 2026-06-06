@@ -1,10 +1,73 @@
 @if ($requiresProMeal)
-    <div class="eg-mission-pro-banner d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-        <div>
-            <strong>{{ __('missions.ai_meal') }}</strong>
-            <p class="small mb-0 eg-text-muted">{{ __('missions.nutrition_ai_hint') }}</p>
+    @if ($hasUserMealProgram)
+        @include('livewire.missions.partials.workspace-ai-program-card', [
+            'target' => 'meal',
+            'program' => $activeMealProgram,
+            'profileUrl' => $programHistoryUrl,
+            'locale' => $locale,
+            'summary' => $activeMealProgramSummary,
+        ])
+    @else
+        <div class="eg-mission-pro-banner d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+            <div>
+                <strong>{{ __('missions.ai_meal') }}</strong>
+                <p class="small mb-0 eg-text-muted">
+                    {{ $canAiMeal ? __('missions.ai_meal_pro_hint') : __('missions.nutrition_ai_hint') }}
+                </p>
+            </div>
+            @if ($canAiMeal)
+                <button type="button" class="btn btn-sm btn-primary" wire:click="openAiMealGenerator" wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="openAiMealGenerator">{{ __('missions.ai_generate_meal_cta') }}</span>
+                    <span wire:loading wire:target="openAiMealGenerator">{{ __('missions.ai_generating') }}</span>
+                </button>
+            @else
+                <a href="{{ route('pricing', ['locale' => app()->getLocale()]) }}" class="btn btn-sm btn-warning" wire:navigate>
+                    {{ __('missions.pro_upgrade_cta') }}
+                </a>
+            @endif
         </div>
-        <button type="button" class="btn btn-sm btn-warning" disabled>{{ __('missions.pro_cta') }}</button>
+    @endif
+@endif
+
+@if ($mealPlanNotes !== '' || $activeMealProgram !== null)
+    <div class="eg-mission-block mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <div>
+                <h2 class="eg-mission-block-title mb-1">{{ __('missions.ai_meal_plan_title') }}</h2>
+                <p class="eg-text-muted small mb-0">{{ __('missions.ai_meal_plan_help') }}</p>
+            </div>
+            @if ($activeMealProgram)
+                <a href="{{ route('profile.program.show', ['uuid' => $activeMealProgram->uuid]) }}" class="btn btn-sm btn-outline-light" wire:navigate>
+                    {{ __('missions.ai_program_view_full') }}
+                </a>
+            @endif
+        </div>
+
+        @if ($mealPlanNotes !== '')
+            <div class="eg-mission-program-notes">{!! nl2br(e($mealPlanNotes)) !!}</div>
+        @endif
+
+        @if ($activeMealProgram)
+            @if ($activeMealProgram->metabolic_target_calories)
+                <p class="small fw-semibold mt-3 mb-2">
+                    {{ __('missions.ai_meal_summary_macros', [
+                        'calories' => $activeMealProgram->metabolic_target_calories,
+                        'protein' => $activeMealProgram->metabolic_protein_grams ?? 0,
+                    ]) }}
+                </p>
+            @endif
+            @foreach ($activeMealProgram->nutritionDays->take(3) as $day)
+                <div class="eg-mission-meal-card mb-2">
+                    <p class="small fw-semibold mb-1">{{ __('missions.ai_meal_day_line', [
+                        'day' => $day->day_index,
+                        'meals' => $day->meals->map(fn ($meal) => $meal->name.' ('.$meal->calories.' '.__('missions.kcal').')')->implode(' · '),
+                    ]) }}</p>
+                </div>
+            @endforeach
+            @if ($activeMealProgram->nutritionDays->count() > 3)
+                <p class="small eg-text-muted mb-0">{{ __('missions.ai_program_more_days', ['count' => $activeMealProgram->nutritionDays->count() - 3]) }}</p>
+            @endif
+        @endif
     </div>
 @endif
 
