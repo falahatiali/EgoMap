@@ -1,0 +1,11 @@
+{
+    "name": "AetherEngine",
+    "alias": "aetherengine",
+    "description": "Personalized gym and nutrition program generation engine.",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\AetherEngine\\Providers\\AetherEngineServiceProvider"
+    ],
+    "files": []
+}

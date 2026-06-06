@@ -1,0 +1,28 @@
+{
+    "name": "egomap/aetherengine",
+    "description": "Hyper-personalized workout and nutrition program engine.",
+    "authors": [
+        {
+            "name": "EgoMap",
+            "email": "hello@egomap.test"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\AetherEngine\\": "",
+            "Modules\\AetherEngine\\Database\\Factories\\": "database/factories/",
+            "Modules\\AetherEngine\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\AetherEngine\\Tests\\": "tests/"
+        }
+    }
+}

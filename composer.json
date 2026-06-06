@@ -44,7 +44,10 @@
             "Modules\\MissionEngine\\Database\\Seeders\\": "Modules/MissionEngine/database/seeders/",
             "Modules\\GamificationEngine\\": "Modules/GamificationEngine/",
             "Modules\\GamificationEngine\\Database\\Factories\\": "Modules/GamificationEngine/database/factories/",
-            "Modules\\GamificationEngine\\Database\\Seeders\\": "Modules/GamificationEngine/database/seeders/"
+            "Modules\\GamificationEngine\\Database\\Seeders\\": "Modules/GamificationEngine/database/seeders/",
+            "Modules\\AetherEngine\\": "Modules/AetherEngine/",
+            "Modules\\AetherEngine\\Database\\Factories\\": "Modules/AetherEngine/database/factories/",
+            "Modules\\AetherEngine\\Database\\Seeders\\": "Modules/AetherEngine/database/seeders/"
         },
         "files": [
             "app/helpers.php"
@@ -54,7 +57,8 @@
         "psr-4": {
             "Tests\\": "tests/",
             "Modules\\MissionEngine\\Tests\\": "Modules/MissionEngine/tests/",
-            "Modules\\GamificationEngine\\Tests\\": "Modules/GamificationEngine/tests/"
+            "Modules\\GamificationEngine\\Tests\\": "Modules/GamificationEngine/tests/",
+            "Modules\\AetherEngine\\Tests\\": "Modules/AetherEngine/tests/"
         }
     },
     "scripts": {
