@@ -4,11 +4,13 @@ namespace App\Providers;
 
 use App\Listeners\ClaimGuestNoContactProtocols;
 use App\Listeners\ClaimGuestQuizSessions;
+use App\Listeners\RedirectToIntendedPricingPlan;
 use App\Listeners\SyncProRoleFromStripeWebhook;
 use App\Listeners\SyncRecoveryJourneyOnLogin;
 use App\Services\Pdf\Drivers\RtlAwareDomPdfDriver;
 use App\Support\LocaleConfig;
 use App\Support\TranslationBundle;
+use App\View\Composers\NavProfileComposer;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Support\Facades\Event;
@@ -62,8 +64,15 @@ class AppServiceProvider extends ServiceProvider
             $view->with('i18nBundle', TranslationBundle::forGroups(['common', 'nav', 'home', 'landing', 'no_contact', 'recovery', 'profile', 'missions', 'pricing']));
         });
 
+        View::composer([
+            'partials.navbar',
+            'partials.navbar-guided',
+            'partials.navbar-protocol',
+        ], NavProfileComposer::class);
+
         Event::listen(Login::class, ClaimGuestQuizSessions::class);
         Event::listen(Login::class, ClaimGuestNoContactProtocols::class);
+        Event::listen(Login::class, RedirectToIntendedPricingPlan::class);
         Event::listen(Login::class, SyncRecoveryJourneyOnLogin::class);
         Event::listen(WebhookHandled::class, SyncProRoleFromStripeWebhook::class);
     }

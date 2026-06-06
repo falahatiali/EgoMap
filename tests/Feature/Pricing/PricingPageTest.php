@@ -89,25 +89,43 @@ class PricingPageTest extends TestCase
         $this->assertSame($plan->id, session('pricing_intended_plan_id'));
     }
 
-    public function test_subscribed_user_sees_active_subscription_notice(): void
+    public function test_subscribed_user_sees_current_plan_and_upgrade_options(): void
     {
         $user = User::factory()->create();
+
+        $monthly = StripePlan::factory()->create([
+            'interval' => 'month',
+            'interval_count' => 1,
+            'active' => true,
+            'is_recurring' => true,
+        ]);
+
+        StripePlan::factory()->create([
+            'interval' => 'year',
+            'interval_count' => 1,
+            'active' => true,
+            'is_recurring' => true,
+        ]);
 
         $user->subscriptions()->create([
             'type' => 'default',
             'stripe_id' => 'sub_test_pricing',
             'stripe_status' => 'active',
+            'stripe_price' => $monthly->stripe_price_id,
         ]);
 
-        StripePlan::factory()->create([
-            'active' => true,
-            'is_recurring' => true,
+        $user->subscriptions()->first()->items()->create([
+            'stripe_id' => 'si_test_pricing',
+            'stripe_product' => $monthly->stripe_product_id,
+            'stripe_price' => $monthly->stripe_price_id,
         ]);
 
         $this->actingAs($user)
             ->get(route('pricing', ['locale' => 'en']))
             ->assertOk()
-            ->assertSee(__('pricing.already_subscribed', [], 'en'));
+            ->assertSee(__('pricing.active_plan', ['plan' => $monthly->billingPeriodName('en')], 'en'))
+            ->assertSee(__('pricing.current_plan', [], 'en'))
+            ->assertSee(__('pricing.upgrade_plan', [], 'en'));
     }
 
     public function test_super_admin_without_subscription_can_still_checkout(): void

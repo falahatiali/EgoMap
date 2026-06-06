@@ -24,7 +24,31 @@
                 <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
                 <div>
                     <strong>{{ __('pricing.checkout_success_title') }}</strong>
-                    <p class="mb-0">{{ __('pricing.checkout_success_body') }}</p>
+                    <p class="mb-0">
+                        @if ($currentPlan)
+                            {{ __('pricing.checkout_success_with_plan', ['plan' => $currentPlan->billingPeriodName($locale)]) }}
+                        @else
+                            {{ __('pricing.checkout_success_body') }}
+                        @endif
+                    </p>
+                </div>
+            </div>
+        </section>
+    @endif
+
+    @if ($planChanged)
+        <section class="container pb-3">
+            <div class="eg-pricing-alert eg-pricing-alert--success" role="status">
+                <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                <div>
+                    <strong>{{ __('pricing.plan_changed_title') }}</strong>
+                    <p class="mb-0">
+                        @if ($currentPlan)
+                            {{ __('pricing.plan_changed_body', ['plan' => $currentPlan->billingPeriodName($locale)]) }}
+                        @else
+                            {{ __('pricing.plan_changed_body_generic') }}
+                        @endif
+                    </p>
                 </div>
             </div>
         </section>
@@ -35,6 +59,15 @@
             <div class="eg-pricing-alert" role="status">
                 <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
                 <p class="mb-0">{{ __('pricing.checkout_cancelled') }}</p>
+            </div>
+        </section>
+    @endif
+
+    @if ($subscribeError)
+        <section class="container pb-3">
+            <div class="eg-pricing-alert eg-pricing-alert--error" role="alert">
+                <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+                <p class="mb-0">{{ $subscribeError }}</p>
             </div>
         </section>
     @endif
@@ -53,7 +86,13 @@
             <div class="eg-pricing-alert eg-pricing-alert--success" role="status">
                 <i class="fa-solid fa-crown" aria-hidden="true"></i>
                 <div class="d-flex flex-wrap align-items-center gap-3">
-                    <span>{{ __('pricing.already_subscribed') }}</span>
+                    <span>
+                        @if ($currentPlan)
+                            {{ __('pricing.active_plan', ['plan' => $currentPlan->billingPeriodName($locale)]) }}
+                        @else
+                            {{ __('pricing.already_subscribed') }}
+                        @endif
+                    </span>
                     <a href="{{ route('profile', ['locale' => $locale]) }}" class="btn btn-sm eg-btn-ghost" wire:navigate>
                         {{ __('pricing.already_pro_cta') }}
                     </a>
@@ -104,13 +143,18 @@
                 @else
                     <div class="eg-pro-tiers">
                         @foreach ($plans as $plan)
+                            @php($relation = $planRelations[$plan->id] ?? null)
+
                             <article @class([
                                 'eg-pro-tier',
-                                'eg-pro-tier--featured' => $plan->isQuarterly(),
-                                'eg-pro-tier--value' => $plan->isYearly(),
+                                'eg-pro-tier--featured' => $plan->isQuarterly() && $relation !== 'current',
+                                'eg-pro-tier--value' => $plan->isYearly() && $relation !== 'current',
+                                'eg-pro-tier--current' => $relation === 'current',
                             ])>
                                 <div class="eg-pro-tier__badge-slot">
-                                    @if ($plan->isQuarterly())
+                                    @if ($relation === 'current')
+                                        <span class="eg-pricing-badge eg-pricing-badge--current">{{ __('pricing.current_plan_badge') }}</span>
+                                    @elseif ($plan->isQuarterly())
                                         <span class="eg-pricing-badge">{{ __('pricing.pro_badge') }}</span>
                                     @elseif ($plan->isYearly() && $yearlySavingsPercent)
                                         <span class="eg-pricing-badge">{{ __('pricing.yearly_badge') }}</span>
@@ -132,19 +176,31 @@
                                 </p>
 
                                 @auth
-                                    @if ($hasActiveSubscription)
-                                        <button type="button" class="btn eg-btn-primary w-100" disabled>
-                                            {{ __('pricing.already_subscribed') }}
+                                    @if ($relation === 'current')
+                                        <button type="button" class="btn eg-btn-ghost w-100" disabled>
+                                            {{ __('pricing.current_plan') }}
                                         </button>
                                     @else
                                         <button
                                             type="button"
-                                            class="btn eg-btn-primary w-100"
+                                            @class([
+                                                'btn w-100',
+                                                'eg-btn-primary' => $relation !== 'downgrade',
+                                                'eg-btn-ghost' => $relation === 'downgrade',
+                                            ])
                                             wire:click="subscribe({{ $plan->id }})"
                                             wire:loading.attr="disabled"
                                             wire:target="subscribe"
                                         >
-                                            <span wire:loading.remove wire:target="subscribe">{{ __('pricing.pro_cta') }}</span>
+                                            <span wire:loading.remove wire:target="subscribe">
+                                                @if ($relation === 'upgrade')
+                                                    {{ __('pricing.upgrade_plan') }}
+                                                @elseif ($relation === 'downgrade')
+                                                    {{ __('pricing.downgrade_plan') }}
+                                                @else
+                                                    {{ __('pricing.pro_cta') }}
+                                                @endif
+                                            </span>
                                             <span wire:loading wire:target="subscribe">…</span>
                                         </button>
                                     @endif

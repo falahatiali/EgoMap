@@ -7,11 +7,12 @@ use App\Models\User;
 use App\Services\Billing\ProSubscriptionService;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Cashier\Subscription;
+use Tests\Support\CreatesSubscriptions;
 use Tests\TestCase;
 
 class StripeSubscriptionTest extends TestCase
 {
+    use CreatesSubscriptions;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -26,7 +27,7 @@ class StripeSubscriptionTest extends TestCase
         $user = User::factory()->create();
         $user->assignRole(RoleName::Member->value);
 
-        $this->createActiveSubscription($user);
+        $this->createSubscription($user);
 
         $this->assertTrue($user->fresh()->isPro());
     }
@@ -48,7 +49,7 @@ class StripeSubscriptionTest extends TestCase
 
         $service = app(ProSubscriptionService::class);
 
-        $this->createActiveSubscription($user);
+        $this->createSubscription($user);
         $service->syncProRole($user->fresh());
 
         $this->assertTrue($user->fresh()->hasRole(RoleName::Pro->value));
@@ -62,14 +63,11 @@ class StripeSubscriptionTest extends TestCase
     public function test_cashier_webhook_route_is_registered(): void
     {
         $this->assertNotNull(route('cashier.webhook'));
+        $this->assertStringContainsString('/stripe/webhook', route('cashier.webhook'));
     }
 
-    private function createActiveSubscription(User $user): Subscription
+    public function test_cashier_payment_route_is_registered(): void
     {
-        return $user->subscriptions()->create([
-            'type' => 'default',
-            'stripe_id' => 'sub_test_'.fake()->unique()->uuid(),
-            'stripe_status' => 'active',
-        ]);
+        $this->assertNotNull(route('cashier.payment', ['id' => 'cs_test']));
     }
 }

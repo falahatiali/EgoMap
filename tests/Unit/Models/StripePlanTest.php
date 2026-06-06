@@ -44,6 +44,22 @@ class StripePlanTest extends TestCase
         $this->assertSame('Yearly', $yearly->billingPeriodName('en'));
     }
 
+    public function test_compare_tier_to_orders_monthly_before_yearly(): void
+    {
+        $monthly = StripePlan::factory()->make([
+            'interval' => 'month',
+            'interval_count' => 1,
+        ]);
+
+        $yearly = StripePlan::factory()->make([
+            'interval' => 'year',
+            'interval_count' => 1,
+        ]);
+
+        $this->assertLessThan(0, $monthly->compareTierTo($yearly));
+        $this->assertGreaterThan(0, $yearly->compareTierTo($monthly));
+    }
+
     public function test_ordered_for_display_sorts_monthly_quarterly_yearly(): void
     {
         $yearly = StripePlan::factory()->create(['interval' => 'year', 'interval_count' => 1, 'unit_amount' => 49900]);

@@ -3,14 +3,17 @@
 namespace App\Livewire\Pricing;
 
 use App\Models\StripePlan;
+use App\Models\User;
+use App\Services\Billing\CheckoutReturnSyncService;
+use App\Services\Billing\PlanSelectionOutcome;
 use App\Services\Billing\SubscriptionCheckoutService;
+use App\Services\Billing\SubscriptionPlanResolver;
 use App\Support\LocaleConfig;
 use App\Support\RebootProtocolQuiz;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
-use RuntimeException;
 
 #[Layout('layouts.app')]
 class Show extends Component
@@ -21,7 +24,11 @@ class Show extends Component
 
     public bool $checkoutCancelled = false;
 
-    public function mount(): void
+    public bool $planChanged = false;
+
+    public ?string $subscribeError = null;
+
+    public function mount(CheckoutReturnSyncService $checkoutReturnSync): void
     {
         $coupon = request()->query('coupon');
 
@@ -31,10 +38,36 @@ class Show extends Component
 
         $this->checkoutSuccess = request()->query('checkout') === 'success';
         $this->checkoutCancelled = request()->query('checkout') === 'cancelled';
+
+        $user = auth()->user();
+
+        if ($this->checkoutSuccess && $user !== null) {
+            $sessionId = request()->query('session_id');
+
+            if (is_string($sessionId) && $sessionId !== '') {
+                $checkoutReturnSync->syncFromCheckoutSession($user, $sessionId);
+            }
+        }
+
+        $resumePlan = request()->query('resume_plan');
+
+        if (is_numeric($resumePlan) && $user !== null) {
+            session()->forget('pricing_intended_plan_id');
+
+            if (! $user->hasActiveSubscription()) {
+                $this->subscribe((int) $resumePlan, app(SubscriptionCheckoutService::class));
+            }
+        }
     }
 
-    public function subscribe(int $planId, SubscriptionCheckoutService $checkout): mixed
-    {
+    public function subscribe(
+        int $planId,
+        SubscriptionCheckoutService $checkout,
+    ): mixed {
+        $this->subscribeError = null;
+        $this->planChanged = false;
+
+        /** @var User $user */
         $user = auth()->user();
 
         if ($user === null) {
@@ -43,28 +76,39 @@ class Show extends Component
             return $this->redirect(route('login', LocaleConfig::routeParameters()), navigate: true);
         }
 
-        if ($user->hasActiveSubscription()) {
-            $this->dispatch('pricing-already-subscribed');
-
-            return null;
-        }
-
         $plan = StripePlan::query()
             ->where('active', true)
             ->findOrFail($planId);
 
-        try {
-            return $checkout->checkout($user, $plan, $this->coupon);
-        } catch (RuntimeException) {
-            $this->dispatch('pricing-already-pro');
+        $outcome = $checkout->selectPlan($user, $plan, $this->coupon);
 
-            return null;
-        }
+        return $this->applyPlanSelectionOutcome($outcome);
+    }
+
+    private function applyPlanSelectionOutcome(PlanSelectionOutcome $outcome): mixed
+    {
+        return match ($outcome->type) {
+            PlanSelectionOutcome::Redirect => $this->redirect($outcome->url),
+            PlanSelectionOutcome::Changed => tap(null, function (): void {
+                $this->planChanged = true;
+                $this->dispatch('pricing-plan-changed');
+            }),
+            PlanSelectionOutcome::Current => tap(null, function (): void {
+                $this->subscribeError = __('pricing.error_current_plan');
+                $this->dispatch('pricing-current-plan');
+            }),
+            PlanSelectionOutcome::Error => tap(null, function () use ($outcome): void {
+                $this->subscribeError = $outcome->message ?? __('pricing.error_checkout_failed');
+            }),
+            default => null,
+        };
     }
 
     public function render(): View
     {
         $locale = app()->getLocale();
+        $user = auth()->user();
+        $planResolver = app(SubscriptionPlanResolver::class);
 
         /** @var Collection<int, StripePlan> $plans */
         $plans = StripePlan::query()
@@ -75,13 +119,20 @@ class Show extends Component
 
         $monthlyPlan = $plans->first(fn (StripePlan $plan): bool => $plan->isMonthly());
         $yearlyPlan = $plans->first(fn (StripePlan $plan): bool => $plan->isYearly());
+        $currentPlan = $user !== null ? $planResolver->currentPlanFor($user) : null;
+
+        $planRelations = $plans->mapWithKeys(fn (StripePlan $plan): array => [
+            $plan->id => $planResolver->planRelation($plan, $currentPlan),
+        ]);
 
         return view('livewire.pricing.show', [
             'locale' => $locale,
             'plans' => $plans,
             'proDescription' => $plans->first()?->description ?: __('pricing.pro_description'),
             'yearlySavingsPercent' => $this->yearlySavingsPercent($monthlyPlan, $yearlyPlan),
-            'hasActiveSubscription' => auth()->user()?->hasActiveSubscription() ?? false,
+            'hasActiveSubscription' => $user?->hasActiveSubscription() ?? false,
+            'currentPlan' => $currentPlan,
+            'planRelations' => $planRelations,
             'quizStartUrl' => route('quiz.start', [
                 'slug' => RebootProtocolQuiz::SLUG,
                 'locale' => $locale,
