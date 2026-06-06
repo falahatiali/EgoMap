@@ -7,6 +7,7 @@ use App\Models\QuizSession;
 use App\Models\User;
 use App\Services\Auth\UserSessionService;
 use App\Services\Missions\MissionNavigationService;
+use App\Services\Profile\UserAetherProgramHistoryService;
 use App\Services\Profile\UserQuizHistoryService;
 use App\Services\Recovery\RecoveryJourneyService;
 use App\Support\LocaleConfig;
@@ -93,6 +94,7 @@ class Show extends Component
 
     public function render(
         UserQuizHistoryService $historyService,
+        UserAetherProgramHistoryService $programHistoryService,
         RecoveryJourneyService $journeyService,
         MissionNavigationService $missionNavigationService,
     ): View {
@@ -122,9 +124,12 @@ class Show extends Component
             $rewardsPreview = app(GamificationEngine::class)->walletFor($this->user, null);
         }
 
+        $programRecords = $programHistoryService->recordsForUser($this->user, $locale);
+
         return view('livewire.profile.show', [
             'locale' => $locale,
             'rewardsPreview' => $rewardsPreview,
+            'programRecords' => $programRecords,
             'missionNav' => $missionNavigationService->forUser($this->user, $locale),
             'missionEnrollments' => $missionEnrollments,
             'records' => $records,

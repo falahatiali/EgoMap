@@ -10,6 +10,7 @@ use App\Livewire\Missions\Show as MissionShow;
 use App\Livewire\Missions\Workspace as MissionWorkspace;
 use App\Livewire\NoContact\Show as NoContactShow;
 use App\Livewire\Pricing\Show as PricingShow;
+use App\Livewire\Profile\ProgramShow;
 use App\Livewire\Profile\Rewards as ProfileRewards;
 use App\Livewire\Profile\Show;
 use App\Livewire\Profile\TestShow;
@@ -72,6 +73,7 @@ Route::prefix('{locale}')
         Route::livewire('/profile', Show::class)->middleware('auth')->name('profile');
         Route::livewire('/profile/rewards', ProfileRewards::class)->middleware('auth')->name('profile.rewards');
         Route::livewire('/profile/tests/{uuid}', TestShow::class)->middleware('auth')->name('profile.test.show');
+        Route::livewire('/profile/programs/{uuid}', ProgramShow::class)->middleware('auth')->name('profile.program.show');
 
         Route::middleware('auth')->prefix('missions')->name('missions.')->group(function (): void {
             Route::livewire('/', MissionsCatalog::class)->name('catalog');

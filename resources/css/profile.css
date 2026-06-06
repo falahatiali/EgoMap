@@ -478,6 +478,107 @@
     font-size: 1.35rem;
 }
 
+.eg-profile-programs-grid {
+    display: grid;
+    gap: var(--eg-space-lg);
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.eg-profile-program-card {
+    padding: var(--eg-space-lg) var(--eg-space-xl);
+    border-radius: var(--eg-radius-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--eg-space-sm);
+    min-height: 8.5rem;
+    border: 1px solid var(--eg-border);
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.eg-profile-program-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(96, 165, 250, 0.35);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+}
+
+.eg-profile-program-card-top {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--eg-space-md);
+}
+
+.eg-profile-program-card-icon {
+    flex-shrink: 0;
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--eg-radius);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(59, 130, 246, 0.14);
+    color: #60a5fa;
+    font-size: 1.2rem;
+}
+
+.eg-profile-program-card-title {
+    font-family: var(--eg-font-display);
+    font-size: 1.1rem;
+    font-weight: 600;
+    line-height: var(--eg-line-height-tight);
+    margin: 0 0 0.25rem;
+}
+
+.eg-profile-program-card-meta {
+    margin-top: auto;
+}
+
+.eg-profile-program-card-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #60a5fa;
+}
+
+.eg-profile-program-card:hover .eg-profile-program-card-cta {
+    color: #93c5fd;
+}
+
+.eg-profile-programs-empty {
+    text-align: center;
+    padding: var(--eg-space-xl) var(--eg-space-lg);
+    border-radius: var(--eg-radius-lg);
+    border: 1px dashed rgba(96, 165, 250, 0.25);
+}
+
+.eg-profile-programs-empty-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    margin-bottom: var(--eg-space-md);
+    border-radius: var(--eg-radius);
+    background: rgba(59, 130, 246, 0.14);
+    color: #60a5fa;
+    font-size: 1.35rem;
+}
+
+.eg-profile-program-hero,
+.eg-profile-program-block {
+    padding: var(--eg-space-lg) var(--eg-space-xl);
+    border-radius: var(--eg-radius-lg);
+    border: 1px solid var(--eg-border);
+}
+
+.eg-profile-program-day-card {
+    padding: var(--eg-space-md);
+    border-radius: var(--eg-radius);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
 .eg-profile-filters {
     display: flex;
     flex-wrap: wrap;

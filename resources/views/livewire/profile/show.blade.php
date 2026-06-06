@@ -151,6 +151,8 @@
         @endif
     </section>
 
+    @include('livewire.profile.partials.aether-programs')
+
     @if ($showQuizHistory)
         @include('livewire.profile.partials.quiz-history')
     @endif
