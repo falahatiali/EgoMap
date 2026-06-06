@@ -27,6 +27,7 @@ use App\Livewire\Admin\Roles\Edit as RolesEdit;
 use App\Livewire\Admin\Roles\Index as RolesIndex;
 use App\Livewire\Admin\Sessions\Index as SessionsIndex;
 use App\Livewire\Admin\Sessions\Show as SessionsShow;
+use App\Livewire\Admin\Subscriptions\Index as SubscriptionsIndex;
 use App\Livewire\Admin\Users\Edit as UsersEdit;
 use App\Livewire\Admin\Users\Index as UsersIndex;
 use Illuminate\Support\Facades\Route;
@@ -36,6 +37,7 @@ Route::livewire('/', Dashboard::class)->name('dashboard');
 Route::middleware('permission:'.Permission::AdminUsersManage->value)->group(function (): void {
     Route::livewire('/users', UsersIndex::class)->name('users.index');
     Route::livewire('/users/{user}', UsersEdit::class)->name('users.edit');
+    Route::livewire('/subscriptions', SubscriptionsIndex::class)->name('subscriptions.index');
 });
 
 Route::middleware('permission:'.Permission::AdminQuizzesManage->value)->group(function (): void {

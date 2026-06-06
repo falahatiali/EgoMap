@@ -42,6 +42,15 @@ final class AdminNavigation
                 'permission' => Permission::AdminUsersManage->value,
             ],
             [
+                'key' => 'subscriptions',
+                'label' => __('admin.nav.subscriptions'),
+                'icon' => 'fa-crown',
+                'route' => 'admin.subscriptions.index',
+                'enabled' => true,
+                'badge' => null,
+                'permission' => Permission::AdminUsersManage->value,
+            ],
+            [
                 'key' => 'quizzes',
                 'label' => __('admin.nav.quizzes'),
                 'icon' => 'fa-flask',

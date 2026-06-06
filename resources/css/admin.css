@@ -506,6 +506,13 @@
     color: var(--eg-slate-400);
 }
 
+.eg-admin-tag--plan {
+    background: rgba(99, 102, 241, 0.14);
+    color: var(--eg-accent-bright);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
 .eg-admin-status {
     display: inline-block;
     padding: 0.2rem 0.55rem;
