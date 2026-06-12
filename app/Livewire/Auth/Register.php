@@ -2,11 +2,9 @@
 
 namespace App\Livewire\Auth;
 
-use App\Enums\RoleName;
-use App\Models\User;
 use App\Services\Auth\EmailVerificationService;
+use App\Services\Auth\UserRegistrationService;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -18,20 +16,16 @@ class Register extends Component
 
     public string $password = '';
 
-    public function register(EmailVerificationService $verificationService): void
-    {
+    public function register(
+        UserRegistrationService $registration,
+        EmailVerificationService $verificationService,
+    ): void {
         $validated = $this->validate([
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', Password::defaults()],
         ]);
 
-        $user = User::query()->create([
-            'name' => Str::before($validated['email'], '@'),
-            'email' => $validated['email'],
-            'password' => $validated['password'],
-        ]);
-
-        $user->assignRole(RoleName::Member->value);
+        $user = $registration->register($validated['email'], $validated['password']);
 
         $verificationService->generateAndSend($user);
 

@@ -15,6 +15,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Ai\Concerns\HasConversations;
 use Laravel\Cashier\Billable;
+use Laravel\Sanctum\HasApiTokens;
 use Modules\MissionEngine\Models\MissionEnrollment;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -36,7 +37,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use Billable, HasConversations, HasFactory, HasRoles, InteractsWithEgoMapPermissions, Notifiable;
+    use Billable, HasApiTokens, HasConversations, HasFactory, HasRoles, InteractsWithEgoMapPermissions, Notifiable;
 
     /**
      * Get the attributes that should be cast.

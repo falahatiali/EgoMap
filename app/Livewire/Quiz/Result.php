@@ -3,9 +3,7 @@
 namespace App\Livewire\Quiz;
 
 use App\Models\QuizSession;
-use App\Services\Pdf\Callbacks\MarkQuizSessionReportDelivered;
-use App\Services\Pdf\Definitions\QuizResultPdfDefinitionFactory;
-use App\Services\Pdf\PdfDeliveryService;
+use App\Services\Quiz\QuizResultDeliveryService;
 use App\Services\Quiz\QuizSessionClaimService;
 use App\Services\Quiz\QuizSessionService;
 use App\Support\LocaleConfig;
@@ -66,23 +64,13 @@ class Result extends Component
         );
     }
 
-    public function sendFullReport(QuizSessionService $quizSessionService, PdfDeliveryService $pdfDelivery): void
+    public function sendFullReport(QuizResultDeliveryService $delivery): void
     {
         $this->validate([
             'email' => ['required', 'email', 'max:255'],
         ]);
 
-        $quizSessionService->attachEmail($this->session, $this->email);
-
-        $locale = LocaleConfig::resolve($this->session->locale ?? app()->getLocale());
-
-        $pdfDelivery->queueToEmail(
-            recipientEmail: $this->email,
-            document: QuizResultPdfDefinitionFactory::fromSession($this->session->fresh(['result.outcomeProfile', 'quiz']), $locale),
-            mail: QuizResultPdfDefinitionFactory::mailEnvelopeForSession($this->session, $locale),
-            afterDeliveredCallback: MarkQuizSessionReportDelivered::class,
-            afterDeliveredPayload: ['session_uuid' => $this->session->uuid],
-        );
+        $delivery->queueEmailReport($this->session, $this->email);
 
         $this->emailSent = true;
     }

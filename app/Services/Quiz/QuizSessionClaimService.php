@@ -34,9 +34,9 @@ class QuizSessionClaimService
         return true;
     }
 
-    public function claimForUser(User $user): int
+    public function claimForUser(User $user, ?string $guestToken = null): int
     {
-        $guestToken = request()->cookie('egomap_guest');
+        $guestToken ??= request()->cookie('egomap_guest');
         $uuids = session('guest_quiz_uuids', []);
 
         $claimed = QuizSession::query()
