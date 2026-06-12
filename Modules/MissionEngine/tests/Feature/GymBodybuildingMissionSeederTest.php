@@ -25,7 +25,9 @@ class GymBodybuildingMissionSeederTest extends TestCase
         $this->assertNotNull($template);
         $this->assertTrue($template->isPublished());
         $this->assertSame('Gym & Bodybuilding', $template->getTranslation('title', 'en', true));
-        $this->assertCount(2, $template->phases);
+        $this->assertCount(4, $template->phases);
+        $this->assertSame(2, $template->version);
+        $this->assertSame('aether', $template->meta['engine_module'] ?? null);
 
         $enabledKeys = $template->capabilities
             ->where('is_enabled', true)
@@ -34,6 +36,6 @@ class GymBodybuildingMissionSeederTest extends TestCase
 
         $this->assertContains(MissionCapabilityKey::Schedule->value, $enabledKeys);
         $this->assertContains(MissionCapabilityKey::Measurement->value, $enabledKeys);
-        $this->assertTrue($template->fields()->where('field_key', 'workout_plan')->exists());
+        $this->assertTrue($template->fields()->where('field_key', 'gym_days')->exists());
     }
 }
