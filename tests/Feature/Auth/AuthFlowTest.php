@@ -45,7 +45,7 @@ class AuthFlowTest extends TestCase
         $this->assertNotNull($user->email_verification_expires_at);
         $this->assertTrue($user->hasRole('member'));
 
-        Mail::assertSent(EmailVerificationCodeMail::class, fn (EmailVerificationCodeMail $mail) => $mail->hasTo('newuser@example.com'));
+        Mail::assertQueued(EmailVerificationCodeMail::class, fn (EmailVerificationCodeMail $mail) => $mail->hasTo('newuser@example.com'));
 
         $this->assertSame($user->id, session('pending_verification_user_id'));
     }
@@ -99,7 +99,7 @@ class AuthFlowTest extends TestCase
 
         $this->assertFalse(Auth::check());
         $this->assertSame($user->id, session('pending_verification_user_id'));
-        Mail::assertSent(EmailVerificationCodeMail::class);
+        Mail::assertQueued(EmailVerificationCodeMail::class);
     }
 
     public function test_verified_user_can_login(): void
@@ -148,7 +148,7 @@ class AuthFlowTest extends TestCase
         Livewire::test(VerifyEmail::class)
             ->call('resendCode');
 
-        Mail::assertSent(EmailVerificationCodeMail::class);
+        Mail::assertQueued(EmailVerificationCodeMail::class);
 
         $user->refresh();
 

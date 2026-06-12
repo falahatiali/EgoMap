@@ -24,7 +24,7 @@ class EmailVerificationService
             'email_verification_expires_at' => now()->addMinutes(self::EXPIRY_MINUTES),
         ])->save();
 
-        Mail::to($user)->send(new EmailVerificationCodeMail($user, $code));
+        Mail::to($user)->queue(new EmailVerificationCodeMail($user, $code));
     }
 
     public function verify(User $user, string $code): void
