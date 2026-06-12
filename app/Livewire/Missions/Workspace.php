@@ -22,6 +22,7 @@ use Modules\AetherEngine\Enums\MotivationStyle;
 use Modules\AetherEngine\Enums\PrimaryGoal;
 use Modules\AetherEngine\Enums\SessionDuration;
 use Modules\AetherEngine\Enums\TrainingExperience;
+use Modules\AetherEngine\Enums\TrainingStylePreference;
 use Modules\AetherEngine\Enums\WorkoutTimePreference;
 use Modules\AetherEngine\Services\AetherProfileService;
 use Modules\MissionEngine\Enums\EquipmentCategory;
@@ -172,21 +173,18 @@ class Workspace extends Component
 
     public string $aiEquipment = 'full_gym';
 
-    public string $aiInjuriesLimitations = '';
-
     public string $aiDietaryPattern = 'omnivore';
 
     public string $aiCookingAbility = 'simple';
 
-    public string $aiAllergiesText = '';
-
-    public string $aiCoachingTone = 'technical';
+    public string $aiCoachingTone = 'gentle';
 
     public string $aiMotivationStyle = 'feeling_strong';
 
-    public string $aiFavoriteExercisesText = '';
+    public string $aiTrainingStyle = 'heavy_weights';
 
-    public string $aiDislikedExercisesText = '';
+    /** @var list<string> */
+    public array $aiInjuryTags = [];
 
     public bool $aiIsGenerating = false;
 
@@ -599,9 +597,33 @@ class Workspace extends Component
         $this->normalizeAiWizardInputs();
         $this->validate($this->aiWizardRulesForStep($this->aiWizardStep));
 
-        if ($this->aiWizardStep < 3) {
+        if ($this->aiWizardStep < 4) {
             $this->aiWizardStep++;
         }
+    }
+
+    public function selectAiTrainingDays(int $days): void
+    {
+        $this->aiTrainingDaysPerWeek = max(2, min(6, $days));
+    }
+
+    public function toggleAiInjury(string $tag): void
+    {
+        if ($tag === 'none') {
+            $this->aiInjuryTags = [];
+
+            return;
+        }
+
+        $tags = collect($this->aiInjuryTags);
+
+        if ($tags->contains($tag)) {
+            $this->aiInjuryTags = $tags->reject($tag)->values()->all();
+
+            return;
+        }
+
+        $this->aiInjuryTags = $tags->push($tag)->values()->all();
     }
 
     public function aiWizardBack(): void
@@ -714,8 +736,9 @@ class Workspace extends Component
             'equipmentCategories' => EquipmentCategory::cases(),
             'equipmentStatuses' => EquipmentStatus::cases(),
             'equipmentPresets' => $this->equipmentPresetDefinitions(),
-            'aiWizardSteps' => 3,
+            'aiWizardSteps' => 4,
             'aiFormOptions' => $this->aiFormOptions(),
+            'aiWizardReview' => $this->aiWizardReviewItems(),
             'hasUserWorkoutProgram' => $programHistory->hasAppliedTarget($user, 'workout'),
             'hasUserMealProgram' => $programHistory->hasAppliedTarget($user, 'meal'),
             'activeWorkoutProgram' => $activeWorkoutProgram = $programHistory->latestForTarget($user, 'workout'),
@@ -1000,14 +1023,12 @@ class Workspace extends Component
         $this->aiSessionDuration = (string) $defaults['session_duration'];
         $this->aiPreferredWorkoutTime = (string) $defaults['preferred_workout_time'];
         $this->aiEquipment = (string) $defaults['equipment'];
-        $this->aiInjuriesLimitations = (string) $defaults['injuries_limitations'];
         $this->aiDietaryPattern = (string) $defaults['dietary_pattern'];
         $this->aiCookingAbility = (string) $defaults['cooking_ability'];
-        $this->aiAllergiesText = (string) $defaults['allergies_text'];
         $this->aiCoachingTone = (string) $defaults['coaching_tone'];
         $this->aiMotivationStyle = (string) $defaults['motivation_style'];
-        $this->aiFavoriteExercisesText = (string) $defaults['favorite_exercises_text'];
-        $this->aiDislikedExercisesText = (string) $defaults['disliked_exercises_text'];
+        $this->aiTrainingStyle = (string) $defaults['training_style'];
+        $this->aiInjuryTags = is_array($defaults['injury_tags'] ?? null) ? $defaults['injury_tags'] : [];
         $this->showAiQuestionnaire = true;
         $this->resetErrorBag();
     }
@@ -1029,14 +1050,55 @@ class Workspace extends Component
             'session_duration' => $this->aiSessionDuration,
             'preferred_workout_time' => $this->aiPreferredWorkoutTime,
             'equipment' => $this->aiEquipment,
-            'injuries_limitations' => $this->aiInjuriesLimitations,
+            'injury_tags' => $this->aiInjuryTags,
             'dietary_pattern' => $this->aiDietaryPattern,
             'cooking_ability' => $this->aiCookingAbility,
-            'allergies_text' => $this->aiAllergiesText,
             'coaching_tone' => $this->aiCoachingTone,
             'motivation_style' => $this->aiMotivationStyle,
-            'favorite_exercises_text' => $this->aiFavoriteExercisesText,
-            'disliked_exercises_text' => $this->aiDislikedExercisesText,
+            'training_style' => $this->aiTrainingStyle,
+            'training_experience' => $this->deriveTrainingExperience(),
+        ];
+    }
+
+    private function deriveTrainingExperience(): string
+    {
+        return match ($this->aiTrainingStyle) {
+            TrainingStylePreference::HeavyWeights->value, TrainingStylePreference::Hiit->value => TrainingExperience::Intermediate->value,
+            default => TrainingExperience::Beginner->value,
+        };
+    }
+
+    /**
+     * @return list<array{label: string, value: string}>
+     */
+    private function aiWizardReviewItems(): array
+    {
+        $locale = app()->getLocale();
+        $options = $this->aiFormOptions();
+
+        $label = static function (array $items, string $value): string {
+            foreach ($items as $item) {
+                if ($item['value'] === $value) {
+                    return $item['label'];
+                }
+            }
+
+            return $value;
+        };
+
+        $injuryLabels = collect($this->aiInjuryTags)
+            ->map(fn (string $tag): string => $label($options['injuries'], $tag))
+            ->implode(' · ');
+
+        return [
+            ['label' => __('missions.ai_review_days', locale: $locale), 'value' => __('missions.ai_review_days_value', ['days' => eg_num($this->aiTrainingDaysPerWeek)], locale: $locale)],
+            ['label' => __('missions.ai_review_session', locale: $locale), 'value' => $label($options['session_durations'], $this->aiSessionDuration)],
+            ['label' => __('missions.ai_review_injuries', locale: $locale), 'value' => $injuryLabels !== '' ? $injuryLabels : __('missions.ai_injury_none', locale: $locale)],
+            ['label' => __('missions.ai_review_goal', locale: $locale), 'value' => $label($options['goals'], $this->aiPrimaryGoal)],
+            ['label' => __('missions.ai_review_equipment', locale: $locale), 'value' => $label($options['equipment'], $this->aiEquipment)],
+            ['label' => __('missions.ai_review_diet', locale: $locale), 'value' => $label($options['dietary'], $this->aiDietaryPattern)],
+            ['label' => __('missions.ai_review_style', locale: $locale), 'value' => $label($options['training_styles'], $this->aiTrainingStyle)],
+            ['label' => __('missions.ai_review_motivation', locale: $locale), 'value' => $label($options['motivation'], $this->aiMotivationStyle)],
         ];
     }
 
@@ -1047,38 +1109,30 @@ class Workspace extends Component
     {
         return match ($step) {
             1 => [
-                'aiAge' => ['required', 'integer', 'min:16', 'max:80'],
-                'aiGender' => $this->enumValueRule(Gender::class),
-                'aiHeightCm' => ['required', 'integer', 'min:130', 'max:230'],
-                'aiWeightKg' => ['required', 'numeric', 'min:35', 'max:250'],
-                'aiBodyFatPercent' => ['nullable', 'numeric', 'min:3', 'max:60'],
+                'aiTrainingDaysPerWeek' => ['required', 'integer', 'min:2', 'max:6'],
+                'aiSessionDuration' => $this->enumValueRule(SessionDuration::class),
+                'aiInjuryTags' => ['nullable', 'array'],
+                'aiInjuryTags.*' => ['string', Rule::in(['knee', 'lower_back', 'shoulder', 'wrist'])],
             ],
             2 => [
-                'aiTrainingExperience' => $this->enumValueRule(TrainingExperience::class),
                 'aiPrimaryGoal' => $this->enumValueRule(PrimaryGoal::class),
-                'aiTrainingDaysPerWeek' => ['required', 'integer', 'min:1', 'max:7'],
-                'aiSessionDuration' => $this->enumValueRule(SessionDuration::class),
-                'aiPreferredWorkoutTime' => $this->enumValueRule(WorkoutTimePreference::class),
                 'aiEquipment' => $this->enumValueRule(EquipmentAccess::class),
-                'aiInjuriesLimitations' => ['nullable', 'string', 'max:1000'],
-            ],
-            default => [
                 'aiDietaryPattern' => $this->enumValueRule(DietaryPattern::class),
-                'aiCookingAbility' => $this->enumValueRule(CookingAbility::class),
-                'aiAllergiesText' => ['nullable', 'string', 'max:500'],
-                'aiCoachingTone' => $this->enumValueRule(CoachingTone::class),
-                'aiMotivationStyle' => $this->enumValueRule(MotivationStyle::class),
-                'aiFavoriteExercisesText' => ['nullable', 'string', 'max:500'],
-                'aiDislikedExercisesText' => ['nullable', 'string', 'max:500'],
             ],
+            3 => [
+                'aiTrainingStyle' => $this->enumValueRule(TrainingStylePreference::class),
+                'aiMotivationStyle' => $this->enumValueRule(MotivationStyle::class),
+            ],
+            default => [],
         };
     }
 
     private function normalizeAiWizardInputs(): void
     {
         $this->aiGender = $this->normalizeBackedEnum($this->aiGender, Gender::class);
-        $this->aiTrainingExperience = $this->normalizeBackedEnum($this->aiTrainingExperience, TrainingExperience::class);
+        $this->aiTrainingExperience = $this->deriveTrainingExperience();
         $this->aiPrimaryGoal = $this->normalizeBackedEnum($this->aiPrimaryGoal, PrimaryGoal::class);
+        $this->aiTrainingStyle = $this->normalizeBackedEnum($this->aiTrainingStyle, TrainingStylePreference::class);
         $this->aiSessionDuration = $this->normalizeBackedEnum($this->aiSessionDuration, SessionDuration::class);
         $this->aiPreferredWorkoutTime = $this->normalizeBackedEnum($this->aiPreferredWorkoutTime, WorkoutTimePreference::class);
         $this->aiEquipment = $this->normalizeBackedEnum($this->aiEquipment, EquipmentAccess::class);
@@ -1127,7 +1181,22 @@ class Workspace extends Component
         return [
             'genders' => $this->enumOptions(Gender::cases(), 'missions.ai_gender_', $locale),
             'goals' => $this->enumOptions(PrimaryGoal::cases(), 'missions.ai_goal_', $locale),
+            'goal_icons' => [
+                'fat_loss' => 'fa-fire',
+                'muscle_gain' => 'fa-dumbbell',
+                'recomposition' => 'fa-scale-balanced',
+                'strength' => 'fa-weight-hanging',
+                'endurance' => 'fa-person-running',
+                'aesthetics' => 'fa-sparkles',
+                'health' => 'fa-heart-pulse',
+            ],
             'experience' => $this->enumOptions(TrainingExperience::cases(), 'missions.ai_experience_', $locale),
+            'experience_icons' => [
+                'beginner' => 'fa-seedling',
+                'intermediate' => 'fa-chart-line',
+                'advanced' => 'fa-bolt',
+                'elite' => 'fa-crown',
+            ],
             'session_durations' => $this->enumOptions(SessionDuration::cases(), 'missions.ai_session_', $locale),
             'workout_times' => $this->enumOptions(WorkoutTimePreference::cases(), 'missions.ai_time_', $locale),
             'equipment' => $this->enumOptions(EquipmentAccess::cases(), 'missions.ai_equipment_', $locale),
@@ -1135,6 +1204,25 @@ class Workspace extends Component
             'cooking' => $this->enumOptions(CookingAbility::cases(), 'missions.ai_cooking_', $locale),
             'tones' => $this->enumOptions(CoachingTone::cases(), 'missions.ai_tone_', $locale),
             'motivation' => $this->enumOptions(MotivationStyle::cases(), 'missions.ai_motivation_', $locale),
+            'training_styles' => $this->enumOptions(TrainingStylePreference::cases(), 'missions.ai_training_style_', $locale),
+            'training_style_icons' => [
+                'heavy_weights' => 'fa-dumbbell',
+                'hiit' => 'fa-bolt',
+                'yoga_stretch' => 'fa-spa',
+                'cardio' => 'fa-person-running',
+            ],
+            'injuries' => [
+                ['value' => 'knee', 'label' => __('missions.ai_injury_knee', locale: $locale), 'icon' => 'fa-person-cane'],
+                ['value' => 'lower_back', 'label' => __('missions.ai_injury_back', locale: $locale), 'icon' => 'fa-chair'],
+                ['value' => 'shoulder', 'label' => __('missions.ai_injury_shoulder', locale: $locale), 'icon' => 'fa-hand'],
+                ['value' => 'none', 'label' => __('missions.ai_injury_none', locale: $locale), 'icon' => 'fa-circle-check'],
+            ],
+            'day_options' => collect(range(2, 6))
+                ->map(fn (int $day): array => [
+                    'value' => $day,
+                    'label' => __('missions.ai_days_option', ['days' => eg_num($day)], locale: $locale),
+                ])
+                ->all(),
         ];
     }
 

@@ -167,14 +167,12 @@ class MissionAetherProgramService
                 'session_duration' => '45_60',
                 'preferred_workout_time' => 'evening',
                 'equipment' => 'full_gym',
-                'injuries_limitations' => '',
+                'injury_tags' => [],
                 'dietary_pattern' => 'omnivore',
                 'cooking_ability' => 'simple',
-                'allergies_text' => '',
-                'coaching_tone' => 'technical',
+                'coaching_tone' => 'gentle',
                 'motivation_style' => 'feeling_strong',
-                'favorite_exercises_text' => '',
-                'disliked_exercises_text' => '',
+                'training_style' => 'heavy_weights',
             ];
         }
 
@@ -190,14 +188,14 @@ class MissionAetherProgramService
             'session_duration' => $profile->session_duration->value,
             'preferred_workout_time' => $profile->preferred_workout_time?->value ?? 'evening',
             'equipment' => $profile->equipment->value,
-            'injuries_limitations' => (string) ($profile->injuries_limitations ?? ''),
+            'injury_tags' => $profile->injury_tags ?? [],
             'dietary_pattern' => $profile->dietary_pattern->value,
             'cooking_ability' => $profile->cooking_ability->value,
-            'allergies_text' => implode(', ', $profile->allergies ?? []),
             'coaching_tone' => $profile->coaching_tone->value,
             'motivation_style' => $profile->motivation_style->value,
-            'favorite_exercises_text' => implode(', ', $profile->favorite_exercises ?? []),
-            'disliked_exercises_text' => implode(', ', $profile->disliked_exercises ?? []),
+            'training_style' => is_string($profile->metadata['training_style'] ?? null)
+                ? $profile->metadata['training_style']
+                : 'heavy_weights',
         ];
     }
 
@@ -213,20 +211,20 @@ class MissionAetherProgramService
             'height_cm' => (int) $wizard['height_cm'],
             'weight_kg' => (float) $wizard['weight_kg'],
             'body_fat_percent' => filled($wizard['body_fat_percent'] ?? null) ? (float) $wizard['body_fat_percent'] : null,
-            'training_experience' => (string) $wizard['training_experience'],
+            'training_experience' => (string) ($wizard['training_experience'] ?? 'intermediate'),
             'primary_goal' => (string) $wizard['primary_goal'],
             'training_days_per_week' => (int) $wizard['training_days_per_week'],
             'session_duration' => (string) $wizard['session_duration'],
-            'preferred_workout_time' => (string) $wizard['preferred_workout_time'],
+            'preferred_workout_time' => (string) ($wizard['preferred_workout_time'] ?? 'evening'),
             'equipment' => (string) $wizard['equipment'],
-            'injuries_limitations' => (string) ($wizard['injuries_limitations'] ?? ''),
+            'injury_tags' => is_array($wizard['injury_tags'] ?? null) ? $wizard['injury_tags'] : [],
             'dietary_pattern' => (string) $wizard['dietary_pattern'],
-            'cooking_ability' => (string) $wizard['cooking_ability'],
-            'allergies' => $this->csvToList($wizard['allergies_text'] ?? ''),
-            'coaching_tone' => (string) $wizard['coaching_tone'],
+            'cooking_ability' => (string) ($wizard['cooking_ability'] ?? 'simple'),
+            'coaching_tone' => (string) ($wizard['coaching_tone'] ?? 'gentle'),
             'motivation_style' => (string) $wizard['motivation_style'],
-            'favorite_exercises' => $this->csvToList($wizard['favorite_exercises_text'] ?? ''),
-            'disliked_exercises' => $this->csvToList($wizard['disliked_exercises_text'] ?? ''),
+            'metadata' => [
+                'training_style' => (string) ($wizard['training_style'] ?? 'heavy_weights'),
+            ],
             'stress_level' => 5,
             'sleep_hours' => 7.5,
         ];
