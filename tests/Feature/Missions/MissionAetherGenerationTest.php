@@ -46,7 +46,7 @@ class MissionAetherGenerationTest extends TestCase
 
         $enrollment->refresh();
 
-        $this->assertNotEmpty($enrollment->field_values['workout_plan'] ?? []);
+        $this->assertEmpty($enrollment->field_values['workout_plan'] ?? []);
         $this->assertSame(1, AetherGeneratedProgram::query()->where('user_id', $user->id)->count());
 
         $program = AetherGeneratedProgram::query()->where('user_id', $user->id)->first();

@@ -98,22 +98,6 @@ class MissionEnrollment extends Model
     }
 
     /**
-     * @return HasMany<MissionWorkoutSession, $this>
-     */
-    public function workoutSessions(): HasMany
-    {
-        return $this->hasMany(MissionWorkoutSession::class, 'enrollment_id');
-    }
-
-    /**
-     * @return HasMany<MissionNutritionDay, $this>
-     */
-    public function nutritionDays(): HasMany
-    {
-        return $this->hasMany(MissionNutritionDay::class, 'enrollment_id');
-    }
-
-    /**
      * @return HasMany<MissionSupplementProduct, $this>
      */
     public function supplementProducts(): HasMany

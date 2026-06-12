@@ -21,6 +21,11 @@
                 @if ($program && ! empty($summary))
                     <p class="small mb-0 mt-2 fw-semibold" style="color:#a7f3d0;">{{ $summary }}</p>
                 @endif
+                @if ($target === 'workout' && isset($adherencePercent) && $adherencePercent > 0)
+                    <p class="small mb-0 mt-2 eg-text-muted">
+                        {{ __('missions.mission_progress') }}: {{ eg_num($adherencePercent) }}%
+                    </p>
+                @endif
             </div>
         </div>
         <a href="{{ $detailUrl }}" class="btn btn-sm eg-aether-mission-card__cta" wire:navigate>

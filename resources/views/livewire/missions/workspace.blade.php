@@ -39,8 +39,7 @@
         <div class="eg-mission-workspace">
             <nav class="eg-mission-tabs eg-glass" aria-label="{{ __('missions.workspace_title') }}">
                 @foreach ([
-                    'workout' => ['icon' => 'fa-dumbbell', 'label' => __('missions.tab_workout')],
-                    'nutrition' => ['icon' => 'fa-utensils', 'label' => __('missions.tab_nutrition')],
+                    'program' => ['icon' => 'fa-bolt', 'label' => __('missions.tab_program')],
                     'supplements' => ['icon' => 'fa-capsules', 'label' => __('missions.tab_supplements')],
                     'daily' => ['icon' => 'fa-calendar-day', 'label' => __('missions.tab_daily')],
                     'schedule' => ['icon' => 'fa-calendar-week', 'label' => __('missions.tab_schedule')],
@@ -59,10 +58,8 @@
             </nav>
 
             <div class="eg-mission-panel eg-glass">
-                @if ($activeTab === 'workout')
-                    @include('livewire.missions.partials.workspace-workout')
-                @elseif ($activeTab === 'nutrition')
-                    @include('livewire.missions.partials.workspace-nutrition')
+                @if ($activeTab === 'program')
+                    @include('livewire.missions.partials.workspace-program')
                 @elseif ($activeTab === 'supplements')
                     @include('livewire.missions.partials.workspace-supplements')
                 @elseif ($activeTab === 'daily')

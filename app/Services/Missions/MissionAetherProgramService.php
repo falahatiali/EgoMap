@@ -3,150 +3,40 @@
 namespace App\Services\Missions;
 
 use App\Models\User;
-use Illuminate\Support\Collection;
-use Modules\AetherEngine\Enums\ProgramScheduleEntryType;
 use Modules\AetherEngine\Models\AetherGeneratedProgram;
 use Modules\AetherEngine\Models\AetherUserProfile;
 use Modules\AetherEngine\Services\AetherEngineService;
 use Modules\AetherEngine\Services\AetherProfileService;
 use Modules\MissionEngine\Models\MissionEnrollment;
-use Modules\MissionEngine\Support\MissionLocalizedText;
 
 class MissionAetherProgramService
 {
-    /**
-     * @var array<int, string>
-     */
-    private const ISO_WEEKDAY_TO_DAY_KEY = [
-        1 => 'mon',
-        2 => 'tue',
-        3 => 'wed',
-        4 => 'thu',
-        5 => 'fri',
-        6 => 'sat',
-        7 => 'sun',
-    ];
-
     public function __construct(
         private AetherProfileService $profileService,
         private AetherEngineService $aetherEngine,
+        private MissionAetherAdherenceService $adherence,
     ) {}
 
     /**
      * @param  array<string, mixed>  $wizard
      */
-    public function generate(User $user, array $wizard): AetherGeneratedProgram
-    {
+    public function generate(
+        User $user,
+        array $wizard,
+        MissionEnrollment $enrollment,
+        string $appliedTarget,
+    ): AetherGeneratedProgram {
         $profile = $this->profileService->upsertForUser($user, $this->normalizeWizard($wizard));
+        $program = $this->aetherEngine->generate($profile);
 
-        return $this->aetherEngine->generate($profile);
-    }
+        $program->update([
+            'mission_enrollment_id' => $enrollment->id,
+            'applied_target' => $appliedTarget,
+        ]);
 
-    /**
-     * @return list<array{day: string, focus: string, notes: string}>
-     */
-    public function workoutPlanRowsForLocale(AetherGeneratedProgram $program, string $locale): array
-    {
-        $program->loadMissing(['scheduleEntries', 'workoutDays.exercises']);
+        $this->adherence->syncEnrollmentProgress($enrollment->fresh(), $user);
 
-        $workoutDays = $program->workoutDays->keyBy('day_index');
-        $rows = [];
-
-        foreach ($program->scheduleEntries as $entry) {
-            if ($entry->entry_type !== ProgramScheduleEntryType::Workout) {
-                continue;
-            }
-
-            $day = $workoutDays->get($entry->workout_day_index);
-
-            if ($day === null) {
-                continue;
-            }
-
-            $dayKey = self::ISO_WEEKDAY_TO_DAY_KEY[$entry->iso_weekday] ?? 'sat';
-            $exerciseLines = $day->exercises
-                ->map(fn ($exercise): string => sprintf(
-                    '%s — %d×%s',
-                    $exercise->name,
-                    $exercise->sets,
-                    $exercise->reps,
-                ))
-                ->implode("\n");
-
-            $rows[] = [
-                'day' => $dayKey,
-                'focus' => $day->label,
-                'notes' => trim(($day->motivation ?? '')."\n".$exerciseLines),
-            ];
-        }
-
-        if ($rows === []) {
-            foreach ($program->workoutDays as $index => $day) {
-                $rows[] = [
-                    'day' => array_values(self::ISO_WEEKDAY_TO_DAY_KEY)[min($index, 6)],
-                    'focus' => $day->label,
-                    'notes' => $day->exercises
-                        ->map(fn ($exercise): string => $exercise->name.' '.$exercise->sets.'×'.$exercise->reps)
-                        ->implode("\n"),
-                ];
-            }
-        }
-
-        return $rows;
-    }
-
-    public function mealPlanNotesForLocale(AetherGeneratedProgram $program, string $locale): string
-    {
-        $program->loadMissing(['nutritionDays.meals']);
-        $lines = [];
-
-        if ($program->metabolic_target_calories !== null) {
-            $lines[] = __('missions.ai_meal_summary_macros', [
-                'calories' => $program->metabolic_target_calories,
-                'protein' => $program->metabolic_protein_grams ?? 0,
-            ]);
-        }
-
-        foreach ($program->nutritionDays as $day) {
-            $meals = $day->meals
-                ->map(fn ($meal): string => $meal->name.' ('.$meal->calories.' kcal)')
-                ->implode(' · ');
-
-            $lines[] = __('missions.ai_meal_day_line', [
-                'day' => $day->day_index,
-                'meals' => $meals,
-            ]);
-        }
-
-        if (is_string($program->shopping_list_summary) && $program->shopping_list_summary !== '') {
-            $lines[] = __('missions.ai_meal_shopping').': '.$program->shopping_list_summary;
-        }
-
-        return implode("\n\n", array_filter($lines));
-    }
-
-    /**
-     * @param  list<array{day: string, focus: string, notes: string}>  $rows
-     * @return list<array{day: string, focus: array<string, string>, notes: array<string, string>}>
-     */
-    public function persistWorkoutPlanRows(MissionEnrollment $enrollment, array $rows, string $locale): array
-    {
-        $existing = is_array($enrollment->field_values['workout_plan'] ?? null)
-            ? $enrollment->field_values['workout_plan']
-            : [];
-        $persisted = [];
-
-        foreach ($rows as $row) {
-            $previous = collect($existing)->firstWhere('day', $row['day']) ?? [];
-
-            $persisted[] = [
-                'day' => $row['day'],
-                'focus' => MissionLocalizedText::merge($previous['focus'] ?? '', $row['focus'], $locale),
-                'notes' => MissionLocalizedText::merge($previous['notes'] ?? '', $row['notes'], $locale),
-            ];
-        }
-
-        return $persisted;
+        return $program->fresh();
     }
 
     public function loadWizardDefaults(?AetherUserProfile $profile, MissionEnrollment $enrollment): array
@@ -228,17 +118,5 @@ class MissionAetherProgramService
             'stress_level' => 5,
             'sleep_hours' => 7.5,
         ];
-    }
-
-    /**
-     * @return list<string>
-     */
-    private function csvToList(string $value): array
-    {
-        return Collection::make(explode(',', $value))
-            ->map(fn (string $item): string => trim($item))
-            ->filter()
-            ->values()
-            ->all();
     }
 }

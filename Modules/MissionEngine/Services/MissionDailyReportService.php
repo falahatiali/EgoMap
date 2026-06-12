@@ -26,8 +26,6 @@ final class MissionDailyReportService
      *     highlights?: string|null,
      *     challenges?: string|null,
      *     notes?: string|null,
-     *     workout_session_id?: int|null,
-     *     nutrition_day_id?: int|null,
      * }  $data
      */
     public function save(MissionEnrollment $enrollment, User $user, array $data): MissionDailyReport
@@ -50,8 +48,6 @@ final class MissionDailyReportService
                 'highlights' => $data['highlights'] ?? null,
                 'challenges' => $data['challenges'] ?? null,
                 'notes' => $data['notes'] ?? null,
-                'workout_session_id' => $data['workout_session_id'] ?? null,
-                'nutrition_day_id' => $data['nutrition_day_id'] ?? null,
             ];
 
             if ($report === null) {

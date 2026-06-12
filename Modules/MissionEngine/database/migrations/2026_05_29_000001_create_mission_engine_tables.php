@@ -172,92 +172,6 @@ return new class extends Migration
             $table->index('enrollment_id');
         });
 
-        Schema::create('mission_workout_sessions', function (Blueprint $table): void {
-            $table->id();
-            $table->uuid('uuid')->unique();
-            $table->foreignId('enrollment_id')->constrained('mission_enrollments')->cascadeOnDelete();
-            $table->date('session_date');
-            $table->string('day_key', 8)->nullable();
-            $table->string('focus', 120)->nullable();
-            $table->unsignedSmallInteger('duration_minutes')->nullable();
-            $table->text('notes')->nullable();
-            $table->timestamps();
-
-            $table->unique(['enrollment_id', 'session_date'], 'me_workout_session_date_unique');
-            $table->index(['enrollment_id', 'session_date']);
-        });
-
-        Schema::create('mission_workout_exercises', function (Blueprint $table): void {
-            $table->id();
-            $table->uuid('uuid')->unique();
-            $table->foreignId('workout_session_id')->constrained('mission_workout_sessions')->cascadeOnDelete();
-            $table->string('name');
-            $table->unsignedSmallInteger('sort_order')->default(0);
-            $table->text('notes')->nullable();
-            $table->timestamps();
-
-            $table->index('workout_session_id');
-        });
-
-        Schema::create('mission_workout_sets', function (Blueprint $table): void {
-            $table->id();
-            $table->foreignId('workout_exercise_id')->constrained('mission_workout_exercises')->cascadeOnDelete();
-            $table->unsignedTinyInteger('set_number');
-            $table->unsignedSmallInteger('reps')->nullable();
-            $table->decimal('weight', 8, 2)->nullable();
-            $table->string('weight_unit', 8)->default('kg');
-            $table->unsignedSmallInteger('duration_seconds')->nullable();
-            $table->decimal('rpe', 3, 1)->nullable();
-            $table->string('notes', 500)->nullable();
-            $table->timestamps();
-
-            $table->index(['workout_exercise_id', 'set_number']);
-        });
-
-        Schema::create('mission_nutrition_days', function (Blueprint $table): void {
-            $table->id();
-            $table->uuid('uuid')->unique();
-            $table->foreignId('enrollment_id')->constrained('mission_enrollments')->cascadeOnDelete();
-            $table->date('log_date');
-            $table->unsignedInteger('total_calories')->nullable();
-            $table->string('calories_status', 24)->nullable();
-            $table->unsignedTinyInteger('meal_quality_score')->nullable();
-            $table->text('day_notes')->nullable();
-            $table->json('ai_analysis')->nullable();
-            $table->timestamps();
-
-            $table->unique(['enrollment_id', 'log_date'], 'me_nutrition_day_unique');
-            $table->index(['enrollment_id', 'log_date']);
-        });
-
-        Schema::create('mission_meals', function (Blueprint $table): void {
-            $table->id();
-            $table->uuid('uuid')->unique();
-            $table->foreignId('nutrition_day_id')->constrained('mission_nutrition_days')->cascadeOnDelete();
-            $table->string('meal_type', 24);
-            $table->time('meal_time')->nullable();
-            $table->unsignedInteger('meal_calories')->nullable();
-            $table->text('notes')->nullable();
-            $table->unsignedSmallInteger('sort_order')->default(0);
-            $table->timestamps();
-
-            $table->index(['nutrition_day_id', 'meal_type']);
-        });
-
-        Schema::create('mission_meal_items', function (Blueprint $table): void {
-            $table->id();
-            $table->foreignId('meal_id')->constrained('mission_meals')->cascadeOnDelete();
-            $table->string('name');
-            $table->decimal('quantity', 8, 2)->nullable();
-            $table->string('unit', 32)->nullable();
-            $table->unsignedSmallInteger('calories')->nullable();
-            $table->decimal('protein_g', 6, 2)->nullable();
-            $table->unsignedSmallInteger('sort_order')->default(0);
-            $table->timestamps();
-
-            $table->index('meal_id');
-        });
-
         Schema::create('mission_supplement_products', function (Blueprint $table): void {
             $table->id();
             $table->uuid('uuid')->unique();
@@ -305,8 +219,6 @@ return new class extends Migration
             $table->text('highlights')->nullable();
             $table->text('challenges')->nullable();
             $table->text('notes')->nullable();
-            $table->foreignId('workout_session_id')->nullable()->constrained('mission_workout_sessions')->nullOnDelete();
-            $table->foreignId('nutrition_day_id')->nullable()->constrained('mission_nutrition_days')->nullOnDelete();
             $table->timestamps();
 
             $table->unique(['enrollment_id', 'report_date'], 'me_daily_report_unique');
@@ -327,12 +239,6 @@ return new class extends Migration
         Schema::dropIfExists('mission_daily_reports');
         Schema::dropIfExists('mission_supplement_intakes');
         Schema::dropIfExists('mission_supplement_products');
-        Schema::dropIfExists('mission_meal_items');
-        Schema::dropIfExists('mission_meals');
-        Schema::dropIfExists('mission_nutrition_days');
-        Schema::dropIfExists('mission_workout_sets');
-        Schema::dropIfExists('mission_workout_exercises');
-        Schema::dropIfExists('mission_workout_sessions');
         Schema::dropIfExists('mission_media');
         Schema::dropIfExists('mission_activity_logs');
         Schema::dropIfExists('mission_measurements');

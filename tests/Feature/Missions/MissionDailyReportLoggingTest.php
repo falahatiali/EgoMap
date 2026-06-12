@@ -5,12 +5,9 @@ namespace Tests\Feature\Missions;
 use App\Livewire\Missions\Workspace;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
-use Modules\MissionEngine\Enums\MealType;
 use Modules\MissionEngine\Enums\MissionActivityEvent;
 use Modules\MissionEngine\Models\MissionDailyReport;
 use Modules\MissionEngine\Services\MissionDailyReportService;
-use Modules\MissionEngine\Services\MissionNutritionLogService;
-use Modules\MissionEngine\Services\MissionWorkoutLogService;
 use Tests\Feature\Missions\Concerns\InteractsWithMissionEnrollment;
 use Tests\TestCase;
 
@@ -78,24 +75,10 @@ class MissionDailyReportLoggingTest extends TestCase
         ]);
     }
 
-    public function test_livewire_links_workout_and_nutrition_when_saving_daily_report(): void
+    public function test_livewire_saves_daily_report_without_mission_workout_tables(): void
     {
         [$user, $enrollment] = $this->enrollMemberInGymMission();
         $date = now()->toDateString();
-
-        $session = app(MissionWorkoutLogService::class)->saveSession($enrollment, $user, [
-            'session_date' => $date,
-            'exercises' => [
-                ['name' => 'Squat', 'sets' => [['reps' => 10, 'weight' => 80]]],
-            ],
-        ]);
-
-        $nutritionDay = app(MissionNutritionLogService::class)->saveDay($enrollment, $user, [
-            'log_date' => $date,
-            'meals' => [
-                ['meal_type' => MealType::Breakfast->value, 'items' => [['name' => 'Eggs', 'calories' => 140]]],
-            ],
-        ]);
 
         Livewire::actingAs($user)
             ->test(Workspace::class, ['enrollment' => $enrollment])
@@ -103,6 +86,7 @@ class MissionDailyReportLoggingTest extends TestCase
             ->set('activeTab', 'daily')
             ->set('reportMood', 8)
             ->set('reportWeight', 81.2)
+            ->set('reportNutritionLogged', true)
             ->call('saveDailyReport')
             ->assertHasNoErrors();
 
@@ -111,9 +95,8 @@ class MissionDailyReportLoggingTest extends TestCase
             ->whereDate('report_date', $date)
             ->first();
 
-        $this->assertTrue($report->trained_today);
+        $this->assertNotNull($report);
         $this->assertTrue($report->nutrition_logged);
-        $this->assertSame($session->id, $report->workout_session_id);
-        $this->assertSame($nutritionDay->id, $report->nutrition_day_id);
+        $this->assertSame(8, $report->mood_score);
     }
 }

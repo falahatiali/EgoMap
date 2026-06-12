@@ -20,8 +20,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'highlights',
     'challenges',
     'notes',
-    'workout_session_id',
-    'nutrition_day_id',
 ])]
 #[ObservedBy([AssignsUuidObserver::class])]
 class MissionDailyReport extends Model
@@ -48,21 +46,5 @@ class MissionDailyReport extends Model
     public function enrollment(): BelongsTo
     {
         return $this->belongsTo(MissionEnrollment::class, 'enrollment_id');
-    }
-
-    /**
-     * @return BelongsTo<MissionWorkoutSession, $this>
-     */
-    public function workoutSession(): BelongsTo
-    {
-        return $this->belongsTo(MissionWorkoutSession::class, 'workout_session_id');
-    }
-
-    /**
-     * @return BelongsTo<MissionNutritionDay, $this>
-     */
-    public function nutritionDay(): BelongsTo
-    {
-        return $this->belongsTo(MissionNutritionDay::class, 'nutrition_day_id');
     }
 }

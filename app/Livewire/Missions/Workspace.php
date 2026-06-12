@@ -2,10 +2,10 @@
 
 namespace App\Livewire\Missions;
 
+use App\Services\Missions\MissionAetherAdherenceService;
 use App\Services\Missions\MissionAetherProgramService;
 use App\Services\Profile\UserAetherProgramHistoryService;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -27,14 +27,10 @@ use Modules\AetherEngine\Enums\WorkoutTimePreference;
 use Modules\AetherEngine\Services\AetherProfileService;
 use Modules\MissionEngine\Enums\EquipmentCategory;
 use Modules\MissionEngine\Enums\EquipmentStatus;
-use Modules\MissionEngine\Enums\MealType;
 use Modules\MissionEngine\Models\MissionEnrollment;
-use Modules\MissionEngine\Models\MissionWorkoutSession;
 use Modules\MissionEngine\Services\MissionDailyReportService;
 use Modules\MissionEngine\Services\MissionEnrollmentFieldService;
-use Modules\MissionEngine\Services\MissionNutritionLogService;
 use Modules\MissionEngine\Services\MissionSupplementLogService;
-use Modules\MissionEngine\Services\MissionWorkoutLogService;
 use Modules\MissionEngine\Support\MissionEnrollmentPresenter;
 use Modules\MissionEngine\Support\MissionLocalizedText;
 use Modules\MissionEngine\Support\MissionProGate;
@@ -49,7 +45,7 @@ class Workspace extends Component
     public MissionEnrollment $enrollment;
 
     #[Url(as: 'tab', history: true)]
-    public string $activeTab = 'workout';
+    public string $activeTab = 'program';
 
     public string $logDate;
 
@@ -58,35 +54,6 @@ class Workspace extends Component
     public array $gymDays = [];
 
     public string $preferredGymTime = '18:00';
-
-    /** @var list<array{day: string, focus: string, notes: string}> */
-    public array $workoutPlan = [];
-
-    public string $mealPlanNotes = '';
-
-    /** Workout session log */
-    public string $workoutDayKey = 'sat';
-
-    public string $workoutFocus = '';
-
-    public ?int $workoutDuration = null;
-
-    public string $workoutSessionNotes = '';
-
-    /**
-     * @var list<array{name: string, notes: string, sets: list<array{reps: string, weight: string, notes: string}>}>
-     */
-    public array $workoutExercises = [];
-
-    /** Nutrition log */
-    public string $nutritionDayNotes = '';
-
-    public ?int $nutritionQuality = null;
-
-    /**
-     * @var list<array{meal_type: string, meal_time: string, notes: string, items: list<array{name: string, quantity: string, unit: string, calories: string, protein_g: string}>}>
-     */
-    public array $nutritionMeals = [];
 
     /** Supplements */
     public string $newSupplementName = '';
@@ -200,8 +167,6 @@ class Workspace extends Component
 
         $this->hydrateFromFieldValues();
         $this->ensureDefaultSupplements($supplements);
-        $this->resetWorkoutForm();
-        $this->resetNutritionForm();
         $this->loadLogsForDate();
         $this->ensureValidTab();
     }
@@ -224,165 +189,6 @@ class Workspace extends Component
             'preferred_gym_time' => $this->preferredGymTime,
         ], Auth::user());
 
-        $this->flashSaved();
-    }
-
-    public function saveWorkoutPlan(MissionEnrollmentFieldService $fields): void
-    {
-        $fields->merge($this->enrollment, [
-            'workout_plan' => $this->persistWorkoutPlanRows(),
-        ], Auth::user());
-
-        $this->flashSaved();
-    }
-
-    public function addWorkoutPlanRow(): void
-    {
-        $this->workoutPlan[] = ['day' => 'sat', 'focus' => '', 'notes' => ''];
-    }
-
-    public function removeWorkoutPlanRow(int $index): void
-    {
-        unset($this->workoutPlan[$index]);
-        $this->workoutPlan = array_values($this->workoutPlan);
-    }
-
-    public function addWorkoutExercise(): void
-    {
-        $this->workoutExercises[] = [
-            'name' => '',
-            'notes' => '',
-            'sets' => [
-                ['reps' => '', 'weight' => '', 'notes' => ''],
-                ['reps' => '', 'weight' => '', 'notes' => ''],
-                ['reps' => '', 'weight' => '', 'notes' => ''],
-            ],
-        ];
-    }
-
-    public function removeWorkoutExercise(int $index): void
-    {
-        unset($this->workoutExercises[$index]);
-        $this->workoutExercises = array_values($this->workoutExercises);
-    }
-
-    public function addWorkoutSet(int $exerciseIndex): void
-    {
-        if (! isset($this->workoutExercises[$exerciseIndex])) {
-            return;
-        }
-
-        $this->workoutExercises[$exerciseIndex]['sets'][] = ['reps' => '', 'weight' => '', 'notes' => ''];
-    }
-
-    public function removeWorkoutSet(int $exerciseIndex, int $setIndex): void
-    {
-        if (! isset($this->workoutExercises[$exerciseIndex]['sets'][$setIndex])) {
-            return;
-        }
-
-        unset($this->workoutExercises[$exerciseIndex]['sets'][$setIndex]);
-        $this->workoutExercises[$exerciseIndex]['sets'] = array_values($this->workoutExercises[$exerciseIndex]['sets']);
-    }
-
-    public function saveWorkoutSession(MissionWorkoutLogService $workouts): void
-    {
-        $this->validate([
-            'logDate' => ['required', 'date'],
-            'workoutFocus' => ['nullable', 'string', 'max:120'],
-            'workoutDuration' => ['nullable', 'integer', 'min:1', 'max:600'],
-            'workoutExercises' => ['required', 'array', 'min:1'],
-            'workoutExercises.*.name' => ['required', 'string', 'max:120'],
-        ]);
-
-        $exercises = array_values(array_filter(
-            $this->normalizeWorkoutExercises(),
-            static fn (array $exercise): bool => $exercise['sets'] !== [],
-        ));
-
-        if ($exercises === []) {
-            $this->addError('workoutExercises', __('missions.workout_need_exercise'));
-
-            return;
-        }
-
-        $session = $workouts->saveSession($this->enrollment, Auth::user(), [
-            'session_date' => $this->logDate,
-            'day_key' => $this->workoutDayKey,
-            'focus' => $this->workoutFocus ?: null,
-            'duration_minutes' => $this->workoutDuration,
-            'notes' => $this->workoutSessionNotes ?: null,
-            'exercises' => $exercises,
-        ]);
-
-        $this->reportTrained = true;
-        $this->loadWorkoutIntoForm($session);
-        $this->flashSaved();
-    }
-
-    public function addNutritionMeal(): void
-    {
-        $this->nutritionMeals[] = [
-            'meal_type' => MealType::Breakfast->value,
-            'meal_time' => '',
-            'notes' => '',
-            'items' => [
-                ['name' => '', 'quantity' => '', 'unit' => '', 'calories' => '', 'protein_g' => ''],
-            ],
-        ];
-    }
-
-    public function removeNutritionMeal(int $index): void
-    {
-        unset($this->nutritionMeals[$index]);
-        $this->nutritionMeals = array_values($this->nutritionMeals);
-    }
-
-    public function addMealItem(int $mealIndex): void
-    {
-        if (! isset($this->nutritionMeals[$mealIndex])) {
-            return;
-        }
-
-        $this->nutritionMeals[$mealIndex]['items'][] = [
-            'name' => '', 'quantity' => '', 'unit' => '', 'calories' => '', 'protein_g' => '',
-        ];
-    }
-
-    public function removeMealItem(int $mealIndex, int $itemIndex): void
-    {
-        if (! isset($this->nutritionMeals[$mealIndex]['items'][$itemIndex])) {
-            return;
-        }
-
-        unset($this->nutritionMeals[$mealIndex]['items'][$itemIndex]);
-        $this->nutritionMeals[$mealIndex]['items'] = array_values($this->nutritionMeals[$mealIndex]['items']);
-    }
-
-    public function saveNutritionDay(MissionNutritionLogService $nutrition): void
-    {
-        $this->validate([
-            'logDate' => ['required', 'date'],
-            'nutritionMeals' => ['required', 'array', 'min:1'],
-        ]);
-
-        $meals = $this->normalizeNutritionMeals();
-
-        if ($meals === []) {
-            $this->addError('nutritionMeals', __('missions.nutrition_need_meal'));
-
-            return;
-        }
-
-        $nutrition->saveDay($this->enrollment, Auth::user(), [
-            'log_date' => $this->logDate,
-            'day_notes' => $this->nutritionDayNotes ?: null,
-            'meal_quality_score' => $this->nutritionQuality,
-            'meals' => $meals,
-        ]);
-
-        $this->reportNutritionLogged = true;
-        $this->loadLogsForDate();
         $this->flashSaved();
     }
 
@@ -444,8 +250,7 @@ class Workspace extends Component
 
     public function saveDailyReport(
         MissionDailyReportService $reports,
-        MissionWorkoutLogService $workouts,
-        MissionNutritionLogService $nutrition,
+        MissionAetherAdherenceService $adherence,
     ): void {
         $this->validate([
             'logDate' => ['required', 'date'],
@@ -455,24 +260,22 @@ class Workspace extends Component
             'reportSleep' => ['nullable', 'numeric', 'min:0', 'max:24'],
         ]);
 
-        $workoutSession = $workouts->findSessionForDate($this->enrollment, $this->logDate);
-        $nutritionDay = $nutrition->findDayForDate($this->enrollment, $this->logDate);
+        $user = Auth::user();
 
-        $reports->save($this->enrollment, Auth::user(), [
+        $reports->save($this->enrollment, $user, [
             'report_date' => $this->logDate,
             'body_weight' => $this->reportWeight,
             'mood_score' => $this->reportMood,
             'energy_score' => $this->reportEnergy,
             'sleep_hours' => $this->reportSleep,
-            'trained_today' => $this->reportTrained || $workoutSession !== null,
-            'nutrition_logged' => $this->reportNutritionLogged || $nutritionDay !== null,
+            'trained_today' => $this->reportTrained || $adherence->trainedOnDate($user, $this->logDate),
+            'nutrition_logged' => $this->reportNutritionLogged,
             'highlights' => $this->reportHighlights ?: null,
             'challenges' => $this->reportChallenges ?: null,
             'notes' => $this->reportNotes ?: null,
-            'workout_session_id' => $workoutSession?->id,
-            'nutrition_day_id' => $nutritionDay?->id,
         ]);
 
+        $adherence->syncEnrollmentProgress($this->enrollment->fresh(), $user);
         $this->enrollment->refresh()->load(['measurements' => fn ($q) => $q->latest('measured_at')->limit(10)]);
         $this->flashSaved();
     }
@@ -633,10 +436,8 @@ class Workspace extends Component
         }
     }
 
-    public function submitAiQuestionnaire(
-        MissionAetherProgramService $aether,
-        MissionEnrollmentFieldService $fields,
-    ): void {
+    public function submitAiQuestionnaire(MissionAetherProgramService $aether): void
+    {
         if ($this->aiIsGenerating) {
             return;
         }
@@ -652,38 +453,14 @@ class Workspace extends Component
 
         try {
             $user = Auth::user();
-            $locale = app()->getLocale();
-            $program = $aether->generate($user, $this->aiWizardPayload());
-            $program->update([
-                'applied_target' => $this->aiQuestionnaireTarget,
-                'mission_enrollment_id' => $this->enrollment->id,
-            ]);
+            $aether->generate(
+                $user,
+                $this->aiWizardPayload(),
+                $this->enrollment,
+                $this->aiQuestionnaireTarget,
+            );
 
-            if (in_array($this->aiQuestionnaireTarget, ['workout', 'meal'], true)) {
-                $merge = [];
-
-                if ($this->aiQuestionnaireTarget === 'workout') {
-                    $rows = $aether->workoutPlanRowsForLocale($program, $locale);
-                    $this->workoutPlan = $rows;
-                    $merge['workout_plan'] = $aether->persistWorkoutPlanRows($this->enrollment, $rows, $locale);
-                }
-
-                if ($this->aiQuestionnaireTarget === 'meal') {
-                    $mealNotes = $aether->mealPlanNotesForLocale($program, $locale);
-                    $merge['meal_plan_notes'] = MissionLocalizedText::merge(
-                        $this->enrollment->field_values['meal_plan_notes'] ?? '',
-                        $mealNotes,
-                        $locale,
-                    );
-                }
-
-                if ($merge !== []) {
-                    $fields->merge($this->enrollment, $merge, $user);
-                    $this->enrollment->refresh();
-                    $this->hydrateFromFieldValues();
-                }
-            }
-
+            $this->enrollment->refresh();
             $this->closeAiQuestionnaire();
             $this->flashSaved();
             session()->flash('mission_ai_status', __('missions.ai_program_applied'));
@@ -696,11 +473,10 @@ class Workspace extends Component
     }
 
     public function render(
-        MissionWorkoutLogService $workouts,
-        MissionNutritionLogService $nutrition,
         MissionSupplementLogService $supplements,
         MissionDailyReportService $reports,
         UserAetherProgramHistoryService $programHistory,
+        MissionAetherAdherenceService $adherence,
     ): View {
         $locale = app()->getLocale();
         $presenter = new MissionEnrollmentPresenter($this->enrollment);
@@ -717,17 +493,17 @@ class Workspace extends Component
             ? $snapshot['icon']
             : 'fa-compass';
 
+        $activeWorkoutProgram = $adherence->latestProgramForEnrollment($this->enrollment, 'workout');
+        $activeMealProgram = $adherence->latestProgramForEnrollment($this->enrollment, 'meal');
+
         return view('livewire.missions.workspace', [
             'locale' => $locale,
             'presenter' => $presenter,
             'missionIcon' => $missionIcon,
             'capabilities' => $capabilities,
-            'workoutHistory' => $workouts->paginateSessions($this->enrollment, 5),
-            'nutritionHistory' => $nutrition->paginateDays($this->enrollment, 5),
             'supplementProducts' => $supplements->activeProducts($this->enrollment),
             'supplementIntakes' => $supplements->paginateIntakes($this->enrollment, 10),
             'dailyReports' => $reports->paginateReports($this->enrollment, 5),
-            'mealTypes' => MealType::cases(),
             'canAiWorkout' => MissionProGate::canUseFeature($user, $taskConfig, 'ai_workout_plan'),
             'canAiMeal' => MissionProGate::canUseFeature($user, $nutritionConfig, 'ai_meal_plan'),
             'requiresProWorkout' => MissionProGate::featureRequiresPro($taskConfig, 'ai_workout_plan'),
@@ -739,54 +515,25 @@ class Workspace extends Component
             'aiWizardSteps' => 4,
             'aiFormOptions' => $this->aiFormOptions(),
             'aiWizardReview' => $this->aiWizardReviewItems(),
-            'hasUserWorkoutProgram' => $programHistory->hasAppliedTarget($user, 'workout'),
-            'hasUserMealProgram' => $programHistory->hasAppliedTarget($user, 'meal'),
-            'activeWorkoutProgram' => $activeWorkoutProgram = $programHistory->latestForTarget($user, 'workout'),
-            'activeMealProgram' => $activeMealProgram = $programHistory->latestForTarget($user, 'meal'),
+            'activeWorkoutProgram' => $activeWorkoutProgram,
+            'activeMealProgram' => $activeMealProgram,
             'activeWorkoutProgramSummary' => $activeWorkoutProgram
                 ? $programHistory->summaryForProgram($activeWorkoutProgram, $locale)
                 : null,
             'activeMealProgramSummary' => $activeMealProgram
                 ? $programHistory->summaryForProgram($activeMealProgram, $locale)
                 : null,
+            'workoutAdherencePercent' => $adherence->workoutAdherencePercent($user, $activeWorkoutProgram),
+            'enrollmentProgress' => (float) $this->enrollment->progress_percent,
             'programHistoryUrl' => route('profile').'#my-programs',
         ]);
     }
 
     private function loadLogsForDate(): void
     {
-        $workouts = app(MissionWorkoutLogService::class);
-        $nutrition = app(MissionNutritionLogService::class);
         $reports = app(MissionDailyReportService::class);
-
-        $session = $workouts->findSessionForDate($this->enrollment, $this->logDate);
-
-        if ($session !== null) {
-            $this->loadWorkoutIntoForm($session);
-        } else {
-            $this->resetWorkoutForm();
-        }
-
-        $day = $nutrition->findDayForDate($this->enrollment, $this->logDate);
-
-        if ($day !== null) {
-            $this->nutritionDayNotes = (string) ($day->day_notes ?? '');
-            $this->nutritionQuality = $day->meal_quality_score;
-            $this->nutritionMeals = $day->meals->map(fn ($meal): array => [
-                'meal_type' => $meal->meal_type->value,
-                'meal_time' => $meal->meal_time ? substr((string) $meal->meal_time, 0, 5) : '',
-                'notes' => (string) ($meal->notes ?? ''),
-                'items' => $meal->items->map(fn ($item): array => [
-                    'name' => $item->name,
-                    'quantity' => $item->quantity !== null ? (string) $item->quantity : '',
-                    'unit' => (string) ($item->unit ?? ''),
-                    'calories' => $item->calories !== null ? (string) $item->calories : '',
-                    'protein_g' => $item->protein_g !== null ? (string) $item->protein_g : '',
-                ])->all(),
-            ])->all();
-        } else {
-            $this->resetNutritionForm();
-        }
+        $adherence = app(MissionAetherAdherenceService::class);
+        $user = Auth::user();
 
         $report = $reports->findForDate($this->enrollment, $this->logDate);
 
@@ -800,142 +547,19 @@ class Workspace extends Component
             $this->reportHighlights = (string) ($report->highlights ?? '');
             $this->reportChallenges = (string) ($report->challenges ?? '');
             $this->reportNotes = (string) ($report->notes ?? '');
-        }
-    }
 
-    private function loadWorkoutIntoForm(MissionWorkoutSession $session): void
-    {
-        $this->workoutDayKey = (string) ($session->day_key ?? 'sat');
-        $this->workoutFocus = MissionLocalizedText::forLocale($session->focus ?? '', app()->getLocale());
-        $this->workoutDuration = $session->duration_minutes;
-        $this->workoutSessionNotes = (string) ($session->notes ?? '');
-        $this->workoutExercises = $session->exercises->map(fn ($exercise): array => [
-            'name' => $exercise->name,
-            'notes' => (string) ($exercise->notes ?? ''),
-            'sets' => $exercise->sets->map(fn ($set): array => [
-                'reps' => $set->reps !== null ? (string) $set->reps : '',
-                'weight' => $set->weight !== null ? (string) $set->weight : '',
-                'notes' => (string) ($set->notes ?? ''),
-            ])->all(),
-        ])->all();
-    }
-
-    private function resetWorkoutForm(): void
-    {
-        $this->workoutDayKey = $this->dayKeyFromDate($this->logDate);
-        $this->workoutFocus = '';
-        $this->workoutDuration = null;
-        $this->workoutSessionNotes = '';
-        $this->workoutExercises = [
-            [
-                'name' => '',
-                'notes' => '',
-                'sets' => [
-                    ['reps' => '', 'weight' => '', 'notes' => ''],
-                    ['reps' => '', 'weight' => '', 'notes' => ''],
-                    ['reps' => '', 'weight' => '', 'notes' => ''],
-                ],
-            ],
-        ];
-    }
-
-    private function resetNutritionForm(): void
-    {
-        $this->nutritionDayNotes = '';
-        $this->nutritionQuality = null;
-        $this->nutritionMeals = [
-            [
-                'meal_type' => MealType::Breakfast->value,
-                'meal_time' => '08:00',
-                'notes' => '',
-                'items' => [
-                    ['name' => '', 'quantity' => '', 'unit' => '', 'calories' => '', 'protein_g' => ''],
-                ],
-            ],
-        ];
-    }
-
-    /**
-     * @return list<array{name: string, notes: string|null, sets: list<array{reps: int|null, weight: float|null, weight_unit: string, notes: string|null}>}>
-     */
-    private function normalizeWorkoutExercises(): array
-    {
-        $normalized = [];
-
-        foreach ($this->workoutExercises as $exercise) {
-            $name = trim((string) ($exercise['name'] ?? ''));
-
-            if ($name === '') {
-                continue;
-            }
-
-            $sets = [];
-
-            foreach ($exercise['sets'] ?? [] as $set) {
-                $reps = filled($set['reps'] ?? '') ? (int) $set['reps'] : null;
-                $weight = filled($set['weight'] ?? '') ? (float) $set['weight'] : null;
-
-                if ($reps === null && $weight === null) {
-                    continue;
-                }
-
-                $sets[] = [
-                    'reps' => $reps,
-                    'weight' => $weight,
-                    'weight_unit' => 'kg',
-                    'notes' => filled($set['notes'] ?? '') ? $set['notes'] : null,
-                ];
-            }
-
-            $normalized[] = [
-                'name' => $name,
-                'notes' => filled($exercise['notes'] ?? '') ? $exercise['notes'] : null,
-                'sets' => $sets,
-            ];
+            return;
         }
 
-        return $normalized;
-    }
-
-    /**
-     * @return list<array{meal_type: string, meal_time: string|null, notes: string|null, items: list<array{name: string, quantity: float|null, unit: string|null, calories: int|null, protein_g: float|null}>}>
-     */
-    private function normalizeNutritionMeals(): array
-    {
-        $normalized = [];
-
-        foreach ($this->nutritionMeals as $meal) {
-            $items = [];
-
-            foreach ($meal['items'] ?? [] as $item) {
-                $name = trim((string) ($item['name'] ?? ''));
-
-                if ($name === '') {
-                    continue;
-                }
-
-                $items[] = [
-                    'name' => $name,
-                    'quantity' => filled($item['quantity'] ?? '') ? (float) $item['quantity'] : null,
-                    'unit' => filled($item['unit'] ?? '') ? $item['unit'] : null,
-                    'calories' => filled($item['calories'] ?? '') ? (int) $item['calories'] : null,
-                    'protein_g' => filled($item['protein_g'] ?? '') ? (float) $item['protein_g'] : null,
-                ];
-            }
-
-            if ($items === []) {
-                continue;
-            }
-
-            $normalized[] = [
-                'meal_type' => $meal['meal_type'],
-                'meal_time' => filled($meal['meal_time'] ?? '') ? $meal['meal_time'] : null,
-                'notes' => filled($meal['notes'] ?? '') ? $meal['notes'] : null,
-                'items' => $items,
-            ];
-        }
-
-        return $normalized;
+        $this->reportWeight = null;
+        $this->reportMood = null;
+        $this->reportEnergy = null;
+        $this->reportSleep = null;
+        $this->reportTrained = $user ? $adherence->trainedOnDate($user, $this->logDate) : false;
+        $this->reportNutritionLogged = false;
+        $this->reportHighlights = '';
+        $this->reportChallenges = '';
+        $this->reportNotes = '';
     }
 
     private function ensureDefaultSupplements(MissionSupplementLogService $supplements): void
@@ -959,11 +583,6 @@ class Workspace extends Component
         $this->gymDays = is_array($values['gym_days'] ?? null) ? $values['gym_days'] : [];
         $this->preferredGymTime = (string) ($values['preferred_gym_time'] ?? '18:00');
         $locale = app()->getLocale();
-        $this->workoutPlan = $this->hydrateWorkoutPlanForLocale(
-            is_array($values['workout_plan'] ?? null) ? $values['workout_plan'] : [],
-            $locale,
-        );
-        $this->mealPlanNotes = MissionLocalizedText::forLocale($values['meal_plan_notes'] ?? '', $locale);
         $this->equipmentNotes = MissionLocalizedText::forLocale($values['equipment_notes'] ?? '', $locale);
         $this->equipmentItems = $this->normalizeEquipmentItems($values['equipment_items'] ?? null);
         $this->registrationProgress = is_array($values['registration_progress'] ?? null)
@@ -973,10 +592,10 @@ class Workspace extends Component
 
     private function ensureValidTab(): void
     {
-        $allowed = ['schedule', 'workout', 'nutrition', 'supplements', 'equipment', 'registration', 'daily'];
+        $allowed = ['program', 'schedule', 'supplements', 'equipment', 'registration', 'daily'];
 
         if (! in_array($this->activeTab, $allowed, true)) {
-            $this->activeTab = 'workout';
+            $this->activeTab = 'program';
         }
     }
 
@@ -1044,7 +663,6 @@ class Workspace extends Component
             'height_cm' => $this->aiHeightCm,
             'weight_kg' => $this->aiWeightKg,
             'body_fat_percent' => $this->aiBodyFatPercent,
-            'training_experience' => $this->aiTrainingExperience,
             'primary_goal' => $this->aiPrimaryGoal,
             'training_days_per_week' => $this->aiTrainingDaysPerWeek,
             'session_duration' => $this->aiSessionDuration,
@@ -1312,71 +930,6 @@ class Workspace extends Component
         }
 
         return $items;
-    }
-
-    private function dayKeyFromDate(string $date): string
-    {
-        $map = [
-            'Saturday' => 'sat',
-            'Sunday' => 'sun',
-            'Monday' => 'mon',
-            'Tuesday' => 'tue',
-            'Wednesday' => 'wed',
-            'Thursday' => 'thu',
-            'Friday' => 'fri',
-        ];
-
-        $dayName = Carbon::parse($date)->format('l');
-
-        return $map[$dayName] ?? 'sat';
-    }
-
-    /**
-     * @return list<array{value: string, label: string}>
-     */
-    /**
-     * @param  list<array<string, mixed>>  $stored
-     * @return list<array{day: string, focus: string, notes: string}>
-     */
-    private function hydrateWorkoutPlanForLocale(array $stored, string $locale): array
-    {
-        return array_values(array_map(
-            static fn (array $row): array => [
-                'day' => (string) ($row['day'] ?? 'sat'),
-                'focus' => MissionLocalizedText::forLocale($row['focus'] ?? '', $locale),
-                'notes' => MissionLocalizedText::forLocale($row['notes'] ?? '', $locale),
-            ],
-            $stored,
-        ));
-    }
-
-    /**
-     * @return list<array{day: string, focus: array{en: string, fa: string}, notes: array{en: string, fa: string}}>
-     */
-    private function persistWorkoutPlanRows(): array
-    {
-        $locale = app()->getLocale();
-        $existing = $this->enrollment->field_values['workout_plan'] ?? [];
-        $persisted = [];
-
-        foreach ($this->workoutPlan as $index => $row) {
-            $previous = is_array($existing[$index] ?? null) ? $existing[$index] : [];
-
-            foreach ($existing as $existingRow) {
-                if (is_array($existingRow) && ($existingRow['day'] ?? null) === ($row['day'] ?? null)) {
-                    $previous = $existingRow;
-                    break;
-                }
-            }
-
-            $persisted[] = [
-                'day' => (string) ($row['day'] ?? 'sat'),
-                'focus' => MissionLocalizedText::merge($previous['focus'] ?? '', (string) ($row['focus'] ?? ''), $locale),
-                'notes' => MissionLocalizedText::merge($previous['notes'] ?? '', (string) ($row['notes'] ?? ''), $locale),
-            ];
-        }
-
-        return $persisted;
     }
 
     private function dayOptions(string $locale): array
