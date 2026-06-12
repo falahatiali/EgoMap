@@ -9,7 +9,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable([
     'aether_program_meal_id',
     'sort_order',
-    'ingredient',
+    'name',
+    'quantity',
+    'unit',
+    'calories',
+    'protein_g',
+    'carbs_g',
+    'fat_g',
+    'category',
+    'is_optional',
 ])]
 class AetherProgramMealIngredient extends Model
 {
@@ -20,6 +28,12 @@ class AetherProgramMealIngredient extends Model
     {
         return [
             'sort_order' => 'integer',
+            'quantity' => 'decimal:2',
+            'calories' => 'integer',
+            'protein_g' => 'decimal:2',
+            'carbs_g' => 'decimal:2',
+            'fat_g' => 'decimal:2',
+            'is_optional' => 'boolean',
         ];
     }
 

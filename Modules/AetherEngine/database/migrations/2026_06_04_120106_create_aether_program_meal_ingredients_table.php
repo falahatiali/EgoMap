@@ -14,7 +14,15 @@ return new class extends Migration
                 ->constrained('aether_program_meals', indexName: 'ap_ing_meal_fk')
                 ->cascadeOnDelete();
             $table->unsignedSmallInteger('sort_order')->default(0);
-            $table->string('ingredient');
+            $table->string('name');
+            $table->decimal('quantity', 8, 2)->nullable();
+            $table->string('unit', 16)->nullable();
+            $table->unsignedSmallInteger('calories')->nullable();
+            $table->decimal('protein_g', 6, 2)->nullable();
+            $table->decimal('carbs_g', 6, 2)->nullable();
+            $table->decimal('fat_g', 6, 2)->nullable();
+            $table->string('category', 32)->nullable();
+            $table->boolean('is_optional')->default(false);
             $table->timestamps();
         });
     }

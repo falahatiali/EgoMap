@@ -13,7 +13,9 @@ return new class extends Migration
             $table->foreignId('aether_program_workout_day_id')
                 ->constrained('aether_program_workout_days', indexName: 'ap_ex_wday_fk')
                 ->cascadeOnDelete();
+            $table->unsignedBigInteger('aether_exercise_id')->nullable();
             $table->unsignedSmallInteger('sort_order')->default(0);
+            $table->string('prescription_type', 24)->default('standard');
             $table->string('slug');
             $table->string('name');
             $table->string('muscle_group', 32);

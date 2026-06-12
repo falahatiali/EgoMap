@@ -27,4 +27,12 @@ return [
     'fat_g_per_kg' => 0.9,
 
     'meals_per_day' => 4,
+
+    'exercise_api' => [
+        'workoutx' => [
+            'enabled' => env('WORKOUTX_API_ENABLED', false),
+            'key' => env('WORKOUTX_API_KEY'),
+            'base_url' => env('WORKOUTX_API_BASE_URL', 'https://api.workoutx.com/v1'),
+        ],
+    ],
 ];

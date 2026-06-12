@@ -16,15 +16,19 @@ use Modules\AetherEngine\Models\AetherUserProfile;
 
 class WorkoutGenerator implements WorkoutGeneratorInterface
 {
-    public function __construct(private ExerciseLibrary $exerciseLibrary) {}
+    public function __construct(
+        private ExerciseLibrary $exerciseLibrary,
+        private PeriodizationCalculator $periodization,
+    ) {}
 
     /**
      * @return array{split: WorkoutSplit, days: array<int, WorkoutDayPlan>}
      */
-    public function generate(AetherUserProfile $profile): array
+    public function generate(AetherUserProfile $profile, int $weekNumber = 1): array
     {
         $split = $this->resolveSplit($profile);
-        $volume = $this->sessionVolume($profile->session_duration, $profile->primary_goal);
+        $volume = $this->sessionVolume($profile->session_duration, $profile->primary_goal, $weekNumber);
+        $phase = $this->periodization->forWeek($weekNumber);
         $dayTemplates = $this->dayTemplates($split, $profile->training_days_per_week);
 
         $days = [];
@@ -54,7 +58,7 @@ class WorkoutGenerator implements WorkoutGeneratorInterface
             $days[] = new WorkoutDayPlan(
                 dayIndex: $index + 1,
                 label: $template['label'],
-                focus: $template['focus'],
+                focus: trim($template['focus'].' · '.$phase['intensity_note']),
                 exercises: $exercises,
                 motivation: $this->defaultMotivation($profile, $index + 1),
             );
@@ -80,7 +84,10 @@ class WorkoutGenerator implements WorkoutGeneratorInterface
     /**
      * @return array{sets: int, reps: string, rest: int}
      */
-    private function sessionVolume(SessionDuration $duration, PrimaryGoal $goal): array
+    /**
+     * @return array{sets: int, reps: string, rest: int}
+     */
+    private function sessionVolume(SessionDuration $duration, PrimaryGoal $goal, int $weekNumber): array
     {
         $baseSets = match ($duration) {
             SessionDuration::TenToTwenty => 2,
@@ -98,7 +105,7 @@ class WorkoutGenerator implements WorkoutGeneratorInterface
         };
 
         return [
-            'sets' => $baseSets,
+            'sets' => $this->periodization->adjustedSets($baseSets, $weekNumber),
             'reps' => $reps,
             'rest' => $rest,
         ];

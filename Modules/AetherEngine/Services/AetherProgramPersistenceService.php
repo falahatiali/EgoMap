@@ -9,16 +9,21 @@ use Modules\AetherEngine\Data\NutritionDayPlan;
 use Modules\AetherEngine\Data\ProgramCoachNarrative;
 use Modules\AetherEngine\Data\WorkoutDayPlan;
 use Modules\AetherEngine\Enums\ProgramScheduleEntryType;
+use Modules\AetherEngine\Models\AetherExercise;
 use Modules\AetherEngine\Models\AetherGeneratedProgram;
 use Modules\AetherEngine\Models\AetherProgramExercise;
+use Modules\AetherEngine\Models\AetherProgramExerciseSet;
 use Modules\AetherEngine\Models\AetherProgramMeal;
 use Modules\AetherEngine\Models\AetherProgramMealIngredient;
 use Modules\AetherEngine\Models\AetherProgramNutritionDay;
 use Modules\AetherEngine\Models\AetherProgramScheduleEntry;
 use Modules\AetherEngine\Models\AetherProgramWorkoutDay;
+use Modules\AetherEngine\Support\ExerciseSetPrescriptionBuilder;
 
 class AetherProgramPersistenceService
 {
+    public function __construct(private ExerciseSetPrescriptionBuilder $setBuilder) {}
+
     public function persist(AetherGeneratedProgram $program, GeneratedProgramPayload $payload): AetherGeneratedProgram
     {
         $coach = ProgramCoachNarrative::fromEnrichmentArray($payload->narrative);
@@ -45,7 +50,7 @@ class AetherProgramPersistenceService
 
         return $program->fresh()->load([
             'scheduleEntries',
-            'workoutDays.exercises',
+            'workoutDays.exercises.prescriptionSets',
             'nutritionDays.meals.ingredients',
         ]);
     }
@@ -80,7 +85,10 @@ class AetherProgramPersistenceService
      */
     private function persistWorkoutDays(AetherGeneratedProgram $program, array $workoutDays): void
     {
-        $program->workoutDays()->with('exercises')->get()->each(function (AetherProgramWorkoutDay $day): void {
+        $program->workoutDays()->with('exercises.prescriptionSets')->get()->each(function (AetherProgramWorkoutDay $day): void {
+            $day->exercises->each(function (AetherProgramExercise $exercise): void {
+                $exercise->prescriptionSets()->delete();
+            });
             $day->exercises()->delete();
         });
         $program->workoutDays()->delete();
@@ -107,9 +115,13 @@ class AetherProgramPersistenceService
         ExercisePrescription $exercise,
         int $sortOrder,
     ): void {
-        AetherProgramExercise::query()->create([
+        $libraryExercise = AetherExercise::query()->where('slug', $exercise->slug)->first();
+
+        $programExercise = AetherProgramExercise::query()->create([
             'aether_program_workout_day_id' => $day->id,
+            'aether_exercise_id' => $libraryExercise?->id,
             'sort_order' => $sortOrder,
+            'prescription_type' => 'standard',
             'slug' => $exercise->slug,
             'name' => $exercise->name,
             'muscle_group' => $exercise->muscleGroup,
@@ -119,6 +131,12 @@ class AetherProgramPersistenceService
             'notes' => $exercise->notes,
             'alternative_slugs' => $exercise->alternativeSlugs !== [] ? $exercise->alternativeSlugs : null,
         ]);
+
+        foreach ($this->setBuilder->build($exercise->sets, $exercise->reps, $exercise->restSeconds) as $setPayload) {
+            AetherProgramExerciseSet::query()->create(array_merge($setPayload, [
+                'aether_program_exercise_id' => $programExercise->id,
+            ]));
+        }
     }
 
     /**
@@ -173,7 +191,7 @@ class AetherProgramPersistenceService
             AetherProgramMealIngredient::query()->create([
                 'aether_program_meal_id' => $mealModel->id,
                 'sort_order' => $ingredientOrder,
-                'ingredient' => $ingredient,
+                'name' => $ingredient,
             ]);
         }
     }

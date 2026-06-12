@@ -17,9 +17,11 @@ use Modules\AetherEngine\Enums\ProgramStatus;
 use Modules\AetherEngine\Enums\SessionDuration;
 use Modules\AetherEngine\Enums\TrainingExperience;
 use Modules\AetherEngine\Enums\WorkoutTimePreference;
+use Modules\AetherEngine\Models\AetherAiGenerationRun;
 use Modules\AetherEngine\Models\AetherExercise;
 use Modules\AetherEngine\Models\AetherMealTemplate;
 use Modules\AetherEngine\Models\AetherProgramExercise;
+use Modules\AetherEngine\Models\AetherProgramExerciseSet;
 use Modules\AetherEngine\Models\AetherProgramMeal;
 use Modules\AetherEngine\Models\AetherProgramNutritionDay;
 use Modules\AetherEngine\Models\AetherProgramScheduleEntry;
@@ -93,6 +95,9 @@ class AetherEngineGenerationTest extends TestCase
 
         $this->assertGreaterThan(0, AetherProgramWorkoutDay::query()->where('aether_generated_program_id', $program->id)->count());
         $this->assertGreaterThan(0, AetherProgramExercise::query()->count());
+        $this->assertGreaterThan(0, AetherProgramExerciseSet::query()->count());
+        $this->assertSame(12, $program->duration_weeks);
+        $this->assertSame(1, AetherAiGenerationRun::query()->where('user_id', $user->id)->count());
         $this->assertSame(7, AetherProgramNutritionDay::query()->where('aether_generated_program_id', $program->id)->count());
         $this->assertGreaterThan(0, AetherProgramMeal::query()->count());
         $this->assertGreaterThan(0, AetherProgramScheduleEntry::query()->where('aether_generated_program_id', $program->id)->count());

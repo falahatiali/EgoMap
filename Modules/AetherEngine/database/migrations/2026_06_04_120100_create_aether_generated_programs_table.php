@@ -15,6 +15,8 @@ return new class extends Migration
             $table->foreignId('aether_user_profile_id')->constrained('aether_user_profiles', indexName: 'aprog_profile_fk')->cascadeOnDelete();
             $table->unsignedSmallInteger('version')->default(1);
             $table->unsignedSmallInteger('week_number')->default(1);
+            $table->unsignedSmallInteger('duration_weeks')->default(12);
+            $table->unsignedSmallInteger('current_week')->default(1);
             $table->string('status', 16)->default('active');
             $table->string('applied_target', 16)->nullable();
             $table->foreignId('mission_enrollment_id')->nullable()->constrained('mission_enrollments', indexName: 'aprog_enrollment_fk')->nullOnDelete();

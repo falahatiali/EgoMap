@@ -20,6 +20,8 @@ use Modules\MissionEngine\Models\MissionEnrollment;
     'aether_user_profile_id',
     'version',
     'week_number',
+    'duration_weeks',
+    'current_week',
     'status',
     'applied_target',
     'mission_enrollment_id',
@@ -54,6 +56,8 @@ class AetherGeneratedProgram extends Model
         return [
             'version' => 'integer',
             'week_number' => 'integer',
+            'duration_weeks' => 'integer',
+            'current_week' => 'integer',
             'starts_at' => 'date',
             'ends_at' => 'date',
             'status' => ProgramStatus::class,
@@ -76,7 +80,7 @@ class AetherGeneratedProgram extends Model
     {
         $query->with([
             'scheduleEntries',
-            'workoutDays.exercises',
+            'workoutDays.exercises.prescriptionSets',
             'nutritionDays.meals.ingredients',
         ]);
     }
@@ -109,6 +113,26 @@ class AetherGeneratedProgram extends Model
     public function nutritionDays(): HasMany
     {
         return $this->hasMany(AetherProgramNutritionDay::class)->orderBy('day_index');
+    }
+
+    public function workoutSessions(): HasMany
+    {
+        return $this->hasMany(AetherWorkoutSession::class, 'aether_generated_program_id');
+    }
+
+    public function editEvents(): HasMany
+    {
+        return $this->hasMany(AetherProgramEditEvent::class, 'aether_generated_program_id');
+    }
+
+    public function checkIns(): HasMany
+    {
+        return $this->hasMany(AetherUserCheckIn::class, 'aether_generated_program_id');
+    }
+
+    public function aiGenerationRuns(): HasMany
+    {
+        return $this->hasMany(AetherAiGenerationRun::class, 'aether_generated_program_id');
     }
 
     /**

@@ -10,6 +10,7 @@ use Modules\AetherEngine\Contracts\ScheduleOptimizerInterface;
 use Modules\AetherEngine\Contracts\WorkoutGeneratorInterface;
 use Modules\AetherEngine\Data\GeneratedProgramPayload;
 use Modules\AetherEngine\Data\NutritionDayPlan;
+use Modules\AetherEngine\Enums\AiGenerationType;
 use Modules\AetherEngine\Enums\ProgramStatus;
 use Modules\AetherEngine\Models\AetherGeneratedProgram;
 use Modules\AetherEngine\Models\AetherUserProfile;
@@ -23,6 +24,7 @@ class AetherEngineService
         private ScheduleOptimizerInterface $scheduleOptimizer,
         private ProgramEnrichmentInterface $programEnrichment,
         private AetherProgramPersistenceService $programPersistence,
+        private AetherAiGenerationRecorder $generationRecorder,
     ) {}
 
     public function generate(AetherUserProfile $profile, int $weekNumber = 1): AetherGeneratedProgram
@@ -31,9 +33,20 @@ class AetherEngineService
             throw new \InvalidArgumentException('Cannot generate program: questionnaire is incomplete.');
         }
 
-        $payload = $this->buildPayload($profile);
+        $payload = $this->buildPayload($profile, $weekNumber);
+        $profile->loadMissing('user');
 
-        return DB::transaction(function () use ($profile, $payload, $weekNumber): AetherGeneratedProgram {
+        $generationRun = $this->generationRecorder->start(
+            $profile->user,
+            AiGenerationType::FullProgram,
+            [
+                'profile_id' => $profile->id,
+                'week_number' => $weekNumber,
+                'goal' => $profile->primary_goal->value,
+            ],
+        );
+
+        return DB::transaction(function () use ($profile, $payload, $weekNumber, $generationRun): AetherGeneratedProgram {
             $version = (int) AetherGeneratedProgram::query()
                 ->where('user_id', $profile->user_id)
                 ->max('version') + 1;
@@ -48,12 +61,22 @@ class AetherEngineService
                 'aether_user_profile_id' => $profile->id,
                 'version' => $version,
                 'week_number' => $weekNumber,
+                'duration_weeks' => (int) config('aether.program_weeks', 12),
+                'current_week' => $weekNumber,
                 'status' => ProgramStatus::Active,
                 'starts_at' => now()->toDateString(),
                 'ends_at' => now()->addDays(6)->toDateString(),
             ]);
 
-            return $this->programPersistence->persist($program, $payload);
+            $persisted = $this->programPersistence->persist($program, $payload);
+
+            $this->generationRecorder->succeed($generationRun, $persisted, [
+                'program_uuid' => $persisted->uuid,
+                'workout_days' => $persisted->workoutDays->count(),
+                'nutrition_days' => $persisted->nutritionDays->count(),
+            ]);
+
+            return $persisted;
         });
     }
 
@@ -64,10 +87,10 @@ class AetherEngineService
         return $this->generate($profile, $weekNumber);
     }
 
-    public function buildPayload(AetherUserProfile $profile): GeneratedProgramPayload
+    public function buildPayload(AetherUserProfile $profile, int $weekNumber = 1): GeneratedProgramPayload
     {
         $metabolic = $this->metabolicCalculator->calculate($profile);
-        $workout = $this->workoutGenerator->generate($profile);
+        $workout = $this->workoutGenerator->generate($profile, $weekNumber);
         $nutritionDays = $this->nutritionGenerator->generate($profile, $metabolic);
         $schedule = $this->scheduleOptimizer->optimize($profile, $workout['days'], $nutritionDays);
 

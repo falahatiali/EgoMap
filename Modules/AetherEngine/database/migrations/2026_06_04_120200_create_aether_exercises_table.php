@@ -19,9 +19,16 @@ return new class extends Migration
             $table->string('muscle_group', 32);
             $table->json('equipment_required');
             $table->unsignedTinyInteger('difficulty')->default(2);
+            $table->string('movement_pattern', 32)->default('compound');
             $table->text('instructions')->nullable();
             $table->json('contraindications')->nullable();
             $table->json('alternative_slugs')->nullable();
+            $table->string('gif_url')->nullable();
+            $table->string('video_url')->nullable();
+            $table->string('image_url')->nullable();
+            $table->string('api_source', 32)->nullable();
+            $table->string('api_external_id')->nullable();
+            $table->timestamp('media_cached_at')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

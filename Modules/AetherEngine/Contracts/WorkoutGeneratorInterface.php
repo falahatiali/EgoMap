@@ -11,5 +11,5 @@ interface WorkoutGeneratorInterface
     /**
      * @return array{split: WorkoutSplit, days: array<int, WorkoutDayPlan>}
      */
-    public function generate(AetherUserProfile $profile): array;
+    public function generate(AetherUserProfile $profile, int $weekNumber = 1): array;
 }

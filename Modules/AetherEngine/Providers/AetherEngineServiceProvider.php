@@ -6,18 +6,27 @@ use Modules\AetherEngine\Contracts\NutritionGeneratorInterface;
 use Modules\AetherEngine\Contracts\ProgramEnrichmentInterface;
 use Modules\AetherEngine\Contracts\ScheduleOptimizerInterface;
 use Modules\AetherEngine\Contracts\WorkoutGeneratorInterface;
+use Modules\AetherEngine\Services\AetherAiGenerationRecorder;
 use Modules\AetherEngine\Services\AetherEngineService;
 use Modules\AetherEngine\Services\AetherProfileService;
+use Modules\AetherEngine\Services\AetherProgramEditEventService;
 use Modules\AetherEngine\Services\AetherProgramPersistenceService;
 use Modules\AetherEngine\Services\AetherPromptBuilder;
+use Modules\AetherEngine\Services\AetherWorkoutLogService;
+use Modules\AetherEngine\Services\AetherWorkoutSessionService;
 use Modules\AetherEngine\Services\ExerciseLibrary;
+use Modules\AetherEngine\Services\ExerciseMediaResolver;
+use Modules\AetherEngine\Services\ExerciseSubstitutionService;
 use Modules\AetherEngine\Services\InjuryTagResolver;
 use Modules\AetherEngine\Services\MealTemplateLibrary;
 use Modules\AetherEngine\Services\MetabolicCalculator;
 use Modules\AetherEngine\Services\NutritionGenerator;
+use Modules\AetherEngine\Services\PeriodizationCalculator;
 use Modules\AetherEngine\Services\ProgramEnrichmentService;
 use Modules\AetherEngine\Services\ScheduleOptimizer;
 use Modules\AetherEngine\Services\WorkoutGenerator;
+use Modules\AetherEngine\Services\WorkoutXApiClient;
+use Modules\AetherEngine\Support\ExerciseSetPrescriptionBuilder;
 use Nwidart\Modules\Support\ModuleServiceProvider;
 
 class AetherEngineServiceProvider extends ModuleServiceProvider
@@ -38,6 +47,15 @@ class AetherEngineServiceProvider extends ModuleServiceProvider
         $this->mergeConfigFrom(module_path($this->name, 'config/config.php'), 'aether');
 
         $this->app->singleton(InjuryTagResolver::class);
+        $this->app->singleton(PeriodizationCalculator::class);
+        $this->app->singleton(WorkoutXApiClient::class);
+        $this->app->singleton(ExerciseMediaResolver::class);
+        $this->app->singleton(ExerciseSubstitutionService::class);
+        $this->app->singleton(ExerciseSetPrescriptionBuilder::class);
+        $this->app->singleton(AetherWorkoutSessionService::class);
+        $this->app->singleton(AetherProgramEditEventService::class);
+        $this->app->singleton(AetherAiGenerationRecorder::class);
+        $this->app->singleton(AetherWorkoutLogService::class);
         $this->app->singleton(ExerciseLibrary::class);
         $this->app->singleton(MealTemplateLibrary::class);
         $this->app->singleton(MetabolicCalculator::class);
