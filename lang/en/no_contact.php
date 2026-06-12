@@ -51,6 +51,8 @@ return [
     'completed_subtitle' => ':days days of silence. Start again if you need another season.',
     'start_again' => 'Activate again',
 
+    'mobile_active_note' => 'Emergency tools, blackhole journal, and daily missions are available on the web app. Your timer syncs here.',
+
     'emergency_button' => 'Panic Button',
     'emergency_title' => 'Emergency Mode',
     'emergency_body' => 'Breathe first. Read this before you decide anything.',

@@ -48,6 +48,19 @@ class QuizSessionController extends Controller
         }
 
         if (! empty($validated['resume_uuid'])) {
+            $existing = QuizSession::query()
+                ->where('uuid', $validated['resume_uuid'])
+                ->where('quiz_id', $quiz->id)
+                ->first();
+
+            if ($existing !== null) {
+                $presenter->authorizeSessionAccess($existing, $guestToken);
+
+                if ($existing->status === SessionStatus::Completed) {
+                    return response()->json($presenter->present($existing));
+                }
+            }
+
             $session = $quizSessionService->resolveSessionForQuiz(
                 $quiz,
                 $validated['resume_uuid'],

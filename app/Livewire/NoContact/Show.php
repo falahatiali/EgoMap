@@ -12,7 +12,7 @@ use App\Services\NoContact\PremiumUpsellService;
 use App\Services\Recovery\GhostModeAiService;
 use App\Services\Recovery\GhostModeAlchemyService;
 use App\Services\Recovery\GhostModeGamificationBridge;
-use App\Services\Recovery\RecoveryJourneyService;
+use App\Support\GhostMode\GhostModeClient;
 use App\Support\LocaleConfig;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
@@ -109,45 +109,38 @@ class Show extends Component
     public ?array $premiumUpsell = null;
 
     public function mount(
+        GhostModeClient $ghostMode,
         NoContactTimerService $timerService,
-        RecoveryJourneyService $journey,
-        GhostModeAiService $ghostAi,
-        GamificationEngine $gamification,
-        GhostModeGamificationBridge $gamificationBridge,
     ): void {
-        $this->selectedDays = $timerService->recommendedDays();
-        $journey->markNoContactActivated();
-        $this->refreshWallet($gamification);
-        $this->blackholeProgress = $gamificationBridge->blackholeProgress(
-            auth()->user(),
-            $this->guestToken(),
-        );
+        $payload = $ghostMode->bootstrap();
 
-        $protocol = $timerService->findActiveProtocol();
-        if ($protocol !== null) {
-            $this->truthFlashes = $ghostAi->truthFlashes(auth()->user(), $protocol);
-            $this->maybeDispatchDailyLogin($gamification);
-            $this->refreshPendingPunishment();
+        $this->selectedDays = (int) ($payload['timer']['recommended_days'] ?? $timerService->recommendedDays());
+        $this->wallet = $payload['wallet'];
+        $this->truthFlashes = $payload['truth_flashes'];
+        $this->blackholeProgress = $payload['blackhole_progress'];
+        $this->pendingPunishment = $payload['pending_punishment'];
+        $this->showProtocolCelebration = (bool) ($payload['protocol_celebration'] ?? false);
+        $this->premiumUpsell = $payload['premium_upsell'];
+        $this->showPremiumUpsell = (bool) (is_array($payload['premium_upsell'] ?? null)
+            ? ($payload['premium_upsell']['show'] ?? false)
+            : false);
+
+        foreach ($payload['gamification_events'] as $event) {
+            $this->handleDispatchResult($event);
         }
-
-        $this->maybeDispatchProtocolComplete($timerService, $gamification);
     }
 
-    public function startProtocol(
-        NoContactTimerService $timerService,
-        GhostModeAiService $ghostAi,
-        GamificationEngine $gamification,
-    ): void {
+    public function startProtocol(GhostModeClient $ghostMode): void
+    {
         try {
-            $timerService->start($this->selectedDays);
+            $payload = $ghostMode->startProtocol($this->selectedDays);
             $this->showSetup = false;
+            $this->wallet = $payload['wallet'];
+            $this->truthFlashes = $payload['truth_flashes'];
 
-            $this->handleDispatchResult($gamification->dispatch(GamificationEvent::GhostModeActivated->value, $this->actorContext()));
-
-            $this->truthFlashes = $ghostAi->truthFlashes(
-                auth()->user(),
-                $timerService->findActiveProtocol(),
-            );
+            foreach ($payload['gamification_events'] as $event) {
+                $this->handleDispatchResult($event);
+            }
 
             $this->redirect(
                 route('no-contact', LocaleConfig::routeParameters()),

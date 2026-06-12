@@ -165,6 +165,110 @@ class QuizSessionService
             ->first();
     }
 
+    public function findResumableInProgressForGuest(Quiz $quiz, string $guestToken): ?QuizSession
+    {
+        $sessions = QuizSession::query()
+            ->where('quiz_id', $quiz->id)
+            ->where('guest_token', $guestToken)
+            ->whereNull('user_id')
+            ->where('status', SessionStatus::InProgress)
+            ->withCount('responses')
+            ->latest('updated_at')
+            ->get();
+
+        foreach ($sessions as $session) {
+            if ($this->hasMeaningfulProgress($session)) {
+                return $session->load([
+                    'quiz.questions' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order')->with('options'),
+                ]);
+            }
+        }
+
+        return null;
+    }
+
+    public function findLatestCompletedForGuest(Quiz $quiz, string $guestToken): ?QuizSession
+    {
+        return QuizSession::query()
+            ->where('quiz_id', $quiz->id)
+            ->where('guest_token', $guestToken)
+            ->whereNull('user_id')
+            ->where('status', SessionStatus::Completed)
+            ->with(['result.outcomeProfile', 'quiz'])
+            ->latest('completed_at')
+            ->first();
+    }
+
+    /**
+     * @return array{action: 'resume'|'show_previous'|'start_fresh', session: QuizSession|null}
+     */
+    public function resolveGuestEntry(Quiz $quiz, ?string $guestToken, ?string $resumeUuid): array
+    {
+        if ($resumeUuid !== null) {
+            $existing = $this->findByUuidOrNull($resumeUuid);
+
+            if ($existing !== null && $existing->quiz_id === $quiz->id) {
+                if ($existing->status === SessionStatus::InProgress && $this->hasMeaningfulProgress($existing)) {
+                    return [
+                        'action' => 'resume',
+                        'session' => $existing->load(['quiz', 'result.outcomeProfile']),
+                    ];
+                }
+
+                if ($existing->status === SessionStatus::Completed) {
+                    return [
+                        'action' => 'show_previous',
+                        'session' => $existing->load(['quiz', 'result.outcomeProfile']),
+                    ];
+                }
+            }
+        }
+
+        if ($guestToken !== null && $guestToken !== '') {
+            $resumable = $this->findResumableInProgressForGuest($quiz, $guestToken);
+
+            if ($resumable !== null) {
+                return [
+                    'action' => 'resume',
+                    'session' => $resumable->load(['quiz', 'result.outcomeProfile']),
+                ];
+            }
+
+            $completed = $this->findLatestCompletedForGuest($quiz, $guestToken);
+
+            if ($completed !== null) {
+                return [
+                    'action' => 'show_previous',
+                    'session' => $completed,
+                ];
+            }
+        }
+
+        return [
+            'action' => 'start_fresh',
+            'session' => null,
+        ];
+    }
+
+    /**
+     * @return array{action: 'resume'|'show_previous'|'start_fresh', session: QuizSession|null}
+     */
+    public function resolveApiEntry(
+        Quiz $quiz,
+        ?User $user,
+        ?string $guestToken,
+        ?string $resumeUuid,
+    ): array {
+        if ($user !== null) {
+            $this->claimService->claimForUser($user, $guestToken);
+            $this->abandonStaleEmptySessionsForUser($user, $quiz->id);
+
+            return $this->resolveAuthenticatedEntry($quiz, $user);
+        }
+
+        return $this->resolveGuestEntry($quiz, $guestToken, $resumeUuid);
+    }
+
     /**
      * Resume an in-progress session when valid, otherwise start a fresh one.
      */

@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BootstrapController;
+use App\Http\Controllers\Api\GhostModeController;
+use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\QuizController;
 use App\Http\Controllers\Api\QuizSessionController;
 use Illuminate\Support\Facades\Route;
@@ -10,6 +12,7 @@ Route::prefix('v1')->group(function (): void {
     Route::get('/bootstrap', [BootstrapController::class, 'show'])->name('bootstrap');
 
     Route::get('/quizzes/{slug}', [QuizController::class, 'show'])->name('quizzes.show');
+    Route::get('/quizzes/{slug}/entry', [QuizController::class, 'entry'])->name('quizzes.entry');
     Route::post('/quizzes/{slug}/sessions', [QuizSessionController::class, 'store'])->name('quizzes.sessions.store');
 
     Route::prefix('quiz-sessions/{uuid}')->name('quiz-sessions.')->group(function (): void {
@@ -22,6 +25,11 @@ Route::prefix('v1')->group(function (): void {
         Route::post('/reset-after-crisis', [QuizSessionController::class, 'resetAfterCrisis'])->name('reset-after-crisis');
     });
 
+    Route::prefix('ghost-mode')->name('ghost-mode.')->group(function (): void {
+        Route::get('/', [GhostModeController::class, 'show'])->name('show');
+        Route::post('/protocol', [GhostModeController::class, 'startProtocol'])->name('protocol.start');
+    });
+
     Route::prefix('auth')->name('auth.')->group(function (): void {
         Route::post('/register', [AuthController::class, 'register'])->name('register');
         Route::post('/login', [AuthController::class, 'login'])->name('login');
@@ -32,5 +40,9 @@ Route::prefix('v1')->group(function (): void {
             Route::get('/me', [AuthController::class, 'me'])->name('me');
             Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
         });
+    });
+
+    Route::middleware('auth:sanctum')->prefix('profile')->name('profile.')->group(function (): void {
+        Route::get('/', [ProfileController::class, 'show'])->name('show');
     });
 });

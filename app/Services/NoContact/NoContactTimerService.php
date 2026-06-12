@@ -66,8 +66,11 @@ class NoContactTimerService
 
     public function findActiveProtocol(): ?NoContactProtocol
     {
-        $owner = $this->resolveOwner();
+        return $this->findActiveProtocolFor($this->resolveOwner());
+    }
 
+    public function findActiveProtocolFor(array $owner): ?NoContactProtocol
+    {
         $protocol = $this->queryForOwner($owner)
             ->where('status', NoContactStatus::Active)
             ->latest('updated_at')
@@ -85,9 +88,17 @@ class NoContactTimerService
      */
     public function displayState(?string $locale = null): array
     {
+        return $this->displayStateFor($this->resolveOwner(), $locale);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function displayStateFor(array $owner, ?string $locale = null): array
+    {
         $locale = $locale ?? app()->getLocale();
         $now = CarbonImmutable::now();
-        $protocol = $this->findActiveProtocol();
+        $protocol = $this->findActiveProtocolFor($owner);
 
         if ($protocol === null) {
             return [
@@ -107,11 +118,15 @@ class NoContactTimerService
 
     public function start(int $durationDays): NoContactProtocol
     {
+        return $this->startFor($this->resolveOwner(), $durationDays);
+    }
+
+    public function startFor(array $owner, int $durationDays): NoContactProtocol
+    {
         if ($durationDays < 1 || $durationDays > 365) {
             throw new InvalidArgumentException('Duration must be between 1 and 365 days.');
         }
 
-        $owner = $this->resolveOwner();
         $now = CarbonImmutable::now();
 
         return DB::transaction(function () use ($owner, $durationDays, $now): NoContactProtocol {

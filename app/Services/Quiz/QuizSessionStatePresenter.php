@@ -127,6 +127,58 @@ class QuizSessionStatePresenter
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
+    public function presentReturning(QuizSession $session, ?string $locale = null): array
+    {
+        $locale = LocaleConfig::resolve($locale ?? $session->locale ?? app()->getLocale());
+        $session->loadMissing(['result.outcomeProfile', 'quiz']);
+        $resultData = QuizResultViewData::fromSession($session, $locale);
+        $report = $resultData['report'];
+        $content = $resultData['content'];
+
+        return [
+            'session_uuid' => $session->uuid,
+            'quiz_name' => $session->quiz->getTranslation('name', $locale, true),
+            'type_code' => (string) ($report['type_code'] ?? '—'),
+            'title' => (string) ($report['title'] ?? ''),
+            'summary' => (string) ($content['tagline'] ?? ($report['summary'] ?? '')),
+            'completed_at' => $session->completed_at?->toIso8601String(),
+            'palette' => $resultData['palette'],
+            'view_result_label' => __('quiz.view_previous_result', locale: $locale),
+            'retake_label' => __('quiz.retake_test', locale: $locale),
+            'eyebrow' => __('quiz.returning_eyebrow', locale: $locale),
+        ];
+    }
+
+    /**
+     * @param  array{action: 'resume'|'show_previous'|'start_fresh', session: QuizSession|null}  $entry
+     * @return array<string, mixed>
+     */
+    public function presentEntry(array $entry, ?string $locale = null): array
+    {
+        $locale = LocaleConfig::resolve($locale ?? app()->getLocale());
+        $session = $entry['session'];
+
+        $payload = [
+            'action' => $entry['action'],
+            'session_uuid' => $session?->uuid,
+        ];
+
+        if ($entry['action'] === 'show_previous' && $session !== null) {
+            $payload['returning'] = $this->presentReturning($session, $locale);
+        }
+
+        if ($entry['action'] === 'resume' && $session !== null) {
+            $payload['screen'] = $session->status === SessionStatus::Completed
+                ? 'result'
+                : 'question';
+        }
+
+        return $payload;
+    }
+
     public function authorizeSessionAccess(QuizSession $session, ?string $guestToken): void
     {
         $user = auth('sanctum')->user();
