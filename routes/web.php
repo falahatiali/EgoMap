@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AliController;
+use App\Http\Controllers\BillingAppReturnController;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Auth\VerifyEmail;
@@ -21,6 +22,8 @@ use App\Support\LocaleUrl;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/billing/app-return', BillingAppReturnController::class)->name('billing.app-return');
 
 Route::get('/', function () {
     $locale = session('locale');

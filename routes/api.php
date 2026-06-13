@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BillingController;
 use App\Http\Controllers\Api\BootstrapController;
 use App\Http\Controllers\Api\GhostModeController;
 use App\Http\Controllers\Api\MissionController;
@@ -45,6 +46,12 @@ Route::prefix('v1')->group(function (): void {
 
     Route::middleware('auth:sanctum')->prefix('profile')->name('profile.')->group(function (): void {
         Route::get('/', [ProfileController::class, 'show'])->name('show');
+    });
+
+    Route::middleware('auth:sanctum')->prefix('billing')->name('billing.')->group(function (): void {
+        Route::get('/', [BillingController::class, 'show'])->name('show');
+        Route::post('/checkout', [BillingController::class, 'checkout'])->name('checkout');
+        Route::post('/checkout/confirm', [BillingController::class, 'confirmCheckout'])->name('checkout.confirm');
     });
 
     Route::middleware('auth:sanctum')->prefix('missions')->name('missions.')->group(function (): void {

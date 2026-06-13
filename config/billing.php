@@ -41,4 +41,24 @@ return [
 
     'sync_pro_role' => (bool) env('BILLING_SYNC_PRO_ROLE', true),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Mobile checkout return URLs
+    |--------------------------------------------------------------------------
+    |
+    | Used by the billing API when starting Stripe Checkout from the mobile app.
+    | {CHECKOUT_SESSION_ID} is replaced by Stripe on redirect.
+    |
+    */
+
+    'mobile_checkout_success_url' => env(
+        'BILLING_MOBILE_CHECKOUT_SUCCESS_URL',
+        rtrim((string) env('APP_URL', 'http://localhost'), '/').'/billing/app-return?checkout=success&session_id={CHECKOUT_SESSION_ID}',
+    ),
+
+    'mobile_checkout_cancel_url' => env(
+        'BILLING_MOBILE_CHECKOUT_CANCEL_URL',
+        rtrim((string) env('APP_URL', 'http://localhost'), '/').'/billing/app-return?checkout=cancelled',
+    ),
+
 ];

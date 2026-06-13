@@ -79,4 +79,5 @@ return [
 
     'empty_plans' => 'Paid plans are being configured. Start free while we finish setup.',
     'secure_checkout' => 'Secure checkout powered by Stripe',
+    'mobile_return_hint' => 'After checkout, return to the app and refresh your subscription status.',
 ];

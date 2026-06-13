@@ -15,8 +15,12 @@ use Throwable;
 
 class SubscriptionCheckoutService
 {
-    public function selectPlan(User $user, StripePlan $plan, ?string $coupon = null): PlanSelectionOutcome
-    {
+    public function selectPlan(
+        User $user,
+        StripePlan $plan,
+        ?string $coupon = null,
+        ?CheckoutReturnUrls $returnUrls = null,
+    ): PlanSelectionOutcome {
         $subscriptionType = $plan->resolvedSubscriptionType();
 
         try {
@@ -27,19 +31,23 @@ class SubscriptionCheckoutService
                     $payment = $subscription->latestPayment();
 
                     if ($payment !== null) {
+                        $redirect = $returnUrls !== null
+                            ? $returnUrls->cancelUrl
+                            : route('pricing', LocaleConfig::routeParameters());
+
                         return PlanSelectionOutcome::redirect(route('cashier.payment', [
                             $payment->id,
-                            'redirect' => route('pricing', LocaleConfig::routeParameters()),
+                            'redirect' => $redirect,
                         ]));
                     }
                 }
             }
 
             if ($user->subscribed($subscriptionType)) {
-                return $this->changeExistingPlan($user, $plan);
+                return $this->changeExistingPlan($user, $plan, $returnUrls);
             }
 
-            return $this->startCheckout($user, $plan, $coupon);
+            return $this->startCheckout($user, $plan, $coupon, $returnUrls);
         } catch (Throwable $throwable) {
             Log::warning('Subscription plan selection failed.', [
                 'user_id' => $user->id,
@@ -80,8 +88,11 @@ class SubscriptionCheckoutService
         return $subscription->swapAndInvoice($plan->stripe_price_id);
     }
 
-    private function changeExistingPlan(User $user, StripePlan $plan): PlanSelectionOutcome
-    {
+    private function changeExistingPlan(
+        User $user,
+        StripePlan $plan,
+        ?CheckoutReturnUrls $returnUrls = null,
+    ): PlanSelectionOutcome {
         $subscription = $user->subscription($plan->resolvedSubscriptionType());
 
         if ($subscription === null || ! $subscription->valid()) {
@@ -98,9 +109,13 @@ class SubscriptionCheckoutService
         try {
             $subscription->swapAndInvoice($plan->stripe_price_id);
         } catch (IncompletePayment $incompletePayment) {
+            $redirect = $returnUrls !== null
+                ? $returnUrls->cancelUrl
+                : route('pricing', LocaleConfig::routeParameters());
+
             return PlanSelectionOutcome::redirect(route('cashier.payment', [
                 $incompletePayment->payment->id,
-                'redirect' => route('pricing', LocaleConfig::routeParameters()),
+                'redirect' => $redirect,
             ]));
         } catch (SubscriptionUpdateFailure $failure) {
             return PlanSelectionOutcome::error(__('pricing.error_plan_change_failed'));
@@ -109,9 +124,13 @@ class SubscriptionCheckoutService
         return PlanSelectionOutcome::changed();
     }
 
-    private function startCheckout(User $user, StripePlan $plan, ?string $coupon): PlanSelectionOutcome
-    {
-        $session = $this->buildCheckout($user, $plan, $coupon);
+    private function startCheckout(
+        User $user,
+        StripePlan $plan,
+        ?string $coupon,
+        ?CheckoutReturnUrls $returnUrls = null,
+    ): PlanSelectionOutcome {
+        $session = $this->buildCheckout($user, $plan, $coupon, $returnUrls);
         $url = $session->url;
 
         if (! is_string($url) || $url === '') {
@@ -121,8 +140,12 @@ class SubscriptionCheckoutService
         return PlanSelectionOutcome::redirect($url);
     }
 
-    private function buildCheckout(User $user, StripePlan $plan, ?string $coupon = null): Checkout
-    {
+    private function buildCheckout(
+        User $user,
+        StripePlan $plan,
+        ?string $coupon = null,
+        ?CheckoutReturnUrls $returnUrls = null,
+    ): Checkout {
         $builder = $user->newSubscription($plan->resolvedSubscriptionType(), $plan->stripe_price_id);
 
         if (is_string($coupon) && $coupon !== '') {
@@ -133,6 +156,10 @@ class SubscriptionCheckoutService
             }
         } else {
             $builder->allowPromotionCodes();
+        }
+
+        if ($returnUrls !== null) {
+            return $builder->checkout($returnUrls->toStripeOptions());
         }
 
         $pricingUrl = route('pricing', LocaleConfig::routeParameters());
