@@ -136,7 +136,8 @@ class BillingApiTest extends TestCase
         $this->postJson('/api/v1/billing/checkout', ['plan_id' => $plan->id])
             ->assertOk()
             ->assertJsonPath('outcome', PlanSelectionOutcome::Redirect)
-            ->assertJsonPath('checkout_url', 'https://checkout.stripe.com/test-session');
+            ->assertJsonPath('checkout_url', 'https://checkout.stripe.com/test-session')
+            ->assertJsonMissing(['labels']);
     }
 
     public function test_checkout_returns_changed_outcome_for_plan_swap(): void

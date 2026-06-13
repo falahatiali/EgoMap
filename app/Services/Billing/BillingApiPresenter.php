@@ -85,7 +85,7 @@ class BillingApiPresenter
             $payload['message'] = $outcome->message;
         }
 
-        $payload['labels'] = match ($outcome->type) {
+        $labels = match ($outcome->type) {
             PlanSelectionOutcome::Changed => [
                 'title' => __('pricing.plan_changed_title', locale: $locale),
                 'body' => __('pricing.plan_changed_body_generic', locale: $locale),
@@ -96,8 +96,16 @@ class BillingApiPresenter
             PlanSelectionOutcome::Error => [
                 'title' => $outcome->message ?? __('pricing.error_checkout_failed', locale: $locale),
             ],
-            default => [],
+            default => null,
         };
+
+        if ($outcome->type === PlanSelectionOutcome::Current) {
+            $payload['message'] = __('pricing.error_current_plan', locale: $locale);
+        }
+
+        if (is_array($labels)) {
+            $payload['labels'] = $labels;
+        }
 
         return $payload;
     }
