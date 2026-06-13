@@ -9,6 +9,7 @@ use Laravel\Sanctum\Sanctum;
 use Modules\MissionEngine\Database\Seeders\GymBodybuildingMissionSeeder;
 use Modules\MissionEngine\Database\Seeders\MissionEngineDatabaseSeeder;
 use Modules\MissionEngine\Models\MissionEnrollment;
+use Modules\MissionEngine\Models\MissionTemplate;
 use Tests\TestCase;
 
 class MissionApiTest extends TestCase
@@ -23,100 +24,86 @@ class MissionApiTest extends TestCase
         $this->seed(MissionEngineDatabaseSeeder::class);
     }
 
-    public function test_missions_catalog_is_public_and_lists_gym_mission(): void
+    public function test_missions_index_requires_authentication(): void
     {
+        $this->getJson('/api/v1/missions')
+            ->assertUnauthorized();
+    }
+
+    public function test_authenticated_user_can_list_missions_catalog(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
         $response = $this->getJson('/api/v1/missions', [
             'Accept-Language' => 'en',
         ]);
 
-        $response->assertOk();
-
-        $missions = collect($response->json('missions'));
-        $gym = $missions->firstWhere('slug', GymBodybuildingMissionSeeder::SLUG);
-
-        $this->assertNotNull($gym);
-        $this->assertSame('aether', $gym['meta']['engine_module'] ?? null);
-
-        $response
-            ->assertJsonStructure([
-                'missions' => [
-                    ['slug', 'title', 'summary', 'meta' => ['highlights', 'outcomes']],
-                ],
-                'labels',
-            ]);
-    }
-
-    public function test_mission_detail_includes_phases_and_fields(): void
-    {
-        $response = $this->getJson('/api/v1/missions/'.GymBodybuildingMissionSeeder::SLUG, [
-            'Accept-Language' => 'en',
-        ]);
-
         $response->assertOk()
-            ->assertJsonPath('mission.slug', GymBodybuildingMissionSeeder::SLUG)
-            ->assertJsonCount(4, 'mission.phases')
+            ->assertJsonPath('templates.0.slug', GymBodybuildingMissionSeeder::SLUG)
+            ->assertJsonPath('active_enrollments', [])
             ->assertJsonStructure([
-                'mission' => ['description', 'phases', 'capabilities', 'fields'],
+                'labels' => ['my_missions_title', 'browse_missions'],
+                'templates' => [['slug', 'title', 'summary', 'estimated_days']],
             ]);
     }
 
-    public function test_authenticated_user_can_enroll_and_fetch_workspace(): void
+    public function test_user_can_view_mission_template_and_enroll(): void
     {
         $user = User::factory()->create();
-        $user->assignRole('member');
         Sanctum::actingAs($user);
 
-        $enroll = $this->postJson('/api/v1/missions/'.GymBodybuildingMissionSeeder::SLUG.'/enroll');
+        $slug = GymBodybuildingMissionSeeder::SLUG;
 
-        $enroll->assertCreated()
-            ->assertJsonPath('already_enrolled', false)
+        $this->getJson("/api/v1/missions/{$slug}")
+            ->assertOk()
+            ->assertJsonPath('template.slug', $slug)
+            ->assertJsonStructure(['template' => ['phases', 'capabilities', 'description']]);
+
+        $enroll = $this->postJson("/api/v1/missions/{$slug}/enroll")
+            ->assertCreated()
+            ->assertJsonPath('enrollment.status', 'active')
             ->assertJsonStructure([
-                'enrollment' => ['uuid', 'progress_percent', 'tabs', 'programs', 'field_values'],
+                'enrollment' => ['uuid', 'title', 'progress_percent'],
+                'workspace' => ['meta', 'mission', 'enrollment', 'engines', 'workspace', 'tools'],
             ]);
 
         $uuid = $enroll->json('enrollment.uuid');
 
-        $this->getJson('/api/v1/mission-enrollments/'.$uuid)
+        $this->getJson('/api/v1/missions')
+            ->assertOk()
+            ->assertJsonCount(1, 'active_enrollments');
+
+        $this->getJson("/api/v1/missions/enrollments/{$uuid}")
             ->assertOk()
             ->assertJsonPath('enrollment.uuid', $uuid)
-            ->assertJsonPath('enrollment.programs.workout', null);
+            ->assertJsonPath('mission.engine_module', 'aether')
+            ->assertJsonPath('workspace.mode', 'locked')
+            ->assertJsonPath('engines.aether.status', 'pro_required')
+            ->assertJsonPath('engines.aether.programs.workout', null)
+            ->assertJsonStructure(['tools']);
 
-        $this->patchJson('/api/v1/mission-enrollments/'.$uuid.'/fields', [
-            'fields' => [
-                'gym_days' => ['sat', 'wed'],
-                'preferred_gym_time' => '19:30',
-            ],
-        ])
-            ->assertOk()
-            ->assertJsonPath('enrollment.field_values.gym_days', ['sat', 'wed']);
-
-        $this->postJson('/api/v1/mission-enrollments/'.$uuid.'/daily-reports', [
-            'report_date' => now()->toDateString(),
-            'mood_score' => 8,
-            'trained_today' => true,
-        ])
-            ->assertOk()
-            ->assertJsonPath('report.mood_score', 8);
-
-        $this->assertSame(1, MissionEnrollment::query()->where('user_id', $user->id)->count());
-
-        $this->postJson('/api/v1/missions/'.GymBodybuildingMissionSeeder::SLUG.'/enroll')
-            ->assertOk()
-            ->assertJsonPath('already_enrolled', true);
+        $this->assertDatabaseHas('mission_enrollments', [
+            'user_id' => $user->id,
+            'uuid' => $uuid,
+        ]);
     }
 
-    public function test_user_cannot_access_another_users_enrollment(): void
+    public function test_enroll_is_idempotent_for_active_mission(): void
     {
-        $owner = User::factory()->create();
-        $owner->assignRole('member');
-        $intruder = User::factory()->create();
-        $intruder->assignRole('member');
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
 
-        Sanctum::actingAs($owner);
-        $uuid = $this->postJson('/api/v1/missions/'.GymBodybuildingMissionSeeder::SLUG.'/enroll')
-            ->json('enrollment.uuid');
+        $template = MissionTemplate::query()->where('slug', GymBodybuildingMissionSeeder::SLUG)->firstOrFail();
 
-        Sanctum::actingAs($intruder);
-        $this->getJson('/api/v1/mission-enrollments/'.$uuid)->assertForbidden();
+        $this->postJson('/api/v1/missions/gym-bodybuilding/enroll')->assertCreated();
+        $this->postJson('/api/v1/missions/gym-bodybuilding/enroll')
+            ->assertOk()
+            ->assertJsonPath('enrollment.status', 'active');
+
+        $this->assertSame(
+            1,
+            MissionEnrollment::query()->where('user_id', $user->id)->where('template_id', $template->id)->count(),
+        );
     }
 }

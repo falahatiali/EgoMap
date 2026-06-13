@@ -5,6 +5,7 @@ namespace Modules\MissionEngine\Services;
 use App\Models\User;
 use App\Services\Missions\MissionAetherAdherenceService;
 use App\Services\Missions\MissionAetherProgramService;
+use App\Services\Missions\MissionWorkspacePresenter;
 use App\Services\Profile\UserAetherProgramHistoryService;
 use App\Support\LocaleConfig;
 use Modules\AetherEngine\Models\AetherGeneratedProgram;
@@ -26,6 +27,7 @@ final class MissionApiService
         private UserAetherProgramHistoryService $programHistory,
         private MissionDailyReportService $dailyReports,
         private MissionSupplementLogService $supplements,
+        private MissionWorkspacePresenter $workspacePresenter,
     ) {}
 
     public function resolveLocale(?string $acceptLanguage = null): string
@@ -152,56 +154,7 @@ final class MissionApiService
     {
         $this->assertOwned($enrollment, $user);
 
-        $enrollment->loadMissing(['measurements' => fn ($q) => $q->latest('measured_at')->limit(10)]);
-        $presenter = new MissionEnrollmentPresenter($enrollment);
-        $capabilities = $presenter->enabledCapabilities($locale);
-
-        $taskConfig = collect($capabilities)->firstWhere('key', 'task')['config'] ?? [];
-        $nutritionConfig = collect($capabilities)->firstWhere('key', 'nutrition')['config'] ?? [];
-
-        $workoutProgram = $this->adherence->latestProgramForEnrollment($enrollment, 'workout');
-        $mealProgram = $this->adherence->latestProgramForEnrollment($enrollment, 'meal');
-
-        return [
-            'enrollment' => array_merge(
-                $this->mapEnrollmentSummary($enrollment, $locale),
-                [
-                    'field_values' => $enrollment->field_values ?? [],
-                    'capabilities' => $capabilities,
-                    'tabs' => $this->workspaceTabs($locale),
-                    'programs' => [
-                        'workout' => $workoutProgram ? $this->mapLinkedProgram($workoutProgram, $locale, $user) : null,
-                        'meal' => $mealProgram ? $this->mapLinkedProgram($mealProgram, $locale, $user) : null,
-                    ],
-                    'ai' => [
-                        'can_workout' => MissionProGate::canUseFeature($user, $taskConfig, 'ai_workout_plan'),
-                        'can_meal' => MissionProGate::canUseFeature($user, $nutritionConfig, 'ai_meal_plan'),
-                        'requires_pro_workout' => MissionProGate::featureRequiresPro($taskConfig, 'ai_workout_plan'),
-                        'requires_pro_meal' => MissionProGate::featureRequiresPro($nutritionConfig, 'ai_meal_plan'),
-                    ],
-                    'supplements' => [
-                        'products' => collect($this->supplements->activeProducts($enrollment))
-                            ->map(fn ($product): array => [
-                                'id' => $product->id,
-                                'uuid' => $product->uuid,
-                                'name' => $product->name,
-                                'brand' => $product->brand,
-                                'default_unit' => $product->default_unit,
-                                'default_amount' => $product->default_amount,
-                            ])
-                            ->all(),
-                    ],
-                    'recent_measurements' => $enrollment->measurements
-                        ->map(fn ($measurement): array => [
-                            'metric_key' => $measurement->metric_key,
-                            'value' => (float) $measurement->value,
-                            'unit' => $measurement->unit,
-                            'measured_at' => $measurement->measured_at?->toIso8601String(),
-                        ])
-                        ->all(),
-                ],
-            ),
-        ];
+        return $this->workspacePresenter->present($enrollment, $user, $locale);
     }
 
     /**
@@ -306,21 +259,6 @@ final class MissionApiService
             'start_mission' => __('missions.start_mission', locale: $locale),
             'continue_mission' => __('missions.continue_mission', locale: $locale),
             'days' => __('missions.days', locale: $locale),
-        ];
-    }
-
-    /**
-     * @return list<array{key: string, label: string, icon: string}>
-     */
-    private function workspaceTabs(string $locale): array
-    {
-        return [
-            ['key' => 'program', 'label' => __('missions.tab_program', locale: $locale), 'icon' => 'fa-bolt'],
-            ['key' => 'supplements', 'label' => __('missions.tab_supplements', locale: $locale), 'icon' => 'fa-capsules'],
-            ['key' => 'daily', 'label' => __('missions.tab_daily', locale: $locale), 'icon' => 'fa-calendar-day'],
-            ['key' => 'schedule', 'label' => __('missions.tab_schedule', locale: $locale), 'icon' => 'fa-calendar-week'],
-            ['key' => 'equipment', 'label' => __('missions.tab_equipment', locale: $locale), 'icon' => 'fa-bag-shopping'],
-            ['key' => 'registration', 'label' => __('missions.tab_registration', locale: $locale), 'icon' => 'fa-clipboard-check'],
         ];
     }
 

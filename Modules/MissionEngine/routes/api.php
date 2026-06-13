@@ -21,4 +21,7 @@ Route::middleware('auth:sanctum')->prefix('v1/mission-enrollments')->name('missi
     Route::post('/{uuid}/supplements/products', [MissionApiController::class, 'addSupplementProduct'])->name('supplements.products.store');
     Route::post('/{uuid}/supplements/intakes', [MissionApiController::class, 'logSupplementIntake'])->name('supplements.intakes.store');
     Route::post('/{uuid}/programs/generate', [MissionApiController::class, 'generateProgram'])->name('programs.generate');
+    Route::get('/{uuid}/calibration/defaults', [MissionApiController::class, 'calibrationDefaults'])->name('calibration.defaults');
+    Route::post('/{uuid}/calibration/complete', [MissionApiController::class, 'calibrationComplete'])->name('calibration.complete');
+    Route::post('/{uuid}/calibration/regenerate', [MissionApiController::class, 'calibrationRegenerate'])->name('calibration.regenerate');
 });

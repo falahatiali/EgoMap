@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BootstrapController;
 use App\Http\Controllers\Api\GhostModeController;
+use App\Http\Controllers\Api\MissionController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\QuizController;
 use App\Http\Controllers\Api\QuizSessionController;
@@ -44,5 +45,12 @@ Route::prefix('v1')->group(function (): void {
 
     Route::middleware('auth:sanctum')->prefix('profile')->name('profile.')->group(function (): void {
         Route::get('/', [ProfileController::class, 'show'])->name('show');
+    });
+
+    Route::middleware('auth:sanctum')->prefix('missions')->name('missions.')->group(function (): void {
+        Route::get('/', [MissionController::class, 'index'])->name('index');
+        Route::get('/enrollments/{uuid}', [MissionController::class, 'workspace'])->name('workspace');
+        Route::post('/{slug}/enroll', [MissionController::class, 'enroll'])->name('enroll');
+        Route::get('/{slug}', [MissionController::class, 'show'])->name('show');
     });
 });

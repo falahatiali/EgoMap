@@ -4,6 +4,7 @@ namespace Modules\MissionEngine\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\Missions\MissionCalibrationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -229,9 +230,105 @@ class MissionApiController extends Controller
     }
 
     /**
+     * GET /api/v1/mission-enrollments/{uuid}/calibration/defaults
+     */
+    public function calibrationDefaults(Request $request, string $uuid, MissionCalibrationService $calibration): JsonResponse
+    {
+        $user = $this->requireUser($request);
+        $enrollment = MissionEnrollment::query()->where('uuid', $uuid)->firstOrFail();
+
+        return response()->json($calibration->defaults($enrollment, $user));
+    }
+
+    /**
+     * POST /api/v1/mission-enrollments/{uuid}/calibration/complete
+     */
+    public function calibrationComplete(Request $request, string $uuid, MissionCalibrationService $calibration, MissionApiService $api): JsonResponse
+    {
+        $user = $this->requireUser($request);
+        $enrollment = MissionEnrollment::query()->where('uuid', $uuid)->firstOrFail();
+        $locale = $api->resolveLocale($request->header('Accept-Language'));
+
+        $validated = $this->validateCalibrationPayload($request);
+
+        return response()->json(
+            $calibration->complete(
+                $enrollment,
+                $user,
+                $validated['targets'],
+                $validated['wizard'],
+                $locale,
+                $validated['intent']['entry_tool_key'] ?? null,
+            ),
+            201,
+        );
+    }
+
+    /**
+     * POST /api/v1/mission-enrollments/{uuid}/calibration/regenerate
+     */
+    public function calibrationRegenerate(Request $request, string $uuid, MissionCalibrationService $calibration, MissionApiService $api): JsonResponse
+    {
+        $user = $this->requireUser($request);
+        $enrollment = MissionEnrollment::query()->where('uuid', $uuid)->firstOrFail();
+        $locale = $api->resolveLocale($request->header('Accept-Language'));
+
+        $validated = $this->validateCalibrationPayload($request);
+        abort_unless((bool) ($validated['force'] ?? false), 422, 'force must be true to regenerate.');
+
+        return response()->json(
+            $calibration->regenerate(
+                $enrollment,
+                $user,
+                $validated['targets'],
+                $validated['wizard'],
+                $locale,
+                $validated['intent']['entry_tool_key'] ?? null,
+            ),
+        );
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function validateCalibrationPayload(Request $request): array
+    {
+        return $request->validate([
+            'intent' => ['nullable', 'array'],
+            'intent.entry_tool_key' => ['nullable', 'string', 'max:32'],
+            'intent.locale' => ['nullable', 'string', 'max:8'],
+            'targets' => ['required', 'array', 'min:1'],
+            'targets.*' => ['required', 'string', Rule::in(['workout', 'meal'])],
+            'wizard' => ['required', 'array'],
+            'wizard.age' => ['required', 'integer', 'min:14', 'max:90'],
+            'wizard.gender' => ['required', 'string', Rule::in(array_map(fn (Gender $g): string => $g->value, Gender::cases()))],
+            'wizard.height_cm' => ['required', 'integer', 'min:120', 'max:230'],
+            'wizard.weight_kg' => ['required', 'numeric', 'min:30', 'max:300'],
+            'wizard.body_fat_percent' => ['nullable', 'numeric', 'min:3', 'max:60'],
+            'wizard.primary_goal' => ['required', 'string', Rule::in(array_map(fn (PrimaryGoal $g): string => $g->value, PrimaryGoal::cases()))],
+            'wizard.training_days_per_week' => ['required', 'integer', 'min:2', 'max:6'],
+            'wizard.session_duration' => ['required', 'string', Rule::in(array_map(fn (SessionDuration $d): string => $d->value, SessionDuration::cases()))],
+            'wizard.preferred_workout_time' => ['nullable', 'string', Rule::in(array_map(fn (WorkoutTimePreference $t): string => $t->value, WorkoutTimePreference::cases()))],
+            'wizard.gym_days' => ['nullable', 'array'],
+            'wizard.gym_days.*' => ['string', Rule::in(['sat', 'sun', 'mon', 'tue', 'wed', 'thu', 'fri'])],
+            'wizard.equipment' => ['required', 'string', Rule::in(array_map(fn (EquipmentAccess $e): string => $e->value, EquipmentAccess::cases()))],
+            'wizard.injury_tags' => ['nullable', 'array'],
+            'wizard.injury_tags.*' => ['string', Rule::in(['knee', 'lower_back', 'shoulder', 'wrist'])],
+            'wizard.dietary_pattern' => ['required', 'string', Rule::in(array_map(fn (DietaryPattern $d): string => $d->value, DietaryPattern::cases()))],
+            'wizard.cooking_ability' => ['nullable', 'string', Rule::in(array_map(fn (CookingAbility $c): string => $c->value, CookingAbility::cases()))],
+            'wizard.coaching_tone' => ['nullable', 'string'],
+            'wizard.motivation_style' => ['required', 'string', Rule::in(array_map(fn (MotivationStyle $m): string => $m->value, MotivationStyle::cases()))],
+            'wizard.training_style' => ['required', 'string', Rule::in(array_map(fn (TrainingStylePreference $s): string => $s->value, TrainingStylePreference::cases()))],
+            'commitment' => ['required', 'array'],
+            'commitment.confirmed' => ['required', 'boolean', 'accepted'],
+            'force' => ['nullable', 'boolean'],
+        ]);
+    }
+
+    /**
      * POST /api/v1/mission-enrollments/{uuid}/programs/generate
      */
-    public function generateProgram(Request $request, string $uuid, MissionApiService $api): JsonResponse
+    public function generateProgram(Request $request, string $uuid, MissionCalibrationService $calibration, MissionApiService $api): JsonResponse
     {
         $user = $this->requireUser($request);
         $enrollment = MissionEnrollment::query()->where('uuid', $uuid)->firstOrFail();
@@ -260,13 +357,14 @@ class MissionApiController extends Controller
         ]);
 
         return response()->json(
-            $api->generateProgram(
+            $calibration->complete(
                 $enrollment,
                 $user,
-                $validated['applied_target'],
+                [$validated['applied_target']],
                 $validated['wizard'],
                 $locale,
             ),
+            201,
         );
     }
 
