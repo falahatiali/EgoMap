@@ -1,33 +1,30 @@
 <?php
 
-namespace Modules\AetherEngine\Services;
+namespace Modules\AetherEngine\Integrations\WorkoutX;
 
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class WorkoutXApiClient
+class WorkoutXHttpClient
 {
     /**
      * @return array{gif_url: ?string, video_url: ?string, image_url: ?string, api_source: string, api_external_id: ?string}|null
      */
     public function fetchByName(string $name): ?array
     {
-        if (! config('aether.exercise_api.workoutx.enabled', false)) {
-            return null;
-        }
-
-        $apiKey = config('aether.exercise_api.workoutx.key');
-
-        if (! is_string($apiKey) || $apiKey === '') {
+        if (! $this->isConfigured()) {
             return null;
         }
 
         try {
             $response = Http::withHeaders([
-                'X-Api-Key' => $apiKey,
+                'X-Api-Key' => (string) config('aether.exercise_api.workoutx.key'),
             ])
-                ->timeout(8)
-                ->get(config('aether.exercise_api.workoutx.base_url').'/exercises', [
+                ->timeout((int) config('aether.exercise_api.workoutx.timeout', 8))
+                ->connectTimeout((int) config('aether.exercise_api.workoutx.connect_timeout', 3))
+                ->get(rtrim((string) config('aether.exercise_api.workoutx.base_url'), '/').'/exercises', [
                     'search' => $name,
                     'limit' => 1,
                 ]);
@@ -49,7 +46,7 @@ class WorkoutXApiClient
                 'api_source' => 'workoutx',
                 'api_external_id' => isset($item['id']) ? (string) $item['id'] : null,
             ];
-        } catch (\Throwable $exception) {
+        } catch (ConnectionException|RequestException $exception) {
             Log::warning('WorkoutX API fetch failed', [
                 'exercise' => $name,
                 'message' => $exception->getMessage(),
@@ -57,5 +54,16 @@ class WorkoutXApiClient
 
             return null;
         }
+    }
+
+    public function isConfigured(): bool
+    {
+        if (! (bool) config('aether.exercise_api.workoutx.enabled', false)) {
+            return false;
+        }
+
+        $apiKey = config('aether.exercise_api.workoutx.key');
+
+        return is_string($apiKey) && $apiKey !== '';
     }
 }

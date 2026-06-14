@@ -16,7 +16,7 @@ use Modules\AetherEngine\Models\AetherProgramExerciseSet;
 use Modules\AetherEngine\Models\AetherWorkoutSetLog;
 use Modules\AetherEngine\Services\AetherWorkoutLogService;
 use Modules\AetherEngine\Services\AetherWorkoutSessionService;
-use Modules\AetherEngine\Services\ExerciseMediaResolver;
+use Modules\AetherEngine\Services\ExerciseMedia\ExerciseMediaResolver;
 use Modules\AetherEngine\Services\ExerciseSubstitutionService;
 use Modules\AetherEngine\Support\ExerciseSetPrescriptionBuilder;
 

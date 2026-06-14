@@ -8,6 +8,7 @@ use App\Support\LocaleConfig;
 use Modules\AetherEngine\Models\AetherGeneratedProgram;
 use Modules\AetherEngine\Models\AetherProgramExerciseSet;
 use Modules\AetherEngine\Models\AetherProgramWorkoutDay;
+use Modules\AetherEngine\Services\ExerciseMedia\ExerciseMediaResolver;
 use Modules\MissionEngine\Support\MissionLocalizedText;
 
 final class AetherApiService
