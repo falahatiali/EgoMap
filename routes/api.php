@@ -54,7 +54,7 @@ Route::prefix('v1')->group(function (): void {
         Route::post('/checkout/confirm', [BillingController::class, 'confirmCheckout'])->name('checkout.confirm');
     });
 
-    Route::middleware('auth:sanctum')->prefix('missions')->name('missions.')->group(function (): void {
+    Route::middleware('auth:sanctum')->prefix('missions')->name('api.missions.')->group(function (): void {
         Route::get('/', [MissionController::class, 'index'])->name('index');
         Route::get('/enrollments/{uuid}', [MissionController::class, 'workspace'])->name('workspace');
         Route::post('/{slug}/enroll', [MissionController::class, 'enroll'])->name('enroll');
