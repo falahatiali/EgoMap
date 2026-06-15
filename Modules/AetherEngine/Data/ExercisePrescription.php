@@ -16,6 +16,9 @@ readonly class ExercisePrescription
         public int $restSeconds,
         public ?string $notes = null,
         public array $alternativeSlugs = [],
+        public ?string $rpe = null,
+        public ?string $tempo = null,
+        public ?float $defaultWeightKg = null,
     ) {}
 
     /**
@@ -32,6 +35,9 @@ readonly class ExercisePrescription
             'rest_seconds' => $this->restSeconds,
             'notes' => $this->notes,
             'alternatives' => $this->alternativeSlugs,
+            'rpe' => $this->rpe,
+            'tempo' => $this->tempo,
+            'default_weight_kg' => $this->defaultWeightKg,
         ];
     }
 }

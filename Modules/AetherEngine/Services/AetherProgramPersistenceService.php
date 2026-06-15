@@ -130,6 +130,9 @@ class AetherProgramPersistenceService
             'rest_seconds' => $exercise->restSeconds,
             'notes' => $exercise->notes,
             'alternative_slugs' => $exercise->alternativeSlugs !== [] ? $exercise->alternativeSlugs : null,
+            'rpe' => $exercise->rpe,
+            'tempo' => $exercise->tempo,
+            'default_weight_kg' => $exercise->defaultWeightKg,
         ]);
 
         foreach ($this->setBuilder->build($exercise->sets, $exercise->reps, $exercise->restSeconds) as $setPayload) {

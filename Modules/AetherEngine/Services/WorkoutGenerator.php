@@ -52,6 +52,9 @@ class WorkoutGenerator implements WorkoutGeneratorInterface
                     restSeconds: $volume['rest'],
                     notes: $picked->instructions,
                     alternativeSlugs: $picked->alternative_slugs ?? [],
+                    rpe: $this->adjustedRpe($picked->rpe_range ?? '6-8', $profile->primary_goal, $weekNumber),
+                    tempo: $picked->tempo ?? '2-0-2-0',
+                    defaultWeightKg: $this->defaultWeightForExperience($picked, $profile->training_experience),
                 );
             }
 
@@ -164,5 +167,36 @@ class WorkoutGenerator implements WorkoutGeneratorInterface
             CoachingTone::Technical => "Day {$dayNumber}: Track loads and RPE. Progressive overload drives adaptation.",
             CoachingTone::Gentle => "Day {$dayNumber}: Consistency beats intensity. You are rebuilding with care.",
         };
+    }
+
+    /**
+     * Shift RPE range up by 1 point in later weeks to encode progressive overload.
+     */
+    private function adjustedRpe(string $rpeRange, PrimaryGoal $goal, int $weekNumber): string
+    {
+        [$low, $high] = array_map('intval', explode('-', $rpeRange));
+
+        $goalShift = match ($goal) {
+            PrimaryGoal::Strength => 1,
+            PrimaryGoal::MuscleGain => 0,
+            default => -1,
+        };
+
+        $weekShift = min($weekNumber - 1, 2);
+        $low = min(10, $low + $goalShift + $weekShift);
+        $high = min(10, $high + $goalShift + $weekShift);
+
+        return "{$low}-{$high}";
+    }
+
+    private function defaultWeightForExperience(AetherExercise $exercise, TrainingExperience $experience): ?float
+    {
+        $weight = match ($experience) {
+            TrainingExperience::Beginner => $exercise->default_weight_beginner_kg,
+            TrainingExperience::Intermediate => $exercise->default_weight_intermediate_kg,
+            TrainingExperience::Advanced, TrainingExperience::Elite => $exercise->default_weight_advanced_kg,
+        };
+
+        return $weight > 0 ? $weight : null;
     }
 }

@@ -24,6 +24,9 @@ return new class extends Migration
             $table->unsignedSmallInteger('rest_seconds')->default(90);
             $table->text('notes')->nullable();
             $table->json('alternative_slugs')->nullable();
+            $table->string('rpe', 8)->nullable();
+            $table->string('tempo', 16)->nullable();
+            $table->decimal('default_weight_kg', 5, 1)->nullable();
             $table->timestamps();
         });
     }

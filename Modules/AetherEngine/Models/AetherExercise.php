@@ -22,6 +22,11 @@ use Modules\AetherEngine\Enums\MuscleGroup;
     'api_source',
     'api_external_id',
     'media_cached_at',
+    'rpe_range',
+    'tempo',
+    'default_weight_beginner_kg',
+    'default_weight_intermediate_kg',
+    'default_weight_advanced_kg',
     'is_active',
 ])]
 class AetherExercise extends Model
@@ -39,6 +44,9 @@ class AetherExercise extends Model
             'is_active' => 'boolean',
             'media_cached_at' => 'datetime',
             'muscle_group' => MuscleGroup::class,
+            'default_weight_beginner_kg' => 'float',
+            'default_weight_intermediate_kg' => 'float',
+            'default_weight_advanced_kg' => 'float',
         ];
     }
 }
