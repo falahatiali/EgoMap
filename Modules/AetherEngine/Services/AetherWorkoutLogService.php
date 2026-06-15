@@ -187,6 +187,100 @@ class AetherWorkoutLogService
         ];
     }
 
+    /**
+     * Log (or update) the weight used for a specific set in the current session.
+     *
+     * @param  float  $weightKg  Weight in kilograms; use 0 to clear.
+     */
+    public function logWeight(
+        User $user,
+        AetherGeneratedProgram $program,
+        AetherProgramExerciseSet $exerciseSet,
+        AetherProgramWorkoutDay $workoutDay,
+        float $weightKg,
+    ): AetherWorkoutSetLog {
+        $session = $this->sessions->startOrResume($user, $program, $workoutDay);
+
+        $log = AetherWorkoutSetLog::query()->firstOrNew([
+            'user_id' => $user->id,
+            'aether_workout_session_id' => $session->id,
+            'aether_program_exercise_set_id' => $exerciseSet->id,
+        ]);
+
+        $log->weight_kg = $weightKg > 0 ? $weightKg : null;
+        $log->save();
+
+        return $log;
+    }
+
+    /**
+     * Compute the suggested weight for a set based on the previous program
+     * version's average logged weight + 2.5 kg progressive overload.
+     *
+     * Returns null when there is no prior data.
+     */
+    public function suggestedWeightForSet(
+        User $user,
+        AetherGeneratedProgram $program,
+        AetherProgramExerciseSet $exerciseSet,
+    ): ?float {
+        // Find the most recent completed log for any set on the same exercise slug
+        // within the same program (prior sessions = prior weeks).
+        $exerciseSlug = $exerciseSet->programExercise?->slug;
+
+        if ($exerciseSlug === null) {
+            return null;
+        }
+
+        $sessionIds = AetherWorkoutSession::query()
+            ->where('user_id', $user->id)
+            ->where('aether_generated_program_id', $program->id)
+            ->orderByDesc('id')
+            ->pluck('id');
+
+        if ($sessionIds->isEmpty()) {
+            return null;
+        }
+
+        // Find all logs with a weight for the same exercise slug.
+        $avgWeight = AetherWorkoutSetLog::query()
+            ->whereIn('aether_workout_session_id', $sessionIds)
+            ->where('user_id', $user->id)
+            ->whereNotNull('weight_kg')
+            ->whereHas('programExerciseSet.programExercise', function ($q) use ($exerciseSlug): void {
+                $q->where('slug', $exerciseSlug);
+            })
+            ->avg('weight_kg');
+
+        if ($avgWeight === null) {
+            return null;
+        }
+
+        // Round to nearest 0.5 kg after adding the overload increment.
+        return round(((float) $avgWeight + 2.5) * 2) / 2;
+    }
+
+    /**
+     * @return Collection<int, AetherWorkoutSetLog>
+     */
+    public function weightLogsForProgram(User $user, AetherGeneratedProgram $program): Collection
+    {
+        $sessionIds = AetherWorkoutSession::query()
+            ->where('user_id', $user->id)
+            ->where('aether_generated_program_id', $program->id)
+            ->pluck('id');
+
+        if ($sessionIds->isEmpty()) {
+            return collect();
+        }
+
+        return AetherWorkoutSetLog::query()
+            ->where('user_id', $user->id)
+            ->whereIn('aether_workout_session_id', $sessionIds)
+            ->whereNotNull('weight_kg')
+            ->get(['aether_program_exercise_set_id', 'weight_kg']);
+    }
+
     private function refreshSessionStatus(AetherWorkoutSession $session): void
     {
         $session->loadMissing('workoutDay.exercises.prescriptionSets', 'setLogs');
