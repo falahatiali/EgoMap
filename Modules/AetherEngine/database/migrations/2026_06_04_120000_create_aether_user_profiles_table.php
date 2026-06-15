@@ -23,6 +23,9 @@ return new class extends Migration
             $table->decimal('body_fat_percent', 4, 1)->nullable();
             $table->string('training_experience', 32);
             $table->string('primary_goal', 32);
+            $table->string('current_body_build', 32)->nullable();
+            $table->string('target_body_goal', 32)->nullable();
+            $table->string('gym_confidence', 32)->nullable();
             $table->string('secondary_goal', 32)->nullable();
             $table->decimal('target_weight_kg', 5, 2)->nullable();
             $table->decimal('target_body_fat_percent', 4, 1)->nullable();

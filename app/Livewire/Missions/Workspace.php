@@ -13,11 +13,14 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\AetherEngine\Enums\BodyBuild;
+use Modules\AetherEngine\Enums\BodyGoal;
 use Modules\AetherEngine\Enums\CoachingTone;
 use Modules\AetherEngine\Enums\CookingAbility;
 use Modules\AetherEngine\Enums\DietaryPattern;
 use Modules\AetherEngine\Enums\EquipmentAccess;
 use Modules\AetherEngine\Enums\Gender;
+use Modules\AetherEngine\Enums\GymConfidence;
 use Modules\AetherEngine\Enums\MotivationStyle;
 use Modules\AetherEngine\Enums\PrimaryGoal;
 use Modules\AetherEngine\Enums\SessionDuration;
@@ -25,6 +28,7 @@ use Modules\AetherEngine\Enums\TrainingExperience;
 use Modules\AetherEngine\Enums\TrainingStylePreference;
 use Modules\AetherEngine\Enums\WorkoutTimePreference;
 use Modules\AetherEngine\Services\AetherProfileService;
+use Modules\AetherEngine\Support\AetherWorkoutWizardSteps;
 use Modules\MissionEngine\Enums\EquipmentCategory;
 use Modules\MissionEngine\Enums\EquipmentStatus;
 use Modules\MissionEngine\Models\MissionEnrollment;
@@ -152,6 +156,14 @@ class Workspace extends Component
 
     /** @var list<string> */
     public array $aiInjuryTags = [];
+
+    public string $aiAgeRange = '18_29';
+
+    public string $aiCurrentBodyBuild = '';
+
+    public string $aiTargetBodyGoal = '';
+
+    public string $aiGymConfidence = '';
 
     public bool $aiIsGenerating = false;
 
@@ -400,9 +412,54 @@ class Workspace extends Component
         $this->normalizeAiWizardInputs();
         $this->validate($this->aiWizardRulesForStep($this->aiWizardStep));
 
-        if ($this->aiWizardStep < 4) {
+        if ($this->aiWizardStep < $this->aiWizardStepCount()) {
             $this->aiWizardStep++;
         }
+    }
+
+    public function selectAiAgeRange(string $range): void
+    {
+        $this->aiAgeRange = $range;
+        $this->aiAge = match ($range) {
+            '18_29' => 25,
+            '30_39' => 35,
+            '40_49' => 45,
+            '50_plus' => 55,
+            default => 28,
+        };
+    }
+
+    public function aiWizardCanProceed(): bool
+    {
+        if ($this->aiQuestionnaireTarget === 'meal') {
+            return true;
+        }
+
+        return match (AetherWorkoutWizardSteps::keyForStep($this->aiWizardStep)) {
+            'current_body' => $this->aiCurrentBodyBuild !== '',
+            'target_body' => $this->aiTargetBodyGoal !== '',
+            'gym_confidence' => $this->aiGymConfidence !== '',
+            default => true,
+        };
+    }
+
+    public function aiWizardStepCount(): int
+    {
+        return $this->aiQuestionnaireTarget === 'meal'
+            ? 4
+            : AetherWorkoutWizardSteps::count();
+    }
+
+    public function aiWorkoutWizardStepKey(): string
+    {
+        return AetherWorkoutWizardSteps::keyForStep($this->aiWizardStep);
+    }
+
+    public function aiWizardProgressPercent(): float
+    {
+        $total = max(1, $this->aiWizardStepCount());
+
+        return round(($this->aiWizardStep / $total) * 100, 1);
     }
 
     public function selectAiTrainingDays(int $days): void
@@ -443,11 +500,15 @@ class Workspace extends Component
         }
 
         $this->normalizeAiWizardInputs();
-        $this->validate(array_merge(
-            $this->aiWizardRulesForStep(1),
-            $this->aiWizardRulesForStep(2),
-            $this->aiWizardRulesForStep(3),
-        ));
+        $validationRules = $this->aiQuestionnaireTarget === 'meal'
+            ? array_merge(
+                $this->aiWizardRulesForStep(1),
+                $this->aiWizardRulesForStep(2),
+                $this->aiWizardRulesForStep(3),
+            )
+            : $this->collectWorkoutWizardRules();
+
+        $this->validate($validationRules);
 
         $this->aiIsGenerating = true;
 
@@ -512,7 +573,10 @@ class Workspace extends Component
             'equipmentCategories' => EquipmentCategory::cases(),
             'equipmentStatuses' => EquipmentStatus::cases(),
             'equipmentPresets' => $this->equipmentPresetDefinitions(),
-            'aiWizardSteps' => 4,
+            'aiWizardSteps' => $this->aiWizardStepCount(),
+            'aiWizardStepKey' => $this->aiWorkoutWizardStepKey(),
+            'aiWizardCanProceed' => $this->aiWizardCanProceed(),
+            'aiWizardProgressPercent' => $this->aiWizardProgressPercent(),
             'aiFormOptions' => $this->aiFormOptions(),
             'aiWizardReview' => $this->aiWizardReviewItems(),
             'activeWorkoutProgram' => $activeWorkoutProgram,
@@ -648,6 +712,11 @@ class Workspace extends Component
         $this->aiMotivationStyle = (string) $defaults['motivation_style'];
         $this->aiTrainingStyle = (string) $defaults['training_style'];
         $this->aiInjuryTags = is_array($defaults['injury_tags'] ?? null) ? $defaults['injury_tags'] : [];
+        $this->aiAgeRange = (string) ($defaults['age_range'] ?? '18_29');
+        $this->selectAiAgeRange($this->aiAgeRange);
+        $this->aiCurrentBodyBuild = (string) ($defaults['current_body_build'] ?? '');
+        $this->aiTargetBodyGoal = (string) ($defaults['target_body_goal'] ?? '');
+        $this->aiGymConfidence = (string) ($defaults['gym_confidence'] ?? '');
         $this->showAiQuestionnaire = true;
         $this->resetErrorBag();
     }
@@ -675,11 +744,25 @@ class Workspace extends Component
             'motivation_style' => $this->aiMotivationStyle,
             'training_style' => $this->aiTrainingStyle,
             'training_experience' => $this->deriveTrainingExperience(),
+            'current_body_build' => $this->aiCurrentBodyBuild,
+            'target_body_goal' => $this->aiTargetBodyGoal,
+            'gym_confidence' => $this->aiGymConfidence,
+            'age_range' => $this->aiAgeRange,
         ];
     }
 
     private function deriveTrainingExperience(): string
     {
+        if ($this->aiGymConfidence !== '') {
+            return match ($this->aiGymConfidence) {
+                GymConfidence::NeverBeen->value, GymConfidence::LostUnsure->value => TrainingExperience::Beginner->value,
+                GymConfidence::BasicsUnsure->value => TrainingExperience::Beginner->value,
+                GymConfidence::ComfortableGuidance->value => TrainingExperience::Intermediate->value,
+                GymConfidence::ConfidentPlan->value => TrainingExperience::Advanced->value,
+                default => TrainingExperience::Intermediate->value,
+            };
+        }
+
         return match ($this->aiTrainingStyle) {
             TrainingStylePreference::HeavyWeights->value, TrainingStylePreference::Hiit->value => TrainingExperience::Intermediate->value,
             default => TrainingExperience::Beginner->value,
@@ -708,13 +791,32 @@ class Workspace extends Component
             ->map(fn (string $tag): string => $label($options['injuries'], $tag))
             ->implode(' · ');
 
+        if ($this->aiQuestionnaireTarget === 'meal') {
+            return [
+                ['label' => __('missions.ai_review_days', locale: $locale), 'value' => __('missions.ai_review_days_value', ['days' => eg_num($this->aiTrainingDaysPerWeek)], locale: $locale)],
+                ['label' => __('missions.ai_review_session', locale: $locale), 'value' => $label($options['session_durations'], $this->aiSessionDuration)],
+                ['label' => __('missions.ai_review_injuries', locale: $locale), 'value' => $injuryLabels !== '' ? $injuryLabels : __('missions.ai_injury_none', locale: $locale)],
+                ['label' => __('missions.ai_review_goal', locale: $locale), 'value' => $label($options['goals'], $this->aiPrimaryGoal)],
+                ['label' => __('missions.ai_review_equipment', locale: $locale), 'value' => $label($options['equipment'], $this->aiEquipment)],
+                ['label' => __('missions.ai_review_diet', locale: $locale), 'value' => $label($options['dietary'], $this->aiDietaryPattern)],
+                ['label' => __('missions.ai_review_style', locale: $locale), 'value' => $label($options['training_styles'], $this->aiTrainingStyle)],
+                ['label' => __('missions.ai_review_motivation', locale: $locale), 'value' => $label($options['motivation'], $this->aiMotivationStyle)],
+            ];
+        }
+
         return [
+            ['label' => __('missions.ai_review_gender', locale: $locale), 'value' => $label($options['genders'], $this->aiGender)],
+            ['label' => __('missions.ai_review_age', locale: $locale), 'value' => $label($options['age_ranges'], $this->aiAgeRange)],
+            ['label' => __('missions.ai_review_height', locale: $locale), 'value' => __('missions.ai_review_height_value', ['height' => eg_num($this->aiHeightCm)], locale: $locale)],
+            ['label' => __('missions.ai_review_weight', locale: $locale), 'value' => __('missions.ai_review_weight_value', ['weight' => eg_num($this->aiWeightKg)], locale: $locale)],
+            ['label' => __('missions.ai_review_current_body', locale: $locale), 'value' => $label($options['body_builds'], $this->aiCurrentBodyBuild)],
+            ['label' => __('missions.ai_review_target_body', locale: $locale), 'value' => $label($options['body_goals'], $this->aiTargetBodyGoal)],
+            ['label' => __('missions.ai_review_goal', locale: $locale), 'value' => $label($options['goals'], $this->aiPrimaryGoal)],
+            ['label' => __('missions.ai_review_gym_confidence', locale: $locale), 'value' => $label($options['gym_confidence'], $this->aiGymConfidence)],
             ['label' => __('missions.ai_review_days', locale: $locale), 'value' => __('missions.ai_review_days_value', ['days' => eg_num($this->aiTrainingDaysPerWeek)], locale: $locale)],
             ['label' => __('missions.ai_review_session', locale: $locale), 'value' => $label($options['session_durations'], $this->aiSessionDuration)],
-            ['label' => __('missions.ai_review_injuries', locale: $locale), 'value' => $injuryLabels !== '' ? $injuryLabels : __('missions.ai_injury_none', locale: $locale)],
-            ['label' => __('missions.ai_review_goal', locale: $locale), 'value' => $label($options['goals'], $this->aiPrimaryGoal)],
             ['label' => __('missions.ai_review_equipment', locale: $locale), 'value' => $label($options['equipment'], $this->aiEquipment)],
-            ['label' => __('missions.ai_review_diet', locale: $locale), 'value' => $label($options['dietary'], $this->aiDietaryPattern)],
+            ['label' => __('missions.ai_review_injuries', locale: $locale), 'value' => $injuryLabels !== '' ? $injuryLabels : __('missions.ai_injury_none', locale: $locale)],
             ['label' => __('missions.ai_review_style', locale: $locale), 'value' => $label($options['training_styles'], $this->aiTrainingStyle)],
             ['label' => __('missions.ai_review_motivation', locale: $locale), 'value' => $label($options['motivation'], $this->aiMotivationStyle)],
         ];
@@ -723,22 +825,85 @@ class Workspace extends Component
     /**
      * @return array<string, array<int, mixed>>
      */
+    private function collectWorkoutWizardRules(): array
+    {
+        $rules = [];
+
+        for ($step = 1; $step < AetherWorkoutWizardSteps::count(); $step++) {
+            $rules = array_merge($rules, $this->aiWizardRulesForStep($step));
+        }
+
+        return $rules;
+    }
+
+    /**
+     * @return array<string, array<int, mixed>>
+     */
     private function aiWizardRulesForStep(int $step): array
     {
-        return match ($step) {
-            1 => [
+        if ($this->aiQuestionnaireTarget === 'meal') {
+            return match ($step) {
+                1 => [
+                    'aiTrainingDaysPerWeek' => ['required', 'integer', 'min:2', 'max:6'],
+                    'aiSessionDuration' => $this->enumValueRule(SessionDuration::class),
+                    'aiInjuryTags' => ['nullable', 'array'],
+                    'aiInjuryTags.*' => ['string', Rule::in(['knee', 'lower_back', 'shoulder', 'wrist'])],
+                ],
+                2 => [
+                    'aiPrimaryGoal' => $this->enumValueRule(PrimaryGoal::class),
+                    'aiEquipment' => $this->enumValueRule(EquipmentAccess::class),
+                    'aiDietaryPattern' => $this->enumValueRule(DietaryPattern::class),
+                ],
+                3 => [
+                    'aiTrainingStyle' => $this->enumValueRule(TrainingStylePreference::class),
+                    'aiMotivationStyle' => $this->enumValueRule(MotivationStyle::class),
+                ],
+                default => [],
+            };
+        }
+
+        return match (AetherWorkoutWizardSteps::keyForStep($step)) {
+            'gender' => [
+                'aiGender' => $this->enumValueRule(Gender::class),
+            ],
+            'age' => [
+                'aiAgeRange' => ['required', 'string', Rule::in(['18_29', '30_39', '40_49', '50_plus'])],
+            ],
+            'height' => [
+                'aiHeightCm' => ['required', 'integer', 'min:120', 'max:230'],
+            ],
+            'weight' => [
+                'aiWeightKg' => ['required', 'numeric', 'min:35', 'max:200'],
+            ],
+            'current_body' => [
+                'aiCurrentBodyBuild' => $this->enumValueRule(BodyBuild::class),
+            ],
+            'target_body' => [
+                'aiTargetBodyGoal' => $this->enumValueRule(BodyGoal::class),
+            ],
+            'goal' => [
+                'aiPrimaryGoal' => $this->enumValueRule(PrimaryGoal::class),
+            ],
+            'gym_confidence' => [
+                'aiGymConfidence' => $this->enumValueRule(GymConfidence::class),
+            ],
+            'days' => [
                 'aiTrainingDaysPerWeek' => ['required', 'integer', 'min:2', 'max:6'],
+            ],
+            'session' => [
                 'aiSessionDuration' => $this->enumValueRule(SessionDuration::class),
+            ],
+            'equipment' => [
+                'aiEquipment' => $this->enumValueRule(EquipmentAccess::class),
+            ],
+            'injuries' => [
                 'aiInjuryTags' => ['nullable', 'array'],
                 'aiInjuryTags.*' => ['string', Rule::in(['knee', 'lower_back', 'shoulder', 'wrist'])],
             ],
-            2 => [
-                'aiPrimaryGoal' => $this->enumValueRule(PrimaryGoal::class),
-                'aiEquipment' => $this->enumValueRule(EquipmentAccess::class),
-                'aiDietaryPattern' => $this->enumValueRule(DietaryPattern::class),
-            ],
-            3 => [
+            'style' => [
                 'aiTrainingStyle' => $this->enumValueRule(TrainingStylePreference::class),
+            ],
+            'motivation' => [
                 'aiMotivationStyle' => $this->enumValueRule(MotivationStyle::class),
             ],
             default => [],
@@ -748,6 +913,9 @@ class Workspace extends Component
     private function normalizeAiWizardInputs(): void
     {
         $this->aiGender = $this->normalizeBackedEnum($this->aiGender, Gender::class);
+        $this->aiCurrentBodyBuild = $this->normalizeBackedEnum($this->aiCurrentBodyBuild, BodyBuild::class);
+        $this->aiTargetBodyGoal = $this->normalizeBackedEnum($this->aiTargetBodyGoal, BodyGoal::class);
+        $this->aiGymConfidence = $this->normalizeBackedEnum($this->aiGymConfidence, GymConfidence::class);
         $this->aiTrainingExperience = $this->deriveTrainingExperience();
         $this->aiPrimaryGoal = $this->normalizeBackedEnum($this->aiPrimaryGoal, PrimaryGoal::class);
         $this->aiTrainingStyle = $this->normalizeBackedEnum($this->aiTrainingStyle, TrainingStylePreference::class);
@@ -798,6 +966,15 @@ class Workspace extends Component
 
         return [
             'genders' => $this->enumOptions(Gender::cases(), 'missions.ai_gender_', $locale),
+            'age_ranges' => [
+                ['value' => '18_29', 'label' => __('missions.ai_age_18_29', locale: $locale)],
+                ['value' => '30_39', 'label' => __('missions.ai_age_30_39', locale: $locale)],
+                ['value' => '40_49', 'label' => __('missions.ai_age_40_49', locale: $locale)],
+                ['value' => '50_plus', 'label' => __('missions.ai_age_50_plus', locale: $locale)],
+            ],
+            'body_builds' => $this->enumOptions(BodyBuild::cases(), 'missions.ai_body_build_', $locale),
+            'body_goals' => $this->enumOptions(BodyGoal::cases(), 'missions.ai_body_goal_', $locale),
+            'gym_confidence' => $this->enumOptions(GymConfidence::cases(), 'missions.ai_gym_confidence_', $locale),
             'goals' => $this->enumOptions(PrimaryGoal::cases(), 'missions.ai_goal_', $locale),
             'goal_icons' => [
                 'fat_loss' => 'fa-fire',

@@ -63,8 +63,14 @@ class MissionAetherProgramService
                 'coaching_tone' => 'gentle',
                 'motivation_style' => 'feeling_strong',
                 'training_style' => 'heavy_weights',
+                'current_body_build' => '',
+                'target_body_goal' => '',
+                'gym_confidence' => '',
+                'age_range' => '18_29',
             ];
         }
+
+        $metadata = is_array($profile->metadata) ? $profile->metadata : [];
 
         return [
             'age' => $profile->age,
@@ -83,10 +89,26 @@ class MissionAetherProgramService
             'cooking_ability' => $profile->cooking_ability->value,
             'coaching_tone' => $profile->coaching_tone->value,
             'motivation_style' => $profile->motivation_style->value,
-            'training_style' => is_string($profile->metadata['training_style'] ?? null)
-                ? $profile->metadata['training_style']
+            'training_style' => is_string($metadata['training_style'] ?? null)
+                ? $metadata['training_style']
                 : 'heavy_weights',
+            'current_body_build' => $profile->current_body_build?->value ?? '',
+            'target_body_goal' => $profile->target_body_goal?->value ?? '',
+            'gym_confidence' => $profile->gym_confidence?->value ?? '',
+            'age_range' => is_string($metadata['age_range'] ?? null)
+                ? $metadata['age_range']
+                : $this->ageRangeFromAge($profile->age),
         ];
+    }
+
+    private function ageRangeFromAge(int $age): string
+    {
+        return match (true) {
+            $age < 30 => '18_29',
+            $age < 40 => '30_39',
+            $age < 50 => '40_49',
+            default => '50_plus',
+        };
     }
 
     /**
@@ -103,6 +125,15 @@ class MissionAetherProgramService
             'body_fat_percent' => filled($wizard['body_fat_percent'] ?? null) ? (float) $wizard['body_fat_percent'] : null,
             'training_experience' => (string) ($wizard['training_experience'] ?? 'intermediate'),
             'primary_goal' => (string) $wizard['primary_goal'],
+            'current_body_build' => filled($wizard['current_body_build'] ?? null)
+                ? (string) $wizard['current_body_build']
+                : null,
+            'target_body_goal' => filled($wizard['target_body_goal'] ?? null)
+                ? (string) $wizard['target_body_goal']
+                : null,
+            'gym_confidence' => filled($wizard['gym_confidence'] ?? null)
+                ? (string) $wizard['gym_confidence']
+                : null,
             'training_days_per_week' => (int) $wizard['training_days_per_week'],
             'session_duration' => (string) $wizard['session_duration'],
             'preferred_workout_time' => (string) ($wizard['preferred_workout_time'] ?? 'evening'),
@@ -112,9 +143,10 @@ class MissionAetherProgramService
             'cooking_ability' => (string) ($wizard['cooking_ability'] ?? 'simple'),
             'coaching_tone' => (string) ($wizard['coaching_tone'] ?? 'gentle'),
             'motivation_style' => (string) $wizard['motivation_style'],
-            'metadata' => [
+            'metadata' => array_filter([
                 'training_style' => (string) ($wizard['training_style'] ?? 'heavy_weights'),
-            ],
+                'age_range' => filled($wizard['age_range'] ?? null) ? (string) $wizard['age_range'] : null,
+            ]),
             'stress_level' => 5,
             'sleep_hours' => 7.5,
         ];

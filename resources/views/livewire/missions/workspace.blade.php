@@ -75,7 +75,5 @@
         </div>
     </section>
 
-    @teleport('body')
-        @include('livewire.missions.partials.workspace-ai-questionnaire')
-    @endteleport
+    @include('livewire.missions.partials.workspace-ai-questionnaire')
 </div>

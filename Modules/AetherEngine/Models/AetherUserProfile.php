@@ -9,11 +9,14 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\AetherEngine\Enums\BodyBuild;
+use Modules\AetherEngine\Enums\BodyGoal;
 use Modules\AetherEngine\Enums\CoachingTone;
 use Modules\AetherEngine\Enums\CookingAbility;
 use Modules\AetherEngine\Enums\DietaryPattern;
 use Modules\AetherEngine\Enums\EquipmentAccess;
 use Modules\AetherEngine\Enums\Gender;
+use Modules\AetherEngine\Enums\GymConfidence;
 use Modules\AetherEngine\Enums\MotivationStyle;
 use Modules\AetherEngine\Enums\PrimaryGoal;
 use Modules\AetherEngine\Enums\SessionDuration;
@@ -29,6 +32,9 @@ use Modules\AetherEngine\Enums\WorkoutTimePreference;
     'body_fat_percent',
     'training_experience',
     'primary_goal',
+    'current_body_build',
+    'target_body_goal',
+    'gym_confidence',
     'secondary_goal',
     'target_weight_kg',
     'target_body_fat_percent',
@@ -83,6 +89,9 @@ class AetherUserProfile extends Model
             'gender' => Gender::class,
             'training_experience' => TrainingExperience::class,
             'primary_goal' => PrimaryGoal::class,
+            'current_body_build' => BodyBuild::class,
+            'target_body_goal' => BodyGoal::class,
+            'gym_confidence' => GymConfidence::class,
             'secondary_goal' => PrimaryGoal::class,
             'session_duration' => SessionDuration::class,
             'preferred_workout_time' => WorkoutTimePreference::class,
