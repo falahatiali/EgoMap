@@ -59,6 +59,20 @@ enum GamificationEvent: string
     /** User finished a chosen recovery punishment after a slip. */
     case PunishmentCompleted = 'punishment.completed';
 
+    // ─── VirtueEngine events ──────────────────────────────────────────────────
+
+    /** User logged a success moment in a virtue routine. */
+    case VirtueSuccessLogged = 'virtue.success_logged';
+
+    /** User maintained a 7-day success streak in a virtue routine. */
+    case VirtueStreak7 = 'virtue.streak_7';
+
+    /** User fully completed a virtue routine (goal reached). */
+    case VirtueRoutineCompleted = 'virtue.routine_completed';
+
+    /** User honestly reported a slip in a virtue routine. */
+    case VirtueSlipReported = 'virtue.slip_reported';
+
     /** @return list<string> All event values for validation and admin selects. */
     public static function values(): array
     {

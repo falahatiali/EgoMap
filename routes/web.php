@@ -17,6 +17,9 @@ use App\Livewire\Profile\Show;
 use App\Livewire\Profile\TestShow;
 use App\Livewire\Quiz\Result;
 use App\Livewire\Quiz\Take;
+use App\Livewire\Virtue\VirtueHabitPicker;
+use App\Livewire\Virtue\VirtueHub;
+use App\Livewire\Virtue\VirtueRoutineDetail;
 use App\Support\LocaleConfig;
 use App\Support\LocaleUrl;
 use Illuminate\Http\Request;
@@ -82,6 +85,12 @@ Route::prefix('{locale}')
             Route::livewire('/', MissionsCatalog::class)->name('catalog');
             Route::livewire('/templates/{template}', MissionShow::class)->name('show');
             Route::livewire('/active/{enrollment}', MissionWorkspace::class)->name('workspace');
+        });
+
+        Route::middleware('auth')->prefix('virtue')->name('virtue.')->group(function (): void {
+            Route::livewire('/', VirtueHub::class)->name('hub');
+            Route::livewire('/habits', VirtueHabitPicker::class)->name('habits');
+            Route::livewire('/routines/{routineId}', VirtueRoutineDetail::class)->name('routine');
         });
 
         Route::livewire('/quiz/session/{uuid}/result', Result::class)->name('quiz.result');

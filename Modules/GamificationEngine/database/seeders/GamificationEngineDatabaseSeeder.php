@@ -44,6 +44,12 @@ class GamificationEngineDatabaseSeeder extends Seeder
             ['slug' => 'blackhole_apprentice', 'name' => 'Blackhole Apprentice', 'icon' => 'fa-graduation-cap'],
             ['slug' => 'shadow_speaker', 'name' => 'Shadow Speaker', 'icon' => 'fa-moon'],
             ['slug' => 'alchemy_apprentice', 'name' => 'Alchemy Apprentice', 'icon' => 'fa-flask'],
+
+            // VirtueEngine badges
+            ['slug' => 'virtue_first_win', 'name' => 'First Victory', 'icon' => 'fa-medal'],
+            ['slug' => 'virtue_streak_7', 'name' => 'Virtue Streak', 'icon' => 'fa-fire-flame-curved'],
+            ['slug' => 'virtue_master', 'name' => 'Virtue Master', 'icon' => 'fa-trophy'],
+            ['slug' => 'virtue_honest', 'name' => 'Honest Heart', 'icon' => 'fa-heart'],
         ];
 
         foreach ($badges as $badge) {
@@ -585,6 +591,58 @@ class GamificationEngineDatabaseSeeder extends Seeder
                 ],
                 'max_per_day' => null,
                 'priority' => 55,
+            ],
+
+            // ─── VirtueEngine rules ───────────────────────────────────────────────────
+            [
+                'key' => 'virtue_success_logged',
+                'name' => 'Virtue: success logged',
+                'event' => GamificationEvent::VirtueSuccessLogged->value,
+                'rule_type' => GamificationRuleType::Reward,
+                'conditions' => null,
+                'effects' => ['points' => 5, 'xp' => 8, 'badge' => 'virtue_first_win'],
+                'max_per_day' => 5,
+                'priority' => 90,
+            ],
+            [
+                'key' => 'virtue_streak_7',
+                'name' => 'Virtue: 7-day streak',
+                'event' => GamificationEvent::VirtueStreak7->value,
+                'rule_type' => GamificationRuleType::Reward,
+                'conditions' => null,
+                'effects' => ['points' => 30, 'coins' => 15, 'xp' => 40, 'badge' => 'virtue_streak_7'],
+                'max_per_day' => 1,
+                'priority' => 91,
+            ],
+            [
+                'key' => 'virtue_routine_completed',
+                'name' => 'Virtue: routine completed',
+                'event' => GamificationEvent::VirtueRoutineCompleted->value,
+                'rule_type' => GamificationRuleType::Reward,
+                'conditions' => null,
+                'effects' => ['points' => 200, 'coins' => 50, 'xp' => 150, 'badge' => 'virtue_master'],
+                'max_per_day' => null,
+                'priority' => 92,
+            ],
+            [
+                'key' => 'virtue_slip_penalty',
+                'name' => 'Virtue: slip reported (penalty)',
+                'event' => GamificationEvent::VirtueSlipReported->value,
+                'rule_type' => GamificationRuleType::Penalty,
+                'conditions' => null,
+                'effects' => ['points' => -8, 'reset_streak' => true],
+                'max_per_day' => null,
+                'priority' => 93,
+            ],
+            [
+                'key' => 'virtue_slip_honesty',
+                'name' => 'Virtue: honest slip (tiny reward)',
+                'event' => GamificationEvent::VirtueSlipReported->value,
+                'rule_type' => GamificationRuleType::Reward,
+                'conditions' => null,
+                'effects' => ['points' => 1, 'badge' => 'virtue_honest'],
+                'max_per_day' => null,
+                'priority' => 94,
             ],
         ];
 

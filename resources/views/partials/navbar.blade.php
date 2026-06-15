@@ -32,6 +32,12 @@
                     <ul class="navbar-nav mx-lg-auto gap-lg-4 mt-3 mt-lg-0">
                         @auth
                             @include('partials.nav-missions-link')
+                            <li class="nav-item">
+                                <a class="eg-nav-link nav-link px-0 eg-transition" href="{{ route('virtue.hub', ['locale' => app()->getLocale()]) }}" wire:navigate>
+                                    <i class="fa-solid fa-brain me-1" aria-hidden="true"></i>
+                                    Virtue Forge
+                                </a>
+                            </li>
                         @endauth
                         @if ($nav['show_no_contact_link'])
                             <li class="nav-item">

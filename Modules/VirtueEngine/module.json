@@ -1,0 +1,11 @@
+{
+    "name": "VirtueEngine",
+    "alias": "virtueengine",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\VirtueEngine\\Providers\\VirtueEngineServiceProvider"
+    ],
+    "files": []
+}

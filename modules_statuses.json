@@ -1,5 +1,6 @@
 {
     "MissionEngine": true,
     "GamificationEngine": true,
-    "AetherEngine": true
+    "AetherEngine": true,
+    "VirtueEngine": true
 }

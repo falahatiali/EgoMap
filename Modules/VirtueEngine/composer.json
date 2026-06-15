@@ -1,0 +1,30 @@
+{
+    "name": "egomap/virtueengine",
+    "description": "",
+    "authors": [
+        {
+            "name": "EgoMap",
+            "email": "hello@egomap.test"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\VirtueEngine\\": "",
+            "Modules\\VirtueEngine\\Database\\Factories\\": "database/factories/",
+            "Modules\\VirtueEngine\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\VirtueEngine\\Tests\\": "tests/"
+        }
+    }
+}

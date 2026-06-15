@@ -7,6 +7,7 @@ use Illuminate\Database\Seeder;
 use Modules\AetherEngine\Database\Seeders\AetherEngineDatabaseSeeder;
 use Modules\GamificationEngine\Database\Seeders\GamificationEngineDatabaseSeeder;
 use Modules\MissionEngine\Database\Seeders\MissionEngineDatabaseSeeder;
+use Modules\VirtueEngine\Database\Seeders\VirtueEngineDatabaseSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -21,6 +22,7 @@ class DatabaseSeeder extends Seeder
         $this->call(MissionEngineDatabaseSeeder::class);
         $this->call(GamificationEngineDatabaseSeeder::class);
         $this->call(AetherEngineDatabaseSeeder::class);
+        $this->call(VirtueEngineDatabaseSeeder::class);
 
         $admin = User::factory()->create([
             'name' => 'Admin User',
