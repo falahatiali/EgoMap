@@ -120,11 +120,7 @@ services:
     container_name: egomap_node
     working_dir: /app
     volumes:
-      - ./resources:/app/resources
-      - ./public:/app/public
-      - ./package.json:/app/package.json
-      - ./package-lock.json:/app/package-lock.json
-      - ./vite.config.js:/app/vite.config.js
+      - .:/app
     command: >
       sh -c "npm ci && npm run build"
     restart: "no"

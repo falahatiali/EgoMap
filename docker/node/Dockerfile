@@ -4,12 +4,7 @@ WORKDIR /app
 
 RUN apk add --no-cache python3 make g++
 
-COPY package*.json ./
-
-RUN npm ci
-
-COPY . .
-
-USER node
+# Dependencies are installed at runtime via docker compose --profile build
+# so package-lock.json stays in sync with the mounted project files.
 
 CMD ["npm", "run", "build"]
