@@ -9,6 +9,7 @@ use Modules\GamificationEngine\Services\GamificationEngine;
 use Modules\GamificationEngine\Services\GamificationRuleMatcher;
 use Modules\GamificationEngine\Services\GamificationWalletResolver;
 use Modules\GamificationEngine\Support\GamificationMetadataEnricher;
+use Modules\GamificationEngine\Support\GamificationSchemaSync;
 use Nwidart\Modules\Support\ModuleServiceProvider;
 
 /**
@@ -16,6 +17,13 @@ use Nwidart\Modules\Support\ModuleServiceProvider;
  */
 class GamificationEngineServiceProvider extends ModuleServiceProvider
 {
+    public function boot(): void
+    {
+        parent::boot();
+
+        GamificationSchemaSync::ensurePerksTable();
+    }
+
     /** Bind module services into the container. */
     public function register(): void
     {

@@ -11,6 +11,7 @@ use Modules\GamificationEngine\Models\GamificationBadge;
 use Modules\GamificationEngine\Models\GamificationPerk;
 use Modules\GamificationEngine\Models\GamificationRule;
 use Modules\GamificationEngine\Models\GamificationShopItem;
+use Modules\GamificationEngine\Support\GamificationSchemaSync;
 
 /**
  * Seeds badges, perks, shop items, and default reward/penalty rules for Ghost Mode & missions.
@@ -20,6 +21,8 @@ class GamificationEngineDatabaseSeeder extends Seeder
     /** Run all gamification seeders. */
     public function run(): void
     {
+        GamificationSchemaSync::ensurePerksTable();
+
         $this->seedBadges();
         $this->seedPerks();
         $this->seedShopItems();
