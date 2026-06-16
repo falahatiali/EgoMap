@@ -73,6 +73,16 @@ class RecoveryAiServicesTest extends TestCase
         $this->assertFalse($prompts->isEnabled());
     }
 
+    public function test_truth_flashes_for_api_use_fallback_without_calling_ai(): void
+    {
+        config(['ai.default' => 'anthropic', 'ai.providers.anthropic.key' => 'sk-test']);
+
+        $flashes = app(GhostModeAiService::class)->truthFlashesForApi();
+
+        $this->assertNotEmpty($flashes);
+        $this->assertLessThanOrEqual(3, count($flashes));
+    }
+
     private function disableDefaultAiProvider(): void
     {
         $provider = (string) config('ai.default');

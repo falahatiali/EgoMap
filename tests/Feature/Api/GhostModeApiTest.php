@@ -67,6 +67,33 @@ class GhostModeApiTest extends TestCase
         ]);
     }
 
+    public function test_start_protocol_returns_fallback_truth_flashes_without_blocking_on_ai(): void
+    {
+        Carbon::setTestNow('2026-06-12 12:00:00');
+        config(['ai.default' => 'anthropic', 'ai.providers.anthropic.key' => 'sk-test']);
+
+        $bootstrap = $this->getJson('/api/v1/ghost-mode');
+        $guestToken = $bootstrap->json('guest_token');
+
+        $startedAt = microtime(true);
+
+        $response = $this->postJson('/api/v1/ghost-mode/protocol', [
+            'duration_days' => 30,
+        ], [
+            ApiQuizGuestTokenService::HEADER => $guestToken,
+        ]);
+
+        $elapsedSeconds = microtime(true) - $startedAt;
+
+        $response->assertCreated()
+            ->assertJsonPath('timer.mode', 'active')
+            ->assertJsonPath('timer.duration_days', 30)
+            ->assertJsonStructure(['truth_flashes', 'gamification_events']);
+
+        $this->assertNotEmpty($response->json('truth_flashes'));
+        $this->assertLessThan(3, $elapsedSeconds, 'Ghost Mode activation should not wait on AI truth flashes.');
+    }
+
     public function test_authenticated_user_can_start_protocol_with_bearer_token(): void
     {
         Carbon::setTestNow('2026-06-12 12:00:00');

@@ -206,7 +206,7 @@ class GhostModeOrchestrator
     ): array {
         $protocol = $this->timerService->findActiveProtocolFor($actor->toOwner());
         $truthFlashes = $protocol !== null && ($state['mode'] ?? '') === 'active'
-            ? $this->ghostAi->truthFlashes($actor->user, $protocol)
+            ? $this->ghostAi->truthFlashesForApi($actor->user, $protocol)
             : [];
 
         return [

@@ -159,6 +159,39 @@ readonly class GhostModeAiService
     }
 
     /**
+     * Fast truth flashes for mobile API — quiz cache or locale fallback only, never blocks on AI.
+     *
+     * @return list<string>
+     */
+    public function truthFlashesForApi(?User $user = null, ?NoContactProtocol $protocol = null): array
+    {
+        $locale = app()->getLocale();
+        $user ??= auth()->user();
+
+        if ($user !== null) {
+            $session = QuizSession::query()
+                ->where('user_id', $user->id)
+                ->whereHas('quiz', fn ($query) => $query->where('slug', RebootProtocolQuiz::SLUG))
+                ->where('status', SessionStatus::Completed)
+                ->with('result')
+                ->latest('completed_at')
+                ->first();
+
+            $premium = $session?->result?->premium_report;
+            if (is_array($premium) && ! empty($premium['truth_flashes'])) {
+                return $premium['truth_flashes'];
+            }
+
+            $freeReport = $session?->result?->free_report;
+            if (is_array($freeReport) && ($freeReport['template'] ?? '') === 'reboot_protocol') {
+                return $this->quizAiReport->buildFallbackPayload($freeReport, $locale)['truth_flashes'];
+            }
+        }
+
+        return LocaleConfig::translateLines('recovery_ai.fallback.truth_flashes', $locale);
+    }
+
+    /**
      * @param  array<string, mixed>|null  $aiResult
      */
     public function logEvent(
