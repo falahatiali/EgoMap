@@ -11,10 +11,6 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (Schema::hasTable('gamification_shop_items')) {
-            return;
-        }
-
         Schema::create('gamification_shop_items', function (Blueprint $table): void {
             $table->id();
             $table->string('slug')->unique();
