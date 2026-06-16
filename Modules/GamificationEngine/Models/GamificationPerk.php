@@ -10,6 +10,7 @@ use Modules\GamificationEngine\Enums\GamificationPerkType;
     'slug',
     'name',
     'description',
+    'icon',
     'type',
     'duration_days',
     'is_active',

@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->string('name');
             $table->string('description')->nullable();
+            $table->string('icon', 40)->default('fa-gift');
             $table->string('type', 20)->default('consumable');
             $table->unsignedSmallInteger('duration_days')->nullable();
             $table->boolean('is_active')->default(true);

@@ -68,12 +68,12 @@ class GamificationEngineDatabaseSeeder extends Seeder
     private function seedPerks(): void
     {
         $perks = [
-            ['slug' => 'free_shield_repair', 'name' => 'Free Shield Repair', 'type' => GamificationPerkType::Consumable, 'duration_days' => null],
-            ['slug' => 'exclusive_badge_frame', 'name' => 'Exclusive Badge Frame', 'type' => GamificationPerkType::Permanent, 'duration_days' => null],
-            ['slug' => 'emergency_voice_message', 'name' => 'Emergency Voice Message', 'type' => GamificationPerkType::Permanent, 'duration_days' => null],
-            ['slug' => 'fast_blackhole', 'name' => 'Fast Blackhole', 'type' => GamificationPerkType::Permanent, 'duration_days' => null],
-            ['slug' => 'panic_calm_24h', 'name' => '24h Panic Calm', 'type' => GamificationPerkType::Consumable, 'duration_days' => null],
-            ['slug' => 'slip_discount_50', 'name' => '50% Slip Shield', 'type' => GamificationPerkType::Consumable, 'duration_days' => null],
+            ['slug' => 'free_shield_repair', 'name' => 'Free Shield Repair', 'icon' => 'fa-shield-halved', 'type' => GamificationPerkType::Consumable, 'duration_days' => null],
+            ['slug' => 'exclusive_badge_frame', 'name' => 'Exclusive Badge Frame', 'icon' => 'fa-frame', 'type' => GamificationPerkType::Permanent, 'duration_days' => null],
+            ['slug' => 'emergency_voice_message', 'name' => 'Emergency Voice Message', 'icon' => 'fa-microphone', 'type' => GamificationPerkType::Permanent, 'duration_days' => null],
+            ['slug' => 'fast_blackhole', 'name' => 'Fast Blackhole', 'icon' => 'fa-circle-dot', 'type' => GamificationPerkType::Permanent, 'duration_days' => null],
+            ['slug' => 'panic_calm_24h', 'name' => '24h Panic Calm', 'icon' => 'fa-heart-pulse', 'type' => GamificationPerkType::Consumable, 'duration_days' => null],
+            ['slug' => 'slip_discount_50', 'name' => '50% Slip Shield', 'icon' => 'fa-percent', 'type' => GamificationPerkType::Consumable, 'duration_days' => null],
         ];
 
         foreach ($perks as $perk) {
@@ -81,6 +81,7 @@ class GamificationEngineDatabaseSeeder extends Seeder
                 ['slug' => $perk['slug']],
                 [
                     'name' => $perk['name'],
+                    'icon' => $perk['icon'],
                     'description' => null,
                     'type' => $perk['type'],
                     'duration_days' => $perk['duration_days'],
