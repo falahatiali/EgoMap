@@ -54,10 +54,17 @@ class Feed extends Component
         session()->flash('community_status', 'Your post is live! 🎉');
     }
 
-    #[On('post-deleted')]
-    public function onPostDeleted(): void
+    public function deletePost(int $postId): void
     {
+        abort_unless(Auth::check(), 403);
+
+        $post = CommunityPost::approved()->findOrFail($postId);
+        $deleted = app(CommunityPostService::class)->delete($post, Auth::user());
+
+        abort_unless($deleted, 403);
+
         $this->resetPage();
+        session()->flash('community_status', __('community.post_deleted'));
     }
 
     public function toggleReaction(int $postId, string $reactionType): void
@@ -80,7 +87,7 @@ class Feed extends Component
 
         return view('livewire.community.feed', [
             'posts' => $posts,
-            'reactionTypes' => ReactionType::forUi(),
+            'reactionGroups' => ReactionType::forUiGrouped(),
             'sortOptions' => [
                 'latest' => __('community.sort_latest'),
                 'liked' => __('community.sort_liked'),

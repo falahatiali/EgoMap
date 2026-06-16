@@ -6,6 +6,7 @@ use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Auth\VerifyEmail;
 use App\Livewire\Community\Feed as CommunityFeed;
+use App\Livewire\Community\ShowPost as CommunityShowPost;
 use App\Livewire\Home\Protocol;
 use App\Livewire\Missions\Catalog as MissionsCatalog;
 use App\Livewire\Missions\Show as MissionShow;
@@ -90,6 +91,7 @@ Route::prefix('{locale}')
 
         Route::prefix('community')->name('community.')->group(function (): void {
             Route::livewire('/', CommunityFeed::class)->name('feed');
+            Route::livewire('/posts/{post}', CommunityShowPost::class)->name('show');
         });
 
         Route::middleware('auth')->prefix('virtue')->name('virtue.')->group(function (): void {

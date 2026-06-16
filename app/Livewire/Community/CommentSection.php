@@ -7,12 +7,18 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Modules\CommunityEngine\Enums\ReactionType;
 use Modules\CommunityEngine\Models\CommunityComment;
-use Modules\CommunityEngine\Models\CommunityPost; // used in queries
+use Modules\CommunityEngine\Models\CommunityPost;
 use Modules\CommunityEngine\Services\CommunityCommentService;
 
 class CommentSection extends Component
 {
     public int $postId;
+
+    public bool $preview = false;
+
+    public int $perPage = 50;
+
+    public int $visibleLimit = 50;
 
     public string $newComment = '';
 
@@ -23,16 +29,23 @@ class CommentSection extends Component
 
     public string $replyContent = '';
 
-    public bool $loaded = false;
-
-    public function mount(int $postId): void
+    public function mount(int $postId, bool $preview = false, int $perPage = 50): void
     {
         $this->postId = $postId;
+        $this->preview = $preview;
+        $this->perPage = $perPage;
+        $this->visibleLimit = $preview
+            ? CommunityCommentService::FEED_PREVIEW_LIMIT
+            : $perPage;
     }
 
-    public function load(): void
+    public function loadMore(): void
     {
-        $this->loaded = true;
+        if ($this->preview) {
+            return;
+        }
+
+        $this->visibleLimit += $this->perPage;
     }
 
     public function submitComment(): void
@@ -118,12 +131,18 @@ class CommentSection extends Component
 
     public function render(): View
     {
-        $comments = $this->loaded
-            ? app(CommunityCommentService::class)->forPost(CommunityPost::findOrFail($this->postId))
-            : collect();
+        $post = CommunityPost::approved()->findOrFail($this->postId);
+
+        $result = app(CommunityCommentService::class)->forPost(
+            $post,
+            Auth::id(),
+            limit: $this->visibleLimit,
+        );
 
         return view('livewire.community.comment-section', [
-            'comments' => $comments,
+            'comments' => $result['comments'],
+            'hasMore' => $result['has_more'],
+            'commentsCount' => $post->comments_count,
             'reactionTypes' => ReactionType::forUi(),
         ]);
     }
