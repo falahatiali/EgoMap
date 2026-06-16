@@ -98,4 +98,6 @@ Route::prefix('{locale}')
         Route::livewire('/quiz/{slug}', Take::class)->name('quiz.start');
     });
 
-Route::get('/ali/test', [AliController::class, 'ali'])->name('ali.test');
+if (app()->environment('local')) {
+    Route::get('/ali/test', [AliController::class, 'ali'])->name('ali.test');
+}

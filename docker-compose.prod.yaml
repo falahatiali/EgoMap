@@ -1,0 +1,157 @@
+services:
+  egomap:
+    build:
+      context: .
+      dockerfile: docker/php/prod/Dockerfile
+    container_name: egomap
+    env_file:
+      - .env
+    volumes:
+      - .:/var/www/html
+    restart: unless-stopped
+    networks:
+      - egomap-network
+    depends_on:
+      egomap_db:
+        condition: service_healthy
+    mem_limit: 512M
+    cpus: "0.5"
+    mem_reservation: 256M
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "php-fpm", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  egomap_nginx:
+    image: nginx:1.27.2
+    container_name: egomap_nginx
+    volumes:
+      - .:/var/www/html:ro
+      - ./docker/nginx/config/prod:/etc/nginx/conf.d:ro
+      - egomap-nginx-logs:/var/log/nginx
+    restart: unless-stopped
+    networks:
+      - egomap-network
+      - traefik-network
+    depends_on:
+      egomap:
+        condition: service_healthy
+    mem_limit: 256M
+    cpus: "0.25"
+    security_opt:
+      - no-new-privileges:true
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.egomap.rule=Host(`egomap.verzav.ir`)"
+      - "traefik.http.routers.egomap.entrypoints=websecure"
+      - "traefik.http.routers.egomap.tls=true"
+      - "traefik.http.routers.egomap.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.egomap.middlewares=secure-headers@file,compress@file,rate-limit@file"
+      - "traefik.http.services.egomap.loadbalancer.server.port=80"
+      - "traefik.http.routers.egomap-http.rule=Host(`egomap.verzav.ir`)"
+      - "traefik.http.routers.egomap-http.entrypoints=web"
+      - "traefik.http.routers.egomap-http.middlewares=egomap-https-redirect@docker"
+      - "traefik.http.middlewares.egomap-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.egomap-https-redirect.redirectscheme.permanent=true"
+
+  egomap_db:
+    image: mysql:8.4.6
+    container_name: egomap_db
+    env_file:
+      - .env
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+    volumes:
+      - egomap-db-data:/var/lib/mysql
+      - egomap-db-logs:/var/log/mysql
+    restart: unless-stopped
+    networks:
+      - egomap-network
+    mem_limit: 1G
+    cpus: "1.0"
+    mem_reservation: 512M
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  egomap_supervisor:
+    build:
+      context: .
+      dockerfile: docker/php/prod/Dockerfile
+    container_name: egomap_supervisor
+    env_file:
+      - .env
+    volumes:
+      - .:/var/www/html
+      - ./docker/supervisord/prod/supervisord.conf:/etc/supervisord.conf:ro
+    command: supervisord -c /etc/supervisord.conf
+    restart: unless-stopped
+    networks:
+      - egomap-network
+    depends_on:
+      egomap:
+        condition: service_healthy
+      egomap_db:
+        condition: service_healthy
+    mem_limit: 256M
+    cpus: "0.25"
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "test", "-S", "/tmp/supervisor.sock"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  egomap_node:
+    build:
+      context: .
+      dockerfile: docker/node/Dockerfile
+    container_name: egomap_node
+    working_dir: /app
+    volumes:
+      - ./resources:/app/resources
+      - ./public:/app/public
+      - ./package.json:/app/package.json
+      - ./package-lock.json:/app/package-lock.json
+      - ./vite.config.js:/app/vite.config.js
+    command: >
+      sh -c "npm ci && npm run build"
+    restart: "no"
+    networks:
+      - egomap-network
+    mem_limit: 512M
+    cpus: "0.5"
+    security_opt:
+      - no-new-privileges:true
+    profiles:
+      - build
+
+networks:
+  egomap-network:
+    driver: bridge
+    name: egomap-network
+    ipam:
+      config:
+        - subnet: 172.30.0.0/16
+  traefik-network:
+    external: true
+    name: traefik-network
+
+volumes:
+  egomap-db-data:
+    driver: local
+  egomap-db-logs:
+    driver: local
+  egomap-nginx-logs:
+    driver: local
