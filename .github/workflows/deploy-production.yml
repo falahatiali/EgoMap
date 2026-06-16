@@ -1,0 +1,89 @@
+# History app — same pattern as financial-mentor CI/CD.
+# Secrets: SERVER_HOST, DEPLOY_USER, SSH_PRIVATE_KEY, SSH_KNOWN_HOSTS.
+# App path on server: /home/deploy/history. .env from /home/deploy/envFiles/.env.history.
+name: Laravel CI/CD
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+env:
+  APP_ENV: production
+  SERVER_HOST: ${{ secrets.SERVER_HOST }}
+  DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+      - name: Copy .env
+        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+      - name: Install Dependencies
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+      - name: Run tests
+        run: php artisan test --parallel || true
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+      - name: Deploy to Server
+        run: |
+          ssh -o StrictHostKeyChecking=no ${DEPLOY_USER}@${SERVER_HOST} << 'ENDSSH'
+          set -e
+          DEPLOY_PATH=/home/deploy/history
+          echo "==> cd $DEPLOY_PATH"
+          cd "$DEPLOY_PATH" || { echo "FAIL: Deploy path missing: $DEPLOY_PATH"; exit 1; }
+          echo "==> git config safe.directory"
+          git config --global --add safe.directory "$DEPLOY_PATH"
+          echo "==> git fetch"
+          git fetch --all
+          echo "==> git checkout main"
+          git checkout main
+          echo "==> git pull origin main"
+          git pull origin main
+          echo "==> cp .env"
+          cp /home/deploy/envFiles/.env.history .env
+          echo "==> docker-compose down"
+          docker-compose -p history -f docker-compose.prod.yml down
+          echo "==> docker-compose up -d --build"
+          docker-compose -p history -f docker-compose.prod.yml up -d --build
+          echo "==> docker-compose run history_node (asset build)"
+          docker-compose -p history -f docker-compose.prod.yml run --rm history_node || true
+          echo "==> waiting for MySQL"
+          for i in $(seq 1 15); do
+            docker exec history_db sh -c 'mysqladmin ping -h localhost -u root -p"$MYSQL_ROOT_PASSWORD"' 2>/dev/null && break
+            sleep 2
+          done
+          echo "==> php artisan down"
+          docker exec history php artisan down
+          echo "==> php artisan migrate --force"
+          docker exec history php artisan migrate --force
+          echo "==> docker exec history composer install --no-dev --optimize-autoloader --no-interaction"
+          docker exec history composer install --no-dev --optimize-autoloader --no-interaction
+          echo "==> php artisan optimize:clear"
+          docker exec history php artisan optimize:clear
+          echo "==> php artisan route:cache"
+          docker exec history php artisan route:cache
+          echo "==> php artisan view:cache"
+          docker exec history php artisan view:cache
+          echo "==> php artisan up"
+          docker exec history php artisan up
+          echo "==> Deploy done."
+          ENDSSH
