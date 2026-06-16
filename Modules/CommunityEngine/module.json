@@ -1,0 +1,11 @@
+{
+    "name": "CommunityEngine",
+    "alias": "communityengine",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\CommunityEngine\\Providers\\CommunityEngineServiceProvider"
+    ],
+    "files": []
+}

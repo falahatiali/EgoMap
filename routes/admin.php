@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\Permission;
+use App\Livewire\Admin\Community\Posts\Index as CommunityPostsIndex;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\Gamification\Analytics\Dashboard as GamificationAnalyticsDashboard;
 use App\Livewire\Admin\Gamification\Badges\Edit as GamificationBadgesEdit;
@@ -78,6 +79,13 @@ Route::middleware('permission:'.Permission::AdminGamificationManage->value)
         Route::livewire('/analytics', GamificationAnalyticsDashboard::class)->name('analytics');
         Route::livewire('/simulator', GamificationSimulatorIndex::class)->name('simulator');
         Route::livewire('/wallets', GamificationWalletsIndex::class)->name('wallets.index');
+    });
+
+Route::middleware('permission:'.Permission::AdminUsersManage->value)
+    ->prefix('community')
+    ->name('community.')
+    ->group(function (): void {
+        Route::livewire('/posts', CommunityPostsIndex::class)->name('posts.index');
     });
 
 Route::livewire('/sessions', SessionsIndex::class)->name('sessions.index');

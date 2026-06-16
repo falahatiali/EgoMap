@@ -38,6 +38,12 @@
                                     Virtue Forge
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="eg-nav-link nav-link px-0 eg-transition" href="{{ route('community.feed', ['locale' => app()->getLocale()]) }}" wire:navigate>
+                                    <i class="fa-solid fa-people-group me-1" aria-hidden="true"></i>
+                                    {{ __('community.title') }}
+                                </a>
+                            </li>
                         @endauth
                         @if ($nav['show_no_contact_link'])
                             <li class="nav-item">

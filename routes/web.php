@@ -5,6 +5,7 @@ use App\Http\Controllers\BillingAppReturnController;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Auth\VerifyEmail;
+use App\Livewire\Community\Feed as CommunityFeed;
 use App\Livewire\Home\Protocol;
 use App\Livewire\Missions\Catalog as MissionsCatalog;
 use App\Livewire\Missions\Show as MissionShow;
@@ -85,6 +86,10 @@ Route::prefix('{locale}')
             Route::livewire('/', MissionsCatalog::class)->name('catalog');
             Route::livewire('/templates/{template}', MissionShow::class)->name('show');
             Route::livewire('/active/{enrollment}', MissionWorkspace::class)->name('workspace');
+        });
+
+        Route::prefix('community')->name('community.')->group(function (): void {
+            Route::livewire('/', CommunityFeed::class)->name('feed');
         });
 
         Route::middleware('auth')->prefix('virtue')->name('virtue.')->group(function (): void {

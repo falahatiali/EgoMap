@@ -2,5 +2,6 @@
     "MissionEngine": true,
     "GamificationEngine": true,
     "AetherEngine": true,
-    "VirtueEngine": true
+    "VirtueEngine": true,
+    "CommunityEngine": true
 }

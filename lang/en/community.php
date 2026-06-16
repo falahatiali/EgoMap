@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'title' => 'Community',
+    'subtitle' => 'You are not alone.',
+    'new_post' => 'New Post',
+    'share_with_community' => 'Share with Community',
+    'whats_on_your_mind' => "What's on your mind? Share what you're going through…",
+    'post_anonymously' => 'Post anonymously',
+    'posting' => 'Posting…',
+    'reactions' => 'reactions',
+    'comments' => 'comments',
+    'share' => 'Share',
+    'delete' => 'Delete',
+    'reply' => 'Reply',
+    'cancel' => 'Cancel',
+    'write_a_comment' => 'Write a comment…',
+    'write_a_reply' => 'Write a reply…',
+    'post_comment' => 'Post',
+    'anonymous' => 'Anonymous',
+    'no_comments_yet' => 'No comments yet. Be the first.',
+    'empty_feed' => 'No posts yet. Start the conversation.',
+    'be_first' => 'Be the first to post',
+    'sort_latest' => 'Latest',
+    'sort_liked' => 'Most Liked',
+    'sort_discussed' => 'Most Discussed',
+    'sort_mine' => 'My Posts',
+];

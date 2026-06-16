@@ -1,0 +1,30 @@
+{
+    "name": "egomap/communityengine",
+    "description": "",
+    "authors": [
+        {
+            "name": "EgoMap",
+            "email": "hello@egomap.test"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\CommunityEngine\\": "",
+            "Modules\\CommunityEngine\\Database\\Factories\\": "database/factories/",
+            "Modules\\CommunityEngine\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\CommunityEngine\\Tests\\": "tests/"
+        }
+    }
+}

@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Modules\AetherEngine\Database\Seeders\AetherEngineDatabaseSeeder;
+use Modules\CommunityEngine\Database\Seeders\CommunityEngineDatabaseSeeder;
 use Modules\GamificationEngine\Database\Seeders\GamificationEngineDatabaseSeeder;
 use Modules\MissionEngine\Database\Seeders\MissionEngineDatabaseSeeder;
 use Modules\VirtueEngine\Database\Seeders\VirtueEngineDatabaseSeeder;
@@ -23,6 +24,7 @@ class DatabaseSeeder extends Seeder
         $this->call(GamificationEngineDatabaseSeeder::class);
         $this->call(AetherEngineDatabaseSeeder::class);
         $this->call(VirtueEngineDatabaseSeeder::class);
+        $this->call(CommunityEngineDatabaseSeeder::class);
 
         $admin = User::factory()->create([
             'name' => 'Admin User',

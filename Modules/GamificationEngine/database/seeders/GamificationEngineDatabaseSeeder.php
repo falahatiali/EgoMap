@@ -50,6 +50,12 @@ class GamificationEngineDatabaseSeeder extends Seeder
             ['slug' => 'virtue_streak_7', 'name' => 'Virtue Streak', 'icon' => 'fa-fire-flame-curved'],
             ['slug' => 'virtue_master', 'name' => 'Virtue Master', 'icon' => 'fa-trophy'],
             ['slug' => 'virtue_honest', 'name' => 'Honest Heart', 'icon' => 'fa-heart'],
+
+            // CommunityEngine badges
+            ['slug' => 'community_first_voice', 'name' => 'First Voice', 'icon' => 'fa-microphone'],
+            ['slug' => 'community_builder', 'name' => 'Community Builder', 'icon' => 'fa-people-group'],
+            ['slug' => 'community_empathy_champion', 'name' => 'Empathy Champion', 'icon' => 'fa-hand-holding-heart'],
+            ['slug' => 'community_super_influencer', 'name' => 'Super Influencer', 'icon' => 'fa-star-sharp'],
         ];
 
         foreach ($badges as $badge) {
@@ -644,6 +650,78 @@ class GamificationEngineDatabaseSeeder extends Seeder
                 'effects' => ['points' => 1, 'badge' => 'virtue_honest'],
                 'max_per_day' => null,
                 'priority' => 94,
+            ],
+
+            // ─── CommunityEngine rules ────────────────────────────────────────────────
+            [
+                'key' => 'community_post_published',
+                'name' => 'Community: post published',
+                'event' => GamificationEvent::CommunityPostPublished->value,
+                'rule_type' => GamificationRuleType::Reward,
+                'conditions' => null,
+                'effects' => ['coins' => 5, 'xp' => 10],
+                'max_per_day' => 3,
+                'priority' => 100,
+            ],
+            [
+                'key' => 'community_first_post',
+                'name' => 'Community: first post (one-time badge)',
+                'event' => GamificationEvent::CommunityFirstPost->value,
+                'rule_type' => GamificationRuleType::Reward,
+                'conditions' => null,
+                'effects' => ['coins' => 10, 'xp' => 20, 'badge' => 'community_first_voice'],
+                'max_per_day' => null,
+                'priority' => 101,
+            ],
+            [
+                'key' => 'community_ten_posts',
+                'name' => 'Community: 10 posts milestone',
+                'event' => GamificationEvent::CommunityTenPosts->value,
+                'rule_type' => GamificationRuleType::Reward,
+                'conditions' => null,
+                'effects' => ['coins' => 30, 'xp' => 50, 'badge' => 'community_builder'],
+                'max_per_day' => null,
+                'priority' => 102,
+            ],
+            [
+                'key' => 'community_comment_posted',
+                'name' => 'Community: comment posted',
+                'event' => GamificationEvent::CommunityCommentPosted->value,
+                'rule_type' => GamificationRuleType::Reward,
+                'conditions' => null,
+                'effects' => ['coins' => 2, 'xp' => 4],
+                'max_per_day' => 5,
+                'priority' => 103,
+            ],
+            [
+                'key' => 'community_reaction_given',
+                'name' => 'Community: reaction given',
+                'event' => GamificationEvent::CommunityReactionGiven->value,
+                'rule_type' => GamificationRuleType::Reward,
+                'conditions' => null,
+                'effects' => ['coins' => 1, 'xp' => 2],
+                'max_per_day' => 10,
+                'priority' => 104,
+            ],
+            [
+                'key' => 'community_empathy_champion',
+                'name' => 'Community: empathy champion (50 comments)',
+                'event' => GamificationEvent::CommunityEmpathyChampion->value,
+                'rule_type' => GamificationRuleType::Reward,
+                'conditions' => null,
+                'effects' => ['coins' => 50, 'xp' => 100, 'badge' => 'community_empathy_champion'],
+                'max_per_day' => null,
+                'priority' => 105,
+            ],
+            [
+                'key' => 'community_post_viral',
+                'name' => 'Community: post went viral (50+ likes)',
+                'event' => GamificationEvent::CommunityPostViral->value,
+                'rule_type' => GamificationRuleType::Reward,
+                'conditions' => null,
+                'effects' => ['coins' => 100, 'xp' => 200, 'badge' => 'community_super_influencer'],
+                'max_per_day' => null,
+                'priority' => 106,
             ],
         ];
 

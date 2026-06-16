@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'title' => 'جامعه',
+    'subtitle' => 'تنها نیستی.',
+    'new_post' => 'پست جدید',
+    'share_with_community' => 'اشتراک‌گذاری با جامعه',
+    'whats_on_your_mind' => 'چی تو ذهنته؟ بنویس…',
+    'post_anonymously' => 'ناشناس پست کن',
+    'posting' => 'در حال ارسال…',
+    'reactions' => 'واکنش',
+    'comments' => 'نظر',
+    'share' => 'اشتراک',
+    'delete' => 'حذف',
+    'reply' => 'پاسخ',
+    'cancel' => 'لغو',
+    'write_a_comment' => 'نظر بنویس…',
+    'write_a_reply' => 'پاسخ بنویس…',
+    'post_comment' => 'ارسال',
+    'anonymous' => 'ناشناس',
+    'no_comments_yet' => 'هنوز نظری نیست. اول باش.',
+    'empty_feed' => 'هنوز پستی نیست. اولین نفر باش.',
+    'be_first' => 'اولین پست رو بنویس',
+    'sort_latest' => 'جدیدترین',
+    'sort_liked' => 'محبوب‌ترین',
+    'sort_discussed' => 'پربحث‌ترین',
+    'sort_mine' => 'پست‌های من',
+];

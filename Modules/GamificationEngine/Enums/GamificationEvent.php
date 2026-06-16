@@ -73,6 +73,28 @@ enum GamificationEvent: string
     /** User honestly reported a slip in a virtue routine. */
     case VirtueSlipReported = 'virtue.slip_reported';
 
+    // CommunityEngine events
+    /** User published a new community post (max 3 rewards/day). */
+    case CommunityPostPublished = 'community.post_published';
+
+    /** User published their very first community post (one-time badge). */
+    case CommunityFirstPost = 'community.first_post';
+
+    /** User reached 10 published community posts (badge milestone). */
+    case CommunityTenPosts = 'community.ten_posts';
+
+    /** User posted a comment (max 5 rewards/day). */
+    case CommunityCommentPosted = 'community.comment_posted';
+
+    /** User gave a reaction to a post (max 10 rewards/day). */
+    case CommunityReactionGiven = 'community.reaction_given';
+
+    /** User reached 50 total comments posted (badge milestone). */
+    case CommunityEmpathyChampion = 'community.empathy_champion';
+
+    /** A post received 50+ likes (badge for the post owner). */
+    case CommunityPostViral = 'community.post_viral';
+
     /** @return list<string> All event values for validation and admin selects. */
     public static function values(): array
     {
