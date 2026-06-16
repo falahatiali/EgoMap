@@ -39,10 +39,96 @@ class CommunityApiTest extends TestCase
         $this->getJson('/api/v1/community/posts')
             ->assertOk()
             ->assertJsonStructure([
-                'data',
+                'locale',
+                'labels' => ['title', 'subtitle', 'you_reacted', 'view_all_comments'],
+                'sort_options',
+                'reaction_groups' => ['positive', 'empathetic'],
+                'data' => [
+                    '*' => [
+                        'id',
+                        'content',
+                        'display_name',
+                        'comments_preview' => ['data', 'has_more', 'total'],
+                    ],
+                ],
                 'meta' => ['current_page', 'last_page', 'total', 'per_page'],
                 'reaction_types',
+                'preview_limit',
+                'comments_per_page',
             ]);
+    }
+
+    public function test_feed_can_skip_comment_previews(): void
+    {
+        $post = CommunityPost::factory()->create(['status' => PostStatus::Approved]);
+        CommunityComment::factory()->count(4)->create(['post_id' => $post->id]);
+
+        $response = $this->getJson('/api/v1/community/posts?include_preview=0')->assertOk();
+
+        $this->assertArrayNotHasKey('comments_preview', $response->json('data.0'));
+    }
+
+    public function test_feed_includes_three_comment_previews_by_default(): void
+    {
+        $post = CommunityPost::factory()->create(['status' => PostStatus::Approved]);
+        CommunityComment::factory()->count(5)->create(['post_id' => $post->id]);
+
+        $response = $this->getJson('/api/v1/community/posts')->assertOk();
+
+        $this->assertCount(3, $response->json('data.0.comments_preview.data'));
+        $this->assertTrue($response->json('data.0.comments_preview.has_more'));
+    }
+
+    public function test_bearer_token_on_public_feed_enables_viewer_context(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('mobile')->plainTextToken;
+        $post = CommunityPost::factory()->create(['status' => PostStatus::Approved]);
+
+        $this->withToken($token)
+            ->getJson('/api/v1/community/posts')
+            ->assertOk()
+            ->assertJsonPath('data.0.can_react', true)
+            ->assertJsonPath('data.0.id', $post->id);
+    }
+
+    public function test_bearer_token_on_post_detail_enables_viewer_context(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('mobile')->plainTextToken;
+        $post = CommunityPost::factory()->create(['status' => PostStatus::Approved]);
+
+        $this->withToken($token)
+            ->getJson('/api/v1/community/posts/'.$post->id)
+            ->assertOk()
+            ->assertJsonPath('post.can_react', true)
+            ->assertJsonPath('post.can_delete', false);
+    }
+
+    public function test_guest_can_view_single_post(): void
+    {
+        $post = CommunityPost::factory()->create([
+            'status' => PostStatus::Approved,
+            'content' => 'Mobile post detail content',
+        ]);
+
+        $this->getJson('/api/v1/community/posts/'.$post->id)
+            ->assertOk()
+            ->assertJsonPath('post.content', 'Mobile post detail content')
+            ->assertJsonStructure([
+                'labels',
+                'reaction_groups',
+                'post' => ['id', 'display_name', 'viewer_reaction', 'can_delete', 'comments_count_label'],
+            ]);
+
+        $this->assertSame(1, $post->fresh()->views_count);
+    }
+
+    public function test_pending_post_detail_returns_not_found(): void
+    {
+        $post = CommunityPost::factory()->create(['status' => PostStatus::Pending]);
+
+        $this->getJson('/api/v1/community/posts/'.$post->id)->assertNotFound();
     }
 
     public function test_feed_only_shows_approved_posts(): void
@@ -83,7 +169,8 @@ class CommunityApiTest extends TestCase
             'content' => 'This is my first community post.',
         ])
             ->assertCreated()
-            ->assertJsonPath('post.status', PostStatus::Approved->value);
+            ->assertJsonPath('post.status', PostStatus::Approved->value)
+            ->assertJsonPath('post.display_name', $user->name);
     }
 
     public function test_post_validates_content_length(): void
@@ -185,7 +272,8 @@ class CommunityApiTest extends TestCase
             'reaction_type' => ReactionType::Fire->value,
         ])
             ->assertOk()
-            ->assertJsonPath('reaction', ReactionType::Fire->value);
+            ->assertJsonPath('reaction.type', ReactionType::Fire->value)
+            ->assertJsonPath('post.viewer_reaction.type', ReactionType::Fire->value);
 
         $this->assertEquals(1, $post->fresh()->likes_count);
     }
@@ -219,7 +307,40 @@ class CommunityApiTest extends TestCase
 
         $this->getJson('/api/v1/community/posts/'.$post->id.'/comments')
             ->assertOk()
-            ->assertJsonStructure(['data']);
+            ->assertJsonStructure([
+                'labels',
+                'data' => [
+                    '*' => ['id', 'content', 'display_name', 'replies', 'viewer_reaction'],
+                ],
+                'meta' => ['has_more', 'total', 'limit', 'offset', 'next_offset'],
+            ]);
+    }
+
+    public function test_comments_support_limit_and_offset_pagination(): void
+    {
+        $user = User::factory()->create();
+        $post = CommunityPost::factory()->create(['status' => PostStatus::Approved]);
+
+        for ($i = 0; $i < 5; $i++) {
+            CommunityComment::factory()->create([
+                'post_id' => $post->id,
+                'user_id' => $user->id,
+            ]);
+        }
+
+        $firstPage = $this->getJson('/api/v1/community/posts/'.$post->id.'/comments?limit=3&offset=0')
+            ->assertOk();
+
+        $this->assertCount(3, $firstPage->json('data'));
+        $this->assertTrue($firstPage->json('meta.has_more'));
+        $this->assertSame(3, $firstPage->json('meta.next_offset'));
+
+        $secondPage = $this->getJson('/api/v1/community/posts/'.$post->id.'/comments?limit=3&offset=3')
+            ->assertOk();
+
+        $this->assertCount(2, $secondPage->json('data'));
+        $this->assertFalse($secondPage->json('meta.has_more'));
+        $this->assertNull($secondPage->json('meta.next_offset'));
     }
 
     public function test_authenticated_user_can_post_comment(): void
@@ -233,7 +354,8 @@ class CommunityApiTest extends TestCase
             'content' => 'This is a meaningful comment.',
         ])
             ->assertCreated()
-            ->assertJsonPath('comment.content', 'This is a meaningful comment.');
+            ->assertJsonPath('comment.content', 'This is a meaningful comment.')
+            ->assertJsonPath('comment.display_name', $user->name);
 
         $this->assertEquals(1, $post->fresh()->comments_count);
     }
