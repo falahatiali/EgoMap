@@ -155,6 +155,23 @@ class CommunityPostService
     }
 
     /**
+     * Load a single approved post for the detail page.
+     */
+    public function findForDisplay(int $postId, ?int $viewerId = null): CommunityPost
+    {
+        $post = CommunityPost::query()
+            ->with('author:id,name')
+            ->approved()
+            ->findOrFail($postId);
+
+        if ($viewerId) {
+            $this->attachViewerReactions([$post], $viewerId);
+        }
+
+        return $post;
+    }
+
+    /**
      * @param  array<CommunityPost>  $posts
      */
     private function attachViewerReactions(array $posts, int $viewerId): void

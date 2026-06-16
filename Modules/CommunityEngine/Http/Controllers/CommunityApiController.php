@@ -3,6 +3,7 @@
 namespace Modules\CommunityEngine\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Support\LocaleConfig;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -10,6 +11,7 @@ use Illuminate\Validation\Rule;
 use Modules\CommunityEngine\Enums\ReactionType;
 use Modules\CommunityEngine\Models\CommunityComment;
 use Modules\CommunityEngine\Models\CommunityPost;
+use Modules\CommunityEngine\Services\CommunityApiPresenter;
 use Modules\CommunityEngine\Services\CommunityCommentService;
 use Modules\CommunityEngine\Services\CommunityPostService;
 
@@ -18,6 +20,7 @@ class CommunityApiController extends Controller
     public function __construct(
         private readonly CommunityPostService $posts,
         private readonly CommunityCommentService $comments,
+        private readonly CommunityApiPresenter $presenter,
     ) {}
 
     /**
@@ -29,23 +32,69 @@ class CommunityApiController extends Controller
         $validated = $request->validate([
             'sort' => ['sometimes', 'string', Rule::in(['latest', 'liked', 'discussed', 'mine'])],
             'per_page' => ['sometimes', 'integer', 'min:5', 'max:30'],
+            'include_preview' => ['sometimes', 'boolean'],
         ]);
+
+        $locale = LocaleConfig::resolve($request->header('Accept-Language'));
+        $viewerId = Auth::id();
+        $includePreview = $validated['include_preview'] ?? true;
 
         $feed = $this->posts->feed(
             sort: $validated['sort'] ?? 'latest',
-            viewerId: Auth::id(),
+            viewerId: $viewerId,
             perPage: $validated['per_page'] ?? 10,
         );
 
+        $previews = $includePreview
+            ? $this->presenter->presentCommentsPreviewsForPosts(collect($feed->items()), $viewerId)
+            : [];
+
+        $data = collect($feed->items())
+            ->map(function (CommunityPost $post) use ($locale, $viewerId, $previews, $includePreview): array {
+                $preview = $includePreview ? ($previews[$post->id] ?? null) : null;
+
+                return $this->presenter->presentPost($post, $locale, $viewerId, $preview);
+            })
+            ->values()
+            ->all();
+
         return response()->json([
-            'data' => $feed->items(),
+            'locale' => $locale,
+            'labels' => $this->presenter->labels($locale),
+            'sort_options' => $this->presenter->sortOptions($locale),
+            'reaction_groups' => $this->presenter->reactionGroups(),
+            'reaction_types' => ReactionType::forUi(),
+            'preview_limit' => CommunityCommentService::FEED_PREVIEW_LIMIT,
+            'comments_per_page' => CommunityCommentService::POST_PAGE_LIMIT,
+            'data' => $data,
             'meta' => [
                 'current_page' => $feed->currentPage(),
                 'last_page' => $feed->lastPage(),
                 'total' => $feed->total(),
                 'per_page' => $feed->perPage(),
             ],
+        ]);
+    }
+
+    /**
+     * GET /api/v1/community/posts/{post}
+     * Public post detail.
+     */
+    public function show(Request $request, int $post): JsonResponse
+    {
+        $locale = LocaleConfig::resolve($request->header('Accept-Language'));
+        $viewerId = Auth::id();
+
+        $postModel = $this->posts->findForDisplay($post, $viewerId);
+        $this->posts->incrementView($postModel);
+
+        return response()->json([
+            'locale' => $locale,
+            'labels' => $this->presenter->labels($locale),
+            'reaction_groups' => $this->presenter->reactionGroups(),
             'reaction_types' => ReactionType::forUi(),
+            'comments_per_page' => CommunityCommentService::POST_PAGE_LIMIT,
+            'post' => $this->presenter->presentPost($postModel, $locale, $viewerId),
         ]);
     }
 
@@ -60,6 +109,8 @@ class CommunityApiController extends Controller
             'is_anonymous' => ['sometimes', 'boolean'],
         ]);
 
+        $locale = LocaleConfig::resolve($request->header('Accept-Language'));
+
         $result = $this->posts->create(
             user: Auth::user(),
             content: $validated['content'],
@@ -73,8 +124,10 @@ class CommunityApiController extends Controller
             ], 422);
         }
 
+        $post = $result['post']->load('author:id,name');
+
         return response()->json([
-            'post' => $result['post'],
+            'post' => $this->presenter->presentPost($post, $locale, Auth::id()),
             'message' => $result['message'],
         ], 201);
     }
@@ -83,36 +136,42 @@ class CommunityApiController extends Controller
      * DELETE /api/v1/community/posts/{post}
      * Requires auth (own post or admin).
      */
-    public function destroy(int $postId): JsonResponse
+    public function destroy(int $post): JsonResponse
     {
-        $post = CommunityPost::findOrFail($postId);
-        $deleted = $this->posts->delete($post, Auth::user());
+        $postModel = CommunityPost::findOrFail($post);
+        $deleted = $this->posts->delete($postModel, Auth::user());
 
         if (! $deleted) {
             return response()->json(['message' => 'Unauthorized.'], 403);
         }
 
-        return response()->json(['message' => 'Post removed.']);
+        return response()->json(['message' => __('community.post_deleted')]);
     }
 
     /**
      * POST /api/v1/community/posts/{post}/react
      * Requires auth.
      */
-    public function react(Request $request, int $postId): JsonResponse
+    public function react(Request $request, int $post): JsonResponse
     {
         $validated = $request->validate([
             'reaction_type' => ['required', 'string', Rule::enum(ReactionType::class)],
         ]);
 
-        $post = CommunityPost::approved()->findOrFail($postId);
+        $postModel = CommunityPost::approved()->findOrFail($post);
         $type = ReactionType::from($validated['reaction_type']);
 
-        $newReaction = $this->posts->toggleReaction($post, Auth::user(), $type);
+        $newReaction = $this->posts->toggleReaction($postModel, Auth::user(), $type);
+        $freshPost = $this->posts->findForDisplay($post, Auth::id());
 
         return response()->json([
-            'reaction' => $newReaction?->value,
-            'likes_count' => $post->fresh()?->likes_count ?? $post->likes_count,
+            'reaction' => $this->presenter->presentViewerReaction($newReaction?->value),
+            'likes_count' => $freshPost->likes_count,
+            'post' => $this->presenter->presentPost(
+                $freshPost,
+                LocaleConfig::resolve($request->header('Accept-Language')),
+                Auth::id(),
+            ),
         ]);
     }
 
@@ -120,21 +179,44 @@ class CommunityApiController extends Controller
      * GET /api/v1/community/posts/{post}/comments
      * Public.
      */
-    public function comments(int $postId): JsonResponse
+    public function comments(Request $request, int $post): JsonResponse
     {
-        $post = CommunityPost::approved()->findOrFail($postId);
-        $comments = $this->comments->forPost($post);
+        $validated = $request->validate([
+            'limit' => ['sometimes', 'integer', 'min:1', 'max:100'],
+            'offset' => ['sometimes', 'integer', 'min:0'],
+        ]);
 
-        return response()->json(['data' => $comments]);
+        $locale = LocaleConfig::resolve($request->header('Accept-Language'));
+        $viewerId = Auth::id();
+        $limit = $validated['limit'] ?? CommunityCommentService::POST_PAGE_LIMIT;
+        $offset = $validated['offset'] ?? 0;
+
+        $postModel = CommunityPost::approved()->findOrFail($post);
+        $result = $this->comments->forPost($postModel, $viewerId, $limit, $offset);
+        $presented = $this->presenter->presentCommentsResult($result, $viewerId);
+
+        return response()->json([
+            'locale' => $locale,
+            'labels' => $this->presenter->labels($locale),
+            'reaction_types' => ReactionType::forUi(),
+            'data' => $presented['data'],
+            'meta' => [
+                'has_more' => $presented['has_more'],
+                'total' => $presented['total'],
+                'limit' => $limit,
+                'offset' => $offset,
+                'next_offset' => $presented['has_more'] ? $offset + $limit : null,
+            ],
+        ]);
     }
 
     /**
      * POST /api/v1/community/posts/{post}/comments
      * Requires auth.
      */
-    public function storeComment(Request $request, int $postId): JsonResponse
+    public function storeComment(Request $request, int $post): JsonResponse
     {
-        $post = CommunityPost::approved()->findOrFail($postId);
+        $postModel = CommunityPost::approved()->findOrFail($post);
 
         $validated = $request->validate([
             'content' => ['required', 'string', 'min:2', 'max:500'],
@@ -144,7 +226,7 @@ class CommunityApiController extends Controller
 
         $result = $this->comments->create(
             user: Auth::user(),
-            post: $post,
+            post: $postModel,
             content: $validated['content'],
             isAnonymous: $validated['is_anonymous'] ?? false,
             parentId: $validated['parent_id'] ?? null,
@@ -157,8 +239,10 @@ class CommunityApiController extends Controller
             ], 422);
         }
 
+        $comment = $result['comment']->load(['author:id,name', 'replies']);
+
         return response()->json([
-            'comment' => $result['comment'],
+            'comment' => $this->presenter->presentComment($comment, Auth::id()),
             'message' => $result['message'],
         ], 201);
     }
@@ -195,7 +279,7 @@ class CommunityApiController extends Controller
         $newReaction = $this->comments->toggleReaction($comment, Auth::user(), $type);
 
         return response()->json([
-            'reaction' => $newReaction?->value,
+            'reaction' => $this->presenter->presentViewerReaction($newReaction?->value),
             'likes_count' => $comment->fresh()?->likes_count ?? $comment->likes_count,
         ]);
     }

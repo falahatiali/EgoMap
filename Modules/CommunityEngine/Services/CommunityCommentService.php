@@ -15,20 +15,34 @@ class CommunityCommentService
 {
     private const DAILY_COMMENT_REWARD_CAP = 5;
 
+    public const FEED_PREVIEW_LIMIT = 3;
+
+    public const POST_PAGE_LIMIT = 50;
+
     public function __construct(
         private readonly CommunityModerationService $moderation,
         private readonly GamificationEngine $gamification,
     ) {}
 
     /**
-     * Load up to 3 levels of comments for a post.
-     * Level 1 (top-level) → level 2 (replies) → level 3 (replies-to-replies).
+     * Load threaded comments for a post (top-level paginated, up to 3 reply levels).
      *
-     * @return Collection<int, CommunityComment>
+     * @return array{comments: Collection<int, CommunityComment>, has_more: bool, total: int}
      */
-    public function forPost(CommunityPost $post): Collection
-    {
-        return CommunityComment::query()
+    public function forPost(
+        CommunityPost $post,
+        ?int $viewerId = null,
+        int $limit = 20,
+        int $offset = 0,
+    ): array {
+        $baseQuery = CommunityComment::query()
+            ->where('post_id', $post->id)
+            ->whereNull('parent_id')
+            ->whereNull('deleted_at');
+
+        $total = (clone $baseQuery)->count();
+
+        $comments = (clone $baseQuery)
             ->with([
                 'author:id,name',
                 'replies' => fn ($q) => $q->with([
@@ -36,12 +50,20 @@ class CommunityCommentService
                     'replies' => fn ($q2) => $q2->with('author:id,name')->limit(5),
                 ])->limit(10),
             ])
-            ->where('post_id', $post->id)
-            ->whereNull('parent_id')
-            ->whereNull('deleted_at')
             ->latest()
-            ->limit(20)
+            ->offset($offset)
+            ->limit($limit)
             ->get();
+
+        if ($viewerId) {
+            $this->attachViewerReactions($comments, $viewerId);
+        }
+
+        return [
+            'comments' => $comments,
+            'has_more' => ($offset + $limit) < $total,
+            'total' => $total,
+        ];
     }
 
     /**
@@ -157,6 +179,77 @@ class CommunityCommentService
                 GamificationEvent::CommunityEmpathyChampion->value,
                 ['user_id' => $user->id],
             );
+        }
+    }
+
+    /**
+     * @param  Collection<int, CommunityComment>  $comments
+     */
+    private function attachViewerReactions(Collection $comments, int $viewerId): void
+    {
+        $commentIds = $this->collectCommentIds($comments);
+
+        if ($commentIds === []) {
+            return;
+        }
+
+        $reactions = CommunityCommentReaction::query()
+            ->where('user_id', $viewerId)
+            ->whereIn('comment_id', $commentIds)
+            ->get()
+            ->keyBy('comment_id');
+
+        $this->applyViewerReactionsToTree($comments, $reactions);
+    }
+
+    /**
+     * @param  Collection<int, CommunityComment>  $comments
+     * @return list<int>
+     */
+    private function collectCommentIds(Collection $comments): array
+    {
+        $ids = [];
+
+        foreach ($comments as $comment) {
+            $ids[] = $comment->id;
+
+            foreach ($comment->replies as $reply) {
+                $ids[] = $reply->id;
+
+                foreach ($reply->replies as $deepReply) {
+                    $ids[] = $deepReply->id;
+                }
+            }
+        }
+
+        return $ids;
+    }
+
+    /**
+     * @param  Collection<int, CommunityComment>  $comments
+     * @param  Collection<int, CommunityCommentReaction>  $reactions
+     */
+    private function applyViewerReactionsToTree(Collection $comments, Collection $reactions): void
+    {
+        foreach ($comments as $comment) {
+            $comment->setAttribute(
+                'viewer_reaction',
+                $reactions->get($comment->id)?->reaction_type?->value,
+            );
+
+            foreach ($comment->replies as $reply) {
+                $reply->setAttribute(
+                    'viewer_reaction',
+                    $reactions->get($reply->id)?->reaction_type?->value,
+                );
+
+                foreach ($reply->replies as $deepReply) {
+                    $deepReply->setAttribute(
+                        'viewer_reaction',
+                        $reactions->get($deepReply->id)?->reaction_type?->value,
+                    );
+                }
+            }
         }
     }
 }

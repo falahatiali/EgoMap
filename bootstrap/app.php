@@ -42,6 +42,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'admin.locale' => SetAdminLocale::class,
+            'optional.sanctum' => \App\Http\Middleware\AuthenticateOptionalSanctum::class,
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
