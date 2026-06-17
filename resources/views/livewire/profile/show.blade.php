@@ -1,31 +1,4 @@
 <div class="eg-profile-page">
-    <section class="container pt-3">
-        @include('partials.page-nav-actions', [
-            'links' => [
-                [
-                    'href' => $missionNav['href'],
-                    'label' => __('nav.my_missions'),
-                    'icon' => 'fa-bullseye',
-                ],
-                [
-                    'href' => route('home'),
-                    'label' => __('quiz.back_home'),
-                    'icon' => 'fa-house',
-                ],
-                [
-                    'href' => route('home').'#tests',
-                    'label' => __('profile.browse_tests'),
-                    'icon' => 'fa-flask',
-                ],
-                [
-                    'href' => route('no-contact'),
-                    'label' => __('nav.no_contact'),
-                    'icon' => 'fa-ghost',
-                ],
-            ],
-        ])
-    </section>
-
     {{-- Hero --}}
     <section class="eg-profile-hero">
         <div class="container">
