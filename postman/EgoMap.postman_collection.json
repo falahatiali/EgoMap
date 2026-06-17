@@ -1,0 +1,1641 @@
+{
+    "info": {
+        "_postman_id": "egomap-api-collection",
+        "name": "EgoMap API",
+        "description": "Complete EgoMap JSON API (v1) including all enabled modules.\n\n**Setup:** Import collection + both environment files. Select *EgoMap \u2014 Development* or *EgoMap \u2014 Production* in Postman.\n\n**Auth flow:** Run *Auth \u2192 Login* (or *Verify Email*). Token is saved to `bearer_token` automatically.\n\n**Guest flows:** Quiz and Ghost Mode requests auto-save `guest_token` from responses.\n\nRegenerate: `php artisan postman:generate`",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{bearer_token}}",
+                "type": "string"
+            }
+        ]
+    },
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "pm.request.headers.upsert({ key: 'Accept', value: 'application/json' });",
+                    "const locale = pm.environment.get('accept_language') || pm.collectionVariables.get('accept_language') || 'en';",
+                    "pm.request.headers.upsert({ key: 'Accept-Language', value: locale });",
+                    "const guest = pm.environment.get('guest_token');",
+                    "if (guest) { pm.request.headers.upsert({ key: 'X-Guest-Token', value: guest }); }"
+                ]
+            }
+        }
+    ],
+    "item": [
+        {
+            "name": "00 \u2014 Infrastructure",
+            "item": [
+                {
+                    "name": "Health Check",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{base_url}}/up",
+                        "description": "Laravel health endpoint (no `/api` prefix).",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                },
+                {
+                    "name": "Stripe Webhook (Cashier)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/{{cashier_path}}/webhook",
+                        "description": "Stripe \u2192 Cashier webhook. Requires valid `Stripe-Signature` header (use Stripe CLI: `stripe listen --forward-to {{base_url}}/stripe/webhook`). Not callable manually without a signed payload.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": \"evt_example\",\n    \"type\": \"checkout.session.completed\",\n    \"data\": {\n        \"object\": []\n    }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "01 \u2014 Bootstrap",
+            "item": [
+                {
+                    "name": "Bootstrap",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{base_url}}/api/v1/bootstrap",
+                        "description": "Landing copy, featured quiz slug, auth labels.",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "02 \u2014 Auth",
+            "item": [
+                {
+                    "name": "Register",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/auth/register",
+                        "description": "Creates account; returns verification_token. Email verification required before login.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "if (pm.response.code === 200 || pm.response.code === 201) {",
+                                    "    const json = pm.response.json();",
+                                    "    if (json.token) { pm.environment.set('bearer_token', json.token); }",
+                                    "    if (json.verification_token) { pm.environment.set('verification_token', json.verification_token); }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Login",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/auth/login",
+                        "description": "Returns bearer token when email is verified. Rate limited: 5/min per email+IP.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "if (pm.response.code === 200 || pm.response.code === 201) {",
+                                    "    const json = pm.response.json();",
+                                    "    if (json.token) { pm.environment.set('bearer_token', json.token); }",
+                                    "    if (json.verification_token) { pm.environment.set('verification_token', json.verification_token); }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Verify Email",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/auth/verify-email",
+                        "description": "4-digit code from email. Returns bearer token on success.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"verification_token\": \"{{verification_token}}\",\n    \"code\": \"{{verification_code}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "if (pm.response.code === 200 || pm.response.code === 201) {",
+                                    "    const json = pm.response.json();",
+                                    "    if (json.token) { pm.environment.set('bearer_token', json.token); }",
+                                    "    if (json.verification_token) { pm.environment.set('verification_token', json.verification_token); }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Resend Verification",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/auth/resend-verification",
+                        "description": "",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"verification_token\": \"{{verification_token}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                },
+                {
+                    "name": "Me",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{base_url}}/api/v1/auth/me",
+                        "description": "Current authenticated user."
+                    }
+                },
+                {
+                    "name": "Logout",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": "{{base_url}}/api/v1/auth/logout",
+                        "description": "Revokes current access token."
+                    }
+                }
+            ]
+        },
+        {
+            "name": "03 \u2014 Profile & Billing",
+            "item": [
+                {
+                    "name": "Profile",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/profile",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "profile"
+                            ],
+                            "query": [
+                                {
+                                    "key": "tests_filter",
+                                    "value": "{{tests_filter}}",
+                                    "description": "all | in_progress | completed"
+                                }
+                            ]
+                        },
+                        "description": ""
+                    }
+                },
+                {
+                    "name": "Billing \u2014 Show",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{base_url}}/api/v1/billing",
+                        "description": ""
+                    }
+                },
+                {
+                    "name": "Billing \u2014 Checkout",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/billing/checkout",
+                        "description": "",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"plan_id\": \"{{plan_id}}\",\n    \"coupon\": \"\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Billing \u2014 Confirm Checkout",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/billing/checkout/confirm",
+                        "description": "",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"session_id\": \"{{stripe_checkout_session_id}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "04 \u2014 Quizzes",
+            "item": [
+                {
+                    "name": "Show Quiz",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{base_url}}/api/v1/quizzes/{{quiz_slug}}",
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                },
+                {
+                    "name": "Quiz Entry",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/quizzes/{{quiz_slug}}/entry",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "quizzes",
+                                "{{quiz_slug}}",
+                                "entry"
+                            ],
+                            "query": [
+                                {
+                                    "key": "resume_uuid",
+                                    "value": "{{quiz_session_uuid}}",
+                                    "description": "Optional session UUID to resume"
+                                }
+                            ]
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "if (pm.response.code === 200 || pm.response.code === 201) {",
+                                    "    const json = pm.response.json();",
+                                    "    if (json.guest_token) { pm.environment.set('guest_token', json.guest_token); }",
+                                    "    if (json.session && json.session.uuid) { pm.environment.set('quiz_session_uuid', json.session.uuid); }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Start Quiz Session",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/quizzes/{{quiz_slug}}/sessions",
+                        "description": "",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"resume_uuid\": \"{{quiz_session_uuid}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "if (pm.response.code === 200 || pm.response.code === 201) {",
+                                    "    const json = pm.response.json();",
+                                    "    if (json.guest_token) { pm.environment.set('guest_token', json.guest_token); }",
+                                    "    if (json.session && json.session.uuid) { pm.environment.set('quiz_session_uuid', json.session.uuid); }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "05 \u2014 Quiz Sessions",
+            "item": [
+                {
+                    "name": "Show Session",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{base_url}}/api/v1/quiz-sessions/{{quiz_session_uuid}}",
+                        "description": "Requires X-Guest-Token header (auto-set from environment).",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                },
+                {
+                    "name": "Submit Answer",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/quiz-sessions/{{quiz_session_uuid}}/answers",
+                        "description": "value: string for single-choice, array for multiple-choice.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"value\": \"option_a\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                },
+                {
+                    "name": "Safety Answer",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/quiz-sessions/{{quiz_session_uuid}}/safety-answer",
+                        "description": "value: integer 1\u20134.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"value\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                },
+                {
+                    "name": "Go Back",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": "{{base_url}}/api/v1/quiz-sessions/{{quiz_session_uuid}}/back",
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                },
+                {
+                    "name": "Result",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{base_url}}/api/v1/quiz-sessions/{{quiz_session_uuid}}/result",
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                },
+                {
+                    "name": "Send Report",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/quiz-sessions/{{quiz_session_uuid}}/send-report",
+                        "description": "",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"{{user_email}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                },
+                {
+                    "name": "Reset After Crisis",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": "{{base_url}}/api/v1/quiz-sessions/{{quiz_session_uuid}}/reset-after-crisis",
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "06 \u2014 Ghost Mode",
+            "item": [
+                {
+                    "name": "Show Ghost Mode",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{base_url}}/api/v1/ghost-mode",
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                },
+                {
+                    "name": "Start Protocol",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/ghost-mode/protocol",
+                        "description": "",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"duration_days\": 30\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "if (pm.response.code === 200 || pm.response.code === 201) {",
+                                    "    const json = pm.response.json();",
+                                    "    if (json.guest_token) { pm.environment.set('guest_token', json.guest_token); }",
+                                    "    if (json.session && json.session.uuid) { pm.environment.set('quiz_session_uuid', json.session.uuid); }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "07 \u2014 Missions (App)",
+            "item": [
+                {
+                    "name": "List Missions",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{base_url}}/api/v1/missions",
+                        "description": "Authenticated mission catalog (app MissionController)."
+                    }
+                },
+                {
+                    "name": "Show Mission",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{base_url}}/api/v1/missions/{{mission_slug}}",
+                        "description": ""
+                    }
+                },
+                {
+                    "name": "Enroll in Mission",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": "{{base_url}}/api/v1/missions/{{mission_slug}}/enroll",
+                        "description": ""
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "if (pm.response.code === 200 || pm.response.code === 201) {",
+                                    "    const json = pm.response.json();",
+                                    "    const uuid = json.enrollment?.uuid || json.workspace?.enrollment?.uuid;",
+                                    "    if (uuid) { pm.environment.set('mission_enrollment_uuid', uuid); }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Mission Workspace",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{base_url}}/api/v1/missions/enrollments/{{mission_enrollment_uuid}}",
+                        "description": ""
+                    }
+                }
+            ]
+        },
+        {
+            "name": "08 \u2014 Mission Engine (Enrollments)",
+            "item": [
+                {
+                    "name": "List Enrollments",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{base_url}}/api/v1/mission-enrollments",
+                        "description": ""
+                    }
+                },
+                {
+                    "name": "Show Enrollment",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{base_url}}/api/v1/mission-enrollments/{{mission_enrollment_uuid}}",
+                        "description": ""
+                    }
+                },
+                {
+                    "name": "Update Fields",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/mission-enrollments/{{mission_enrollment_uuid}}/fields",
+                        "description": "",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"fields\": {\n        \"body_weight\": 75\n    }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Get Daily Report",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/mission-enrollments/{{mission_enrollment_uuid}}/daily-reports",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "mission-enrollments",
+                                "{{mission_enrollment_uuid}}",
+                                "daily-reports"
+                            ],
+                            "query": [
+                                {
+                                    "key": "date",
+                                    "value": "{{report_date}}",
+                                    "description": "Required date (Y-m-d)"
+                                }
+                            ]
+                        },
+                        "description": ""
+                    }
+                },
+                {
+                    "name": "Save Daily Report",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/mission-enrollments/{{mission_enrollment_uuid}}/daily-reports",
+                        "description": "",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"report_date\": \"{{report_date}}\",\n    \"body_weight\": 75,\n    \"mood_score\": 7,\n    \"energy_score\": 6,\n    \"sleep_hours\": 7.5,\n    \"trained_today\": true,\n    \"nutrition_logged\": true,\n    \"highlights\": \"Good session\",\n    \"challenges\": \"\",\n    \"notes\": \"\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Add Supplement Product",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/mission-enrollments/{{mission_enrollment_uuid}}/supplements/products",
+                        "description": "",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Whey Protein\",\n    \"brand\": \"Optimum\",\n    \"default_unit\": \"scoop\",\n    \"default_amount\": \"1\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Log Supplement Intake",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/mission-enrollments/{{mission_enrollment_uuid}}/supplements/intakes",
+                        "description": "",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"intake_date\": \"{{report_date}}\",\n    \"supplement_product_id\": null,\n    \"product_name\": \"Whey Protein\",\n    \"brand\": \"Optimum\",\n    \"amount\": 1,\n    \"unit\": \"scoop\",\n    \"notes\": \"\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Calibration Defaults",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{base_url}}/api/v1/mission-enrollments/{{mission_enrollment_uuid}}/calibration/defaults",
+                        "description": ""
+                    }
+                },
+                {
+                    "name": "Calibration Complete",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/mission-enrollments/{{mission_enrollment_uuid}}/calibration/complete",
+                        "description": "",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"intent\": {\n        \"entry_tool_key\": \"task\"\n    },\n    \"targets\": [\n        \"workout\"\n    ],\n    \"wizard\": {\n        \"age\": 28,\n        \"gender\": \"male\",\n        \"height_cm\": 175,\n        \"weight_kg\": 75,\n        \"body_fat_percent\": null,\n        \"primary_goal\": \"muscle_gain\",\n        \"training_days_per_week\": 4,\n        \"session_duration\": \"45_60\",\n        \"preferred_workout_time\": \"evening\",\n        \"gym_days\": [\n            \"mon\",\n            \"tue\",\n            \"thu\",\n            \"sat\"\n        ],\n        \"equipment\": \"full_gym\",\n        \"injury_tags\": [],\n        \"dietary_pattern\": \"omnivore\",\n        \"cooking_ability\": \"simple\",\n        \"coaching_tone\": \"gentle\",\n        \"motivation_style\": \"feeling_strong\",\n        \"training_style\": \"heavy_weights\"\n    },\n    \"commitment\": {\n        \"confirmed\": true\n    }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Calibration Regenerate",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/mission-enrollments/{{mission_enrollment_uuid}}/calibration/regenerate",
+                        "description": "",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"intent\": {\n        \"entry_tool_key\": \"task\"\n    },\n    \"targets\": [\n        \"workout\"\n    ],\n    \"wizard\": {\n        \"age\": 28,\n        \"gender\": \"male\",\n        \"height_cm\": 175,\n        \"weight_kg\": 75,\n        \"body_fat_percent\": null,\n        \"primary_goal\": \"muscle_gain\",\n        \"training_days_per_week\": 4,\n        \"session_duration\": \"45_60\",\n        \"preferred_workout_time\": \"evening\",\n        \"gym_days\": [\n            \"mon\",\n            \"tue\",\n            \"thu\",\n            \"sat\"\n        ],\n        \"equipment\": \"full_gym\",\n        \"injury_tags\": [],\n        \"dietary_pattern\": \"omnivore\",\n        \"cooking_ability\": \"simple\",\n        \"coaching_tone\": \"gentle\",\n        \"motivation_style\": \"feeling_strong\",\n        \"training_style\": \"heavy_weights\"\n    },\n    \"commitment\": {\n        \"confirmed\": true\n    },\n    \"force\": true\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Generate Program",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/mission-enrollments/{{mission_enrollment_uuid}}/programs/generate",
+                        "description": "",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"applied_target\": \"workout\",\n    \"wizard\": {\n        \"age\": 28,\n        \"gender\": \"male\",\n        \"height_cm\": 175,\n        \"weight_kg\": 75,\n        \"body_fat_percent\": null,\n        \"primary_goal\": \"muscle_gain\",\n        \"training_days_per_week\": 4,\n        \"session_duration\": \"45_60\",\n        \"preferred_workout_time\": \"evening\",\n        \"gym_days\": [\n            \"mon\",\n            \"tue\",\n            \"thu\",\n            \"sat\"\n        ],\n        \"equipment\": \"full_gym\",\n        \"injury_tags\": [],\n        \"dietary_pattern\": \"omnivore\",\n        \"cooking_ability\": \"simple\",\n        \"coaching_tone\": \"gentle\",\n        \"motivation_style\": \"feeling_strong\",\n        \"training_style\": \"heavy_weights\"\n    }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "if (pm.response.code === 200 || pm.response.code === 201) {",
+                                    "    const json = pm.response.json();",
+                                    "    const uuid = json.program?.uuid || json.data?.uuid;",
+                                    "    if (uuid) { pm.environment.set('aether_program_uuid', uuid); }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "09 \u2014 Gamification Engine",
+            "item": [
+                {
+                    "name": "Wallet",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/gamification/wallet",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "gamification",
+                                "wallet"
+                            ],
+                            "query": [
+                                {
+                                    "key": "guest_token",
+                                    "value": "{{guest_token}}",
+                                    "description": "Optional"
+                                }
+                            ]
+                        },
+                        "description": ""
+                    }
+                },
+                {
+                    "name": "Transactions",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/gamification/transactions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "gamification",
+                                "transactions"
+                            ],
+                            "query": [
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "description": "1\u201350, default 10"
+                                }
+                            ]
+                        },
+                        "description": ""
+                    }
+                },
+                {
+                    "name": "Dispatch Event",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/gamification/dispatch",
+                        "description": "See GamificationEvent enum for all event values.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"event\": \"ghost_mode.daily_checkin\",\n    \"metadata\": [],\n    \"guest_token\": \"{{guest_token}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Preview Event",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/gamification/preview",
+                        "description": "",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"event\": \"ghost_mode.daily_checkin\",\n    \"metadata\": []\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Shop",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{base_url}}/api/v1/gamification/shop",
+                        "description": ""
+                    }
+                },
+                {
+                    "name": "Purchase Shop Item",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/gamification/shop/{{shop_item_slug}}/purchase",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "gamification",
+                                "shop",
+                                "{{shop_item_slug}}",
+                                "purchase"
+                            ],
+                            "query": [
+                                {
+                                    "key": "guest_token",
+                                    "value": "{{guest_token}}",
+                                    "description": "Optional"
+                                }
+                            ]
+                        },
+                        "description": ""
+                    }
+                },
+                {
+                    "name": "Consume Perk",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/gamification/perks/{{perk_slug}}/consume",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "gamification",
+                                "perks",
+                                "{{perk_slug}}",
+                                "consume"
+                            ],
+                            "query": [
+                                {
+                                    "key": "guest_token",
+                                    "value": "{{guest_token}}",
+                                    "description": "Optional"
+                                }
+                            ]
+                        },
+                        "description": ""
+                    }
+                }
+            ]
+        },
+        {
+            "name": "10 \u2014 Aether Engine",
+            "item": [
+                {
+                    "name": "List Programs",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/aether/programs",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "aether",
+                                "programs"
+                            ],
+                            "query": [
+                                {
+                                    "key": "mission_enrollment_uuid",
+                                    "value": "{{mission_enrollment_uuid}}",
+                                    "description": "Optional filter"
+                                }
+                            ]
+                        },
+                        "description": ""
+                    }
+                },
+                {
+                    "name": "Show Program",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{base_url}}/api/v1/aether/programs/{{aether_program_uuid}}",
+                        "description": ""
+                    }
+                },
+                {
+                    "name": "Toggle Workout Set",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": "{{base_url}}/api/v1/aether/programs/{{aether_program_uuid}}/workout-days/{{workout_day_id}}/sets/{{exercise_set_id}}/toggle",
+                        "description": ""
+                    }
+                },
+                {
+                    "name": "Log Set Weight",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/aether/programs/{{aether_program_uuid}}/workout-days/{{workout_day_id}}/sets/{{exercise_set_id}}/weight",
+                        "description": "",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"weight_kg\": 60\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Check-in Status",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{base_url}}/api/v1/aether/programs/{{aether_program_uuid}}/check-in/status",
+                        "description": ""
+                    }
+                },
+                {
+                    "name": "Submit Check-in",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/aether/programs/{{aether_program_uuid}}/check-in",
+                        "description": "",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"sessions_completed\": 3,\n    \"intensity_rating\": 2,\n    \"had_pain\": false,\n    \"pain_notes\": \"\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Volume Chart",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/aether/programs/{{aether_program_uuid}}/volume-chart",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "aether",
+                                "programs",
+                                "{{aether_program_uuid}}",
+                                "volume-chart"
+                            ],
+                            "query": [
+                                {
+                                    "key": "days",
+                                    "value": "30",
+                                    "description": "7\u201390, default 30"
+                                }
+                            ]
+                        },
+                        "description": ""
+                    }
+                }
+            ]
+        },
+        {
+            "name": "11 \u2014 Virtue Engine",
+            "item": [
+                {
+                    "name": "List Habits",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{base_url}}/api/v1/virtue/habits",
+                        "description": ""
+                    }
+                },
+                {
+                    "name": "Analyze Habit",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/virtue/habits/analyze",
+                        "description": "",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"description\": \"Stop scrolling social media before bed\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "List Routines",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/virtue/routines",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "virtue",
+                                "routines"
+                            ],
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": "{{virtue_routine_status}}",
+                                    "description": "Optional filter"
+                                }
+                            ]
+                        },
+                        "description": ""
+                    }
+                },
+                {
+                    "name": "Start Routine",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/virtue/routines",
+                        "description": "",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"virtue_habit_id\": \"{{virtue_habit_id}}\",\n    \"personal_note\": \"My commitment\",\n    \"goal_type\": \"days_count\",\n    \"goal_target\": 30\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const id = pm.response.json().data?.id;",
+                                    "    if (id) { pm.environment.set('virtue_routine_id', String(id)); }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Routine Progress",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{base_url}}/api/v1/virtue/routines/{{virtue_routine_id}}",
+                        "description": ""
+                    }
+                },
+                {
+                    "name": "Log Success",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/virtue/routines/{{virtue_routine_id}}/success",
+                        "description": "",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"situation\": \"Resisted urge\",\n    \"emotional_state\": \"calm\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Log Slip",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/virtue/routines/{{virtue_routine_id}}/slip",
+                        "description": "",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"what_happened\": \"Gave in briefly\",\n    \"choose_punishment_id\": null\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Complete Routine",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": "{{base_url}}/api/v1/virtue/routines/{{virtue_routine_id}}/complete",
+                        "description": ""
+                    }
+                }
+            ]
+        },
+        {
+            "name": "12 \u2014 Community Engine",
+            "item": [
+                {
+                    "name": "Feed",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/community/posts",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "community",
+                                "posts"
+                            ],
+                            "query": [
+                                {
+                                    "key": "sort",
+                                    "value": "latest",
+                                    "description": "latest | liked | discussed | mine"
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "15",
+                                    "description": "5\u201330"
+                                },
+                                {
+                                    "key": "include_preview",
+                                    "value": "true",
+                                    "description": "boolean"
+                                }
+                            ]
+                        },
+                        "description": "Optional bearer for personalization (optional.sanctum).",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                },
+                {
+                    "name": "Show Post",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": "{{base_url}}/api/v1/community/posts/{{community_post_id}}",
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                },
+                {
+                    "name": "List Comments",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/community/posts/{{community_post_id}}/comments",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "community",
+                                "posts",
+                                "{{community_post_id}}",
+                                "comments"
+                            ],
+                            "query": [
+                                {
+                                    "key": "limit",
+                                    "value": "20",
+                                    "description": "1\u2013100"
+                                },
+                                {
+                                    "key": "offset",
+                                    "value": "0",
+                                    "description": "\u22650"
+                                }
+                            ]
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                },
+                {
+                    "name": "Create Post",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/community/posts",
+                        "description": "",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"content\": \"Sharing my journey today \\u2014 feeling stronger.\",\n    \"is_anonymous\": false\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const id = pm.response.json().post?.id || pm.response.json().data?.id;",
+                                    "    if (id) { pm.environment.set('community_post_id', String(id)); }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Delete Post",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": "{{base_url}}/api/v1/community/posts/{{community_post_id}}",
+                        "description": ""
+                    }
+                },
+                {
+                    "name": "React to Post",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/community/posts/{{community_post_id}}/react",
+                        "description": "ReactionType: like, love, fire, support, insight, strength, sad, hug, heartbreak",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"reaction_type\": \"like\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Create Comment",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/community/posts/{{community_post_id}}/comments",
+                        "description": "",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"content\": \"Great post!\",\n    \"is_anonymous\": false,\n    \"parent_id\": null\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const id = pm.response.json().comment?.id || pm.response.json().data?.id;",
+                                    "    if (id) { pm.environment.set('community_comment_id', String(id)); }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Delete Comment",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": "{{base_url}}/api/v1/community/comments/{{community_comment_id}}",
+                        "description": ""
+                    }
+                },
+                {
+                    "name": "React to Comment",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{base_url}}/api/v1/community/comments/{{community_comment_id}}/react",
+                        "description": "",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"reaction_type\": \"support\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}
