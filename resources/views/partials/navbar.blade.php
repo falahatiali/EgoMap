@@ -1,89 +1,114 @@
 @php
     $nav = app(\App\Services\Recovery\RecoveryJourneyService::class)->navigationState();
     $hasMenu = $nav['show_explore_links'] || $nav['show_no_contact_link'] || auth()->check();
+    $locale = app()->getLocale();
 @endphp
 
 <header class="eg-nav sticky-top">
-    <div class="container">
-        <nav class="navbar navbar-expand-lg py-0 h-100" style="min-height: var(--eg-nav-height);">
-            <a class="eg-brand" href="{{ route('home') }}" wire:navigate>
+    <div class="container-fluid eg-nav__container">
+        <nav class="navbar navbar-expand-xl py-0 eg-nav__bar">
+            <a class="eg-brand eg-nav__brand" href="{{ route('home') }}" wire:navigate>
                 <span class="eg-brand-icon" aria-hidden="true">
                     <i class="fa-solid fa-compass"></i>
                 </span>
-                <span data-i18n="common.brand">{{ __('common.brand') }}</span>
+                <span class="eg-brand-text" data-i18n="common.brand">{{ __('common.brand') }}</span>
             </a>
 
             @if ($hasMenu)
                 <button
-                    class="navbar-toggler border-0 shadow-none"
+                    class="navbar-toggler eg-nav__toggle border-0 shadow-none"
                     type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#egNav"
                     aria-controls="egNav"
                     aria-expanded="false"
-                    aria-label="Menu"
+                    aria-label="{{ __('nav.menu') }}"
                 >
-                    <i class="fa-solid fa-bars text-white"></i>
+                    <i class="fa-solid fa-bars" aria-hidden="true"></i>
                 </button>
             @endif
 
-            <div @class(['collapse navbar-collapse', 'show' => ! $hasMenu]) id="egNav">
+            <div @class(['collapse navbar-collapse eg-nav__collapse', 'show' => ! $hasMenu]) id="egNav">
                 @if ($hasMenu)
-                    <ul class="navbar-nav mx-lg-auto gap-lg-4 mt-3 mt-lg-0">
+                    <ul class="navbar-nav eg-nav__links flex-xl-nowrap">
                         @auth
                             @include('partials.nav-missions-link')
-                            <li class="nav-item">
-                                <a class="eg-nav-link nav-link px-0 eg-transition" href="{{ route('virtue.hub', ['locale' => app()->getLocale()]) }}" wire:navigate>
-                                    <i class="fa-solid fa-brain me-1" aria-hidden="true"></i>
-                                    Virtue Forge
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="eg-nav-link nav-link px-0 eg-transition" href="{{ route('community.feed', ['locale' => app()->getLocale()]) }}" wire:navigate>
-                                    <i class="fa-solid fa-people-group me-1" aria-hidden="true"></i>
-                                    {{ __('community.title') }}
-                                </a>
-                            </li>
+                            @include('partials.nav-app-link', [
+                                'href' => route('virtue.hub', ['locale' => $locale]),
+                                'icon' => 'brain',
+                                'label' => __('nav.virtue_forge'),
+                            ])
+                            @include('partials.nav-app-link', [
+                                'href' => route('community.feed', ['locale' => $locale]),
+                                'icon' => 'people-group',
+                                'label' => __('nav.community'),
+                            ])
                         @endauth
+
                         @if ($nav['show_no_contact_link'])
-                            <li class="nav-item">
-                                <a class="eg-nav-link nav-link px-0 eg-transition" href="{{ route('no-contact') }}" wire:navigate data-i18n="nav.no_contact">
-                                    <i class="fa-solid fa-ghost me-1" aria-hidden="true"></i>
-                                    {{ __('nav.no_contact') }}
-                                </a>
-                            </li>
+                            @include('partials.nav-app-link', [
+                                'href' => route('no-contact'),
+                                'icon' => 'ghost',
+                                'label' => __('nav.no_contact'),
+                                'modifier' => 'ghost',
+                            ])
                         @endif
+
                         @if ($nav['show_explore_links'])
-                            <li class="nav-item">
-                                <a class="eg-nav-link nav-link px-0 eg-transition" href="{{ route('pricing') }}" wire:navigate data-i18n="nav.pricing">{{ __('nav.pricing') }}</a>
+                            <li class="nav-item eg-nav__item d-xl-none">
+                                <span class="eg-nav__section-label">{{ __('nav.explore') }}</span>
                             </li>
-                            <li class="nav-item">
-                                <a class="eg-nav-link nav-link px-0 eg-transition" href="{{ route('home') }}#tests" data-i18n="nav.tests">{{ __('nav.tests') }}</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="eg-nav-link nav-link px-0 eg-transition" href="{{ route('home') }}#framework" data-i18n="nav.how_it_works">{{ __('nav.how_it_works') }}</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="eg-nav-link nav-link px-0 eg-transition" href="{{ route('home') }}#features" data-i18n="nav.report_preview">{{ __('nav.report_preview') }}</a>
-                            </li>
+                            @include('partials.nav-app-link', [
+                                'href' => route('pricing'),
+                                'icon' => 'tag',
+                                'label' => __('nav.pricing'),
+                                'mobileOnly' => true,
+                            ])
+                            @include('partials.nav-app-link', [
+                                'href' => route('home').'#tests',
+                                'icon' => 'clipboard-list',
+                                'label' => __('nav.tests'),
+                                'mobileOnly' => true,
+                            ])
+                            @include('partials.nav-app-link', [
+                                'href' => route('home').'#framework',
+                                'icon' => 'route',
+                                'label' => __('nav.how_it_works'),
+                                'mobileOnly' => true,
+                            ])
+                            @include('partials.nav-app-link', [
+                                'href' => route('home').'#features',
+                                'icon' => 'sparkles',
+                                'label' => __('nav.report_preview'),
+                                'mobileOnly' => true,
+                            ])
+                            @include('partials.nav-explore-dropdown')
                         @endif
                     </ul>
                 @endif
 
-                <div class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center gap-3 mt-3 mt-lg-0 ms-lg-auto">
+                <div class="eg-nav__actions">
                     @auth
-                        <div class="d-lg-none">
+                        <div class="d-xl-none w-100">
                             @include('partials.nav-missions-link', ['variant' => 'button'])
                         </div>
-                        @include('partials.nav-profile-link')
-                        <form method="POST" action="{{ route('logout') }}" class="d-inline">
+                        <div class="d-xl-none w-100">
+                            @include('partials.nav-profile-link')
+                        </div>
+                        <form method="POST" action="{{ route('logout') }}" class="d-xl-none w-100">
                             @csrf
-                            <button type="submit" class="btn btn-link eg-nav-auth-link px-0">
-                                {{ __('auth.logout') }}
+                            <button type="submit" class="eg-nav-pill eg-nav-pill--ghost eg-nav-pill--block">
+                                <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
+                                <span>{{ __('auth.logout') }}</span>
                             </button>
                         </form>
+                        <div class="d-none d-xl-block">
+                            @include('partials.nav-user-menu')
+                        </div>
                     @else
-                        <a href="{{ route('login') }}" class="eg-nav-auth-link eg-transition" data-i18n="nav.login">{{ __('nav.login') }}</a>
+                        <a href="{{ route('login') }}" class="eg-nav-pill eg-nav-pill--cta eg-transition" data-i18n="nav.login">
+                            {{ __('nav.login') }}
+                        </a>
                     @endauth
                 </div>
             </div>

@@ -20,7 +20,7 @@ class MissionLangParityTest extends TestCase
 
     public function test_nav_my_missions_is_persian_in_fa_locale(): void
     {
-        $this->assertSame('مأموریت‌های من', __('nav.my_missions', locale: 'fa'));
+        $this->assertSame('مأموریت‌ها', __('nav.my_missions', locale: 'fa'));
         $this->assertNotSame('nav.my_missions', __('nav.my_missions', locale: 'fa'));
     }
 }

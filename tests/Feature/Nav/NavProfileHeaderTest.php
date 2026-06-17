@@ -20,7 +20,7 @@ class NavProfileHeaderTest extends TestCase
         $this->actingAs($user)
             ->get(route('pricing', ['locale' => 'en']))
             ->assertOk()
-            ->assertSee('eg-nav-profile-name', false)
+            ->assertSee('eg-nav-user-menu', false)
             ->assertSee('Jordan Lee', false);
     }
 

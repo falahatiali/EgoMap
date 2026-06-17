@@ -18,14 +18,14 @@
         @endif
     </a>
 @else
-    <li class="nav-item">
+    <li class="nav-item eg-nav__item">
         <a
             href="{{ $missionNav['href'] }}"
-            class="eg-nav-link eg-nav-missions-link nav-link px-0 eg-transition"
+            class="eg-nav-pill eg-nav-pill--missions eg-transition"
             wire:navigate
         >
-            <i class="fa-solid fa-bullseye me-1" aria-hidden="true"></i>
-            {{ $missionNav['primary_label'] }}
+            <i class="fa-solid fa-bullseye" aria-hidden="true"></i>
+            <span>{{ $missionNav['primary_label'] }}</span>
             @if ($missionNav['active_count'] > 0)
                 <span class="eg-nav-missions-badge">{{ eg_num($missionNav['active_count']) }}</span>
             @endif
