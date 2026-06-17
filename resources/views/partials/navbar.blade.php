@@ -6,7 +6,7 @@
 
 <header class="eg-nav sticky-top">
     <div class="container-fluid eg-nav__container">
-        <nav class="navbar navbar-expand-xl py-0 eg-nav__bar">
+        <nav class="navbar navbar-expand-xl py-0 eg-nav__bar w-100">
             <a class="eg-brand eg-nav__brand" href="{{ route('home') }}" wire:navigate>
                 <span class="eg-brand-icon" aria-hidden="true">
                     <i class="fa-solid fa-compass"></i>
@@ -16,22 +16,35 @@
 
             @if ($hasMenu)
                 <button
-                    class="navbar-toggler eg-nav__toggle border-0 shadow-none"
+                    class="eg-nav__toggle d-xl-none ms-auto border-0 shadow-none"
                     type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#egNav"
-                    aria-controls="egNav"
-                    aria-expanded="false"
+                    data-bs-toggle="offcanvas"
+                    data-bs-target="#egNavDrawer"
+                    aria-controls="egNavDrawer"
                     aria-label="{{ __('nav.menu') }}"
                 >
                     <i class="fa-solid fa-bars" aria-hidden="true"></i>
                 </button>
+            @elseif (auth()->guest())
+                <a
+                    href="{{ route('login') }}"
+                    class="eg-nav-pill eg-nav-pill--cta eg-transition d-xl-none ms-auto"
+                    data-i18n="nav.login"
+                    wire:navigate
+                >
+                    {{ __('nav.login') }}
+                </a>
             @endif
 
-            <div @class(['collapse navbar-collapse eg-nav__collapse', 'show' => ! $hasMenu]) id="egNav">
+            <div class="eg-nav__desktop d-none d-xl-flex align-items-center ms-auto">
                 @if ($hasMenu)
-                    <ul class="navbar-nav eg-nav__links flex-xl-nowrap">
+                    <ul class="navbar-nav eg-nav__links flex-nowrap">
                         @auth
+                            @include('partials.nav-app-link', [
+                                'href' => route('today', ['locale' => $locale]),
+                                'icon' => 'sun',
+                                'label' => __('nav.today'),
+                            ])
                             @include('partials.nav-missions-link')
                             @include('partials.nav-app-link', [
                                 'href' => route('virtue.hub', ['locale' => $locale]),
@@ -55,33 +68,6 @@
                         @endif
 
                         @if ($nav['show_explore_links'])
-                            <li class="nav-item eg-nav__item d-xl-none">
-                                <span class="eg-nav__section-label">{{ __('nav.explore') }}</span>
-                            </li>
-                            @include('partials.nav-app-link', [
-                                'href' => route('pricing'),
-                                'icon' => 'tag',
-                                'label' => __('nav.pricing'),
-                                'mobileOnly' => true,
-                            ])
-                            @include('partials.nav-app-link', [
-                                'href' => route('home').'#tests',
-                                'icon' => 'clipboard-list',
-                                'label' => __('nav.tests'),
-                                'mobileOnly' => true,
-                            ])
-                            @include('partials.nav-app-link', [
-                                'href' => route('home').'#framework',
-                                'icon' => 'route',
-                                'label' => __('nav.how_it_works'),
-                                'mobileOnly' => true,
-                            ])
-                            @include('partials.nav-app-link', [
-                                'href' => route('home').'#features',
-                                'icon' => 'sparkles',
-                                'label' => __('nav.report_preview'),
-                                'mobileOnly' => true,
-                            ])
                             @include('partials.nav-explore-dropdown')
                         @endif
                     </ul>
@@ -89,24 +75,9 @@
 
                 <div class="eg-nav__actions">
                     @auth
-                        <div class="d-xl-none w-100">
-                            @include('partials.nav-missions-link', ['variant' => 'button'])
-                        </div>
-                        <div class="d-xl-none w-100">
-                            @include('partials.nav-profile-link')
-                        </div>
-                        <form method="POST" action="{{ route('logout') }}" class="d-xl-none w-100">
-                            @csrf
-                            <button type="submit" class="eg-nav-pill eg-nav-pill--ghost eg-nav-pill--block">
-                                <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
-                                <span>{{ __('auth.logout') }}</span>
-                            </button>
-                        </form>
-                        <div class="d-none d-xl-block">
-                            @include('partials.nav-user-menu')
-                        </div>
+                        @include('partials.nav-user-menu')
                     @else
-                        <a href="{{ route('login') }}" class="eg-nav-pill eg-nav-pill--cta eg-transition" data-i18n="nav.login">
+                        <a href="{{ route('login') }}" class="eg-nav-pill eg-nav-pill--cta eg-transition" data-i18n="nav.login" wire:navigate>
                             {{ __('nav.login') }}
                         </a>
                     @endauth
@@ -114,4 +85,11 @@
             </div>
         </nav>
     </div>
+
+    @if ($hasMenu)
+        @include('partials.nav-mobile-drawer', [
+            'nav' => $nav,
+            'locale' => $locale,
+        ])
+    @endif
 </header>

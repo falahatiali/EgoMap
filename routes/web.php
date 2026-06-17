@@ -11,6 +11,7 @@ use App\Livewire\Home\Protocol;
 use App\Livewire\Missions\Catalog as MissionsCatalog;
 use App\Livewire\Missions\Show as MissionShow;
 use App\Livewire\Missions\Workspace as MissionWorkspace;
+use App\Livewire\Mood\MoodHub;
 use App\Livewire\NoContact\Show as NoContactShow;
 use App\Livewire\Pricing\Show as PricingShow;
 use App\Livewire\Profile\ProgramShow;
@@ -99,6 +100,8 @@ Route::prefix('{locale}')
             Route::livewire('/habits', VirtueHabitPicker::class)->name('habits');
             Route::livewire('/routines/{routineId}', VirtueRoutineDetail::class)->name('routine');
         });
+
+        Route::livewire('/today', MoodHub::class)->middleware('auth')->name('today');
 
         Route::livewire('/quiz/session/{uuid}/result', Result::class)->name('quiz.result');
         Route::livewire('/quiz/session/{uuid}', Take::class)->name('quiz.session');

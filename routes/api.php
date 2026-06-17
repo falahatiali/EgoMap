@@ -4,7 +4,9 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BillingController;
 use App\Http\Controllers\Api\BootstrapController;
 use App\Http\Controllers\Api\GhostModeController;
+use App\Http\Controllers\Api\IdeaApiController;
 use App\Http\Controllers\Api\MissionController;
+use App\Http\Controllers\Api\MoodApiController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\QuizController;
 use App\Http\Controllers\Api\QuizSessionController;
@@ -59,5 +61,18 @@ Route::prefix('v1')->group(function (): void {
         Route::get('/enrollments/{uuid}', [MissionController::class, 'workspace'])->name('workspace');
         Route::post('/{slug}/enroll', [MissionController::class, 'enroll'])->name('enroll');
         Route::get('/{slug}', [MissionController::class, 'show'])->name('show');
+    });
+
+    Route::middleware('auth:sanctum')->prefix('mood')->name('api.mood.')->group(function (): void {
+        Route::get('/', [MoodApiController::class, 'show'])->name('show');
+        Route::post('/', [MoodApiController::class, 'store'])->name('store');
+    });
+
+    Route::middleware('auth:sanctum')->prefix('ideas')->name('api.ideas.')->group(function (): void {
+        Route::get('/', [IdeaApiController::class, 'index'])->name('index');
+        Route::post('/', [IdeaApiController::class, 'store'])->name('store');
+        Route::post('/{idea}/mature', [IdeaApiController::class, 'mature'])->name('mature');
+        Route::post('/{idea}/harvest', [IdeaApiController::class, 'harvest'])->name('harvest');
+        Route::patch('/{idea}/progress', [IdeaApiController::class, 'progress'])->name('progress');
     });
 });

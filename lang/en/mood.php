@@ -1,0 +1,75 @@
+<?php
+
+return [
+    'emotions' => [
+        'joy' => 'Joy',
+        'sadness' => 'Sadness',
+        'anger' => 'Anger',
+        'fear' => 'Fear',
+        'energy' => 'Energy',
+        'calm' => 'Calm',
+    ],
+    'idea_status' => [
+        'raw' => 'Seed',
+        'mature' => 'Growing',
+        'harvested' => 'In progress',
+    ],
+    'goal_cadence' => [
+        'daily' => 'Daily habit',
+        'monthly' => 'Monthly milestone',
+        'quarterly' => 'Quarterly project',
+    ],
+    'compass_title' => 'Feeling compass',
+    'compass_subtitle' => 'Name it. Transmute it. Grow from it.',
+    'intensity_label' => 'Intensity',
+    'save_mood' => 'Receive wisdom',
+    'save_to_ideas' => 'Save to Idea Garden',
+    'dismiss' => 'Not now',
+    'idea_garden_title' => 'Idea Garden',
+    'idea_garden_subtitle' => 'Raw seeds → mature plans → tracked goals',
+    'mature_idea' => 'Mature idea',
+    'harvest_idea' => 'Harvest as goal',
+    'check_in' => 'Check in',
+    'community_pulse' => 'Community pulse',
+    'community_subtitle' => 'You are not alone in this rebuild',
+    'view_community' => 'Open community',
+    'no_ideas' => 'Save AI suggestions or add your own seeds here.',
+    'fallback' => [
+        'joy' => [
+            'empathy' => 'Joy is fuel — notice it while it is here.',
+            'challenge' => 'Teach one thing you learned today to your notes in 5 minutes.',
+            'reframe' => 'How can you bottle this energy for a harder day?',
+            'idea_seed' => 'Capture daily wins in a one-line journal.',
+        ],
+        'sadness' => [
+            'empathy' => 'It is heavy, and it is okay to feel it.',
+            'challenge' => 'Pick up a pen. Write the alphabet slowly five times to ground your body.',
+            'reframe' => 'What would this sadness look like as a color on a canvas?',
+            'idea_seed' => 'Improve my handwriting with 5 minutes of slow lettering.',
+        ],
+        'anger' => [
+            'empathy' => 'Anger is information — something important is being protected.',
+            'challenge' => 'Draw a one-page problem map: trigger → story → next tiny action.',
+            'reframe' => 'What boundary would make this anger unnecessary tomorrow?',
+            'idea_seed' => 'Practice one boundary statement in writing.',
+        ],
+        'fear' => [
+            'empathy' => 'Fear means you care about the outcome — that is human.',
+            'challenge' => 'Take one 2-minute exposure step toward what you are avoiding.',
+            'reframe' => 'If the worst case happened, what would you still control?',
+            'idea_seed' => 'List three controllable actions for this week.',
+        ],
+        'energy' => [
+            'empathy' => 'You have voltage today — that is a gift.',
+            'challenge' => 'Do a 10-minute brain dump sprint, then circle one line to act on.',
+            'reframe' => 'Where should this energy go so it builds you, not burns you?',
+            'idea_seed' => 'Channel high energy into a focused 10-minute sprint.',
+        ],
+        'calm' => [
+            'empathy' => 'Calm is clarity — stay with it gently.',
+            'challenge' => 'Write three sentences about what you want next month to feel like.',
+            'reframe' => 'What decision becomes obvious when you are this clear?',
+            'idea_seed' => 'Design a calm evening ritual for recovery days.',
+        ],
+    ],
+];
