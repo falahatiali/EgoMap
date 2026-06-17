@@ -6,6 +6,8 @@ services:
     container_name: egomap
     env_file:
       - .env
+    environment:
+      COMPOSER_HOME: /var/www/html/.composer
     volumes:
       - .:/var/www/html
     restart: unless-stopped
@@ -99,6 +101,8 @@ services:
     container_name: egomap_supervisor
     env_file:
       - .env
+    environment:
+      COMPOSER_HOME: /var/www/html/.composer
     volumes:
       - .:/var/www/html
       - ./docker/supervisord/prod/supervisord.conf:/etc/supervisord.conf:ro
@@ -126,6 +130,7 @@ services:
       context: .
       dockerfile: docker/node/Dockerfile
     container_name: egomap_node
+    user: "${APP_UID:-1000}:${APP_GID:-1000}"
     working_dir: /app
     volumes:
       - .:/app

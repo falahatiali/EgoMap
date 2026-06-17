@@ -20,7 +20,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-RUN usermod -u 33 www-data && groupmod -g 33 www-data
+ENV COMPOSER_HOME=/var/www/html/.composer
 
 RUN git config --system --add safe.directory /var/www/html
 
